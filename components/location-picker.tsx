@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react';
 import {
   Alert,
-  PermissionsAndroid,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 
 type Coordinate = { latitude: number; longitude: number };
@@ -75,37 +74,33 @@ export function LocationPicker({
   }
 
   async function handleCurrentLocation() {
-    if (Platform.OS === 'android') {
-      const permission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Utiliser ma position',
-          message: 'Fragmenta utilisera ta position pour placer ce point sur la carte.',
-          buttonPositive: 'Autoriser',
-          buttonNegative: 'Annuler',
-        }
-      );
-      if (permission !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Permission refusée', 'Tu peux toujours placer le point manuellement sur la carte.');
+    setLocating(true);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission refusée', 'Autorise la localisation dans les réglages du téléphone ou place le point manuellement.');
         return;
       }
+
+      setLocationEnabled(true);
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const current = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      onSelect(current);
+      mapRef.current?.animateToRegion({
+        ...current,
+        latitudeDelta: 0.025,
+        longitudeDelta: 0.025,
+      }, 500);
+    } catch {
+      Alert.alert('GPS indisponible', 'Vérifie que la localisation du téléphone est activée, puis réessaie.');
+    } finally {
+      setLocating(false);
     }
-
-    setLocating(true);
-    setLocationEnabled(true);
-    setTimeout(() => setLocating(false), 10000);
-  }
-
-  function receiveLocation(event: { nativeEvent: { coordinate?: Coordinate } }) {
-    const current = event.nativeEvent.coordinate;
-    if (!current) return;
-    setLocating(false);
-    onSelect(current);
-    mapRef.current?.animateToRegion({
-      ...current,
-      latitudeDelta: 0.025,
-      longitudeDelta: 0.025,
-    }, 500);
   }
 
   return (
@@ -122,7 +117,6 @@ export function LocationPicker({
         onPress={(event) => onSelect(event.nativeEvent.coordinate)}
         showsUserLocation={locationEnabled}
         showsMyLocationButton={false}
-        onUserLocationChange={receiveLocation}
       >
         {coordinate ? <Marker coordinate={coordinate} pinColor="#62E6B1" /> : null}
       </MapView>
