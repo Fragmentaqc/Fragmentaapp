@@ -50,6 +50,8 @@ export type NewCuriosity = {
   status?: 'draft' | 'published';
 };
 
+export type CuriosityUpdate = Omit<NewCuriosity, 'images'>;
+
 type CuriositiesContextValue = {
   curiosities: Curiosity[];
   loading: boolean;
@@ -58,6 +60,7 @@ type CuriositiesContextValue = {
     curiosity: NewCuriosity
   ) => Promise<boolean>;
   deleteCuriosity: (curiosityId: string) => Promise<boolean>;
+  updateCuriosity: (curiosityId: string, update: CuriosityUpdate) => Promise<boolean>;
   refreshCuriosities: () => Promise<void>;
 };
 
@@ -550,6 +553,36 @@ export function CuriositiesProvider({
     [refreshCuriosities, user]
   );
 
+  const updateCuriosity = useCallback(async (
+    curiosityId: string,
+    update: CuriosityUpdate
+  ) => {
+    if (!user || !update.title.trim() || !update.description.trim()) return false;
+    const { error } = await supabase
+      .from('curiosities')
+      .update({
+        adventure_id: update.adventureId || null,
+        title: update.title.trim(),
+        description: update.description.trim(),
+        category: update.category.trim() || 'Autre',
+        location_name: update.locationName.trim() || null,
+        address: update.address.trim() || null,
+        accessibility: update.accessibility.trim() || null,
+        best_time_to_visit: update.bestTimeToVisit.trim() || null,
+        recommended_duration: update.recommendedDuration.trim() || null,
+        status: update.status || 'published',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', curiosityId)
+      .eq('owner_id', user.id);
+    if (error) {
+      console.error('Erreur de modification de la curiosité :', error.message);
+      return false;
+    }
+    await refreshCuriosities();
+    return true;
+  }, [refreshCuriosities, user]);
+
   const deleteCuriosity = useCallback(async (curiosityId: string) => {
     if (!user) return false;
 
@@ -585,6 +618,7 @@ export function CuriositiesProvider({
       uploading,
       addCuriosity,
       deleteCuriosity,
+      updateCuriosity,
       refreshCuriosities,
     }),
     [
@@ -593,6 +627,7 @@ export function CuriositiesProvider({
       uploading,
       addCuriosity,
       deleteCuriosity,
+      updateCuriosity,
       refreshCuriosities,
     ]
   );
