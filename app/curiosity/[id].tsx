@@ -1,5 +1,6 @@
 import { useCuriosities } from '@/context/curiosities-context';
 import { useAuth } from '@/context/auth-context';
+import { openDirections } from '@/lib/directions';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -184,6 +185,24 @@ export default function CuriosityDetailsScreen() {
               <Text style={styles.deleteButtonText}>{deleting ? 'Suppression…' : 'Supprimer la curiosité'}</Text>
             </Pressable>
           </View>
+        ) : null}
+
+        {typeof curiosity.latitude === 'number' &&
+        typeof curiosity.longitude === 'number' ? (
+          <Pressable
+            style={styles.directionsCard}
+            onPress={() => void openDirections(
+              curiosity.latitude as number,
+              curiosity.longitude as number,
+              curiosity.title
+            )}
+          >
+            <View>
+              <Text style={styles.directionsEyebrow}>SE RENDRE SUR PLACE</Text>
+              <Text style={styles.directionsTitle}>Ouvrir l’itinéraire</Text>
+            </View>
+            <Text style={styles.directionsArrow}>↗</Text>
+          </Pressable>
         ) : null}
       </ScrollView>
     </SafeAreaView>
@@ -434,6 +453,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
   },
+  directionsCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 20, backgroundColor: '#173D31', padding: 17, marginTop: 14 },
+  directionsEyebrow: { color: '#82AA99', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
+  directionsTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '900', marginTop: 5 },
+  directionsArrow: { color: '#62E6B1', fontSize: 25 },
   ownerActions: { marginTop: 22, gap: 10 },
   editButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, backgroundColor: '#62E6B1' },
   editButtonText: { color: '#071310', fontSize: 14, fontWeight: '900' },
