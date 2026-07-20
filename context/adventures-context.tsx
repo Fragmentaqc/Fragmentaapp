@@ -1,5 +1,7 @@
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
+import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system/legacy';
 import {
     createContext,
     ReactNode,
@@ -77,6 +79,95 @@ type AdventureImageRow = {
   image_url: string;
   position: number | null;
 };
+
+const STORAGE_BUCKET = 'adventure-images';
+
+function getFileExtension(uri: string) {
+  const cleanUri = uri.split('?')[0];
+  const extension = cleanUri.split('.').pop()?.toLowerCase();
+
+  if (
+    extension === 'jpg' ||
+    extension === 'jpeg' ||
+    extension === 'png' ||
+    extension === 'webp' ||
+    extension === 'heic'
+  ) {
+    return extension;
+  }
+
+  return 'jpg';
+}
+
+function getContentType(extension: string) {
+  const contentTypes: Record<string, string> = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+    heic: 'image/heic',
+  };
+
+  return contentTypes[extension] ?? 'image/jpeg';
+}
+
+async function uploadAdventureImage({
+  localUri,
+  userId,
+  adventureId,
+  position,
+}: {
+  localUri: string;
+  userId: string;
+  adventureId: string;
+  position: number;
+}) {
+  if (
+    localUri.startsWith('https://') ||
+    localUri.startsWith('http://')
+  ) {
+    return { publicUrl: localUri, storagePath: null };
+  }
+
+  const extension = getFileExtension(localUri);
+  const contentType = getContentType(extension);
+  const fileName = `${Date.now()}-${position}.${extension}`;
+  const storagePath = `${userId}/${adventureId}/${fileName}`;
+
+  const base64 = await FileSystem.readAsStringAsync(localUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  const { error: uploadError } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .upload(storagePath, decode(base64), {
+      contentType,
+      cacheControl: '3600',
+      upsert: false,
+    });
+
+  if (uploadError) {
+    throw new Error(
+      `Téléversement impossible : ${uploadError.message}`
+    );
+  }
+
+  const { data } = supabase.storage
+    .from(STORAGE_BUCKET)
+    .getPublicUrl(storagePath);
+
+  if (!data.publicUrl) {
+    await supabase.storage
+      .from(STORAGE_BUCKET)
+      .remove([storagePath]);
+
+    throw new Error(
+      'Impossible de générer l’adresse publique de la photo.'
+    );
+  }
+
+  return { publicUrl: data.publicUrl, storagePath };
+}
 
 const AdventuresContext = createContext<
   AdventuresContextValue | undefined
@@ -362,6 +453,9 @@ export function AdventuresProvider({
         return false;
       }
 
+      let createdAdventureId: string | null = null;
+      const uploadedStoragePaths: string[] = [];
+
       try {
         const {
           data: createdAdventure,
@@ -401,7 +495,9 @@ export function AdventuresProvider({
           return false;
         }
 
-        if (!createdAdventure?.id) {
+        createdAdventureId = createdAdventure?.id ?? null;
+
+        if (!createdAdventureId) {
           console.error(
             'Aucun identifiant reçu après la création.'
           );
@@ -417,10 +513,31 @@ export function AdventuresProvider({
           );
 
         if (validImages.length > 0) {
-          const imageRows = validImages.map(
+          const uploadedUrls: string[] = [];
+
+          for (
+            let index = 0;
+            index < validImages.length;
+            index += 1
+          ) {
+            const { publicUrl, storagePath } =
+              await uploadAdventureImage({
+                localUri: validImages[index],
+                userId: user.id,
+                adventureId: createdAdventureId,
+                position: index,
+              });
+
+            uploadedUrls.push(publicUrl);
+
+            if (storagePath) {
+              uploadedStoragePaths.push(storagePath);
+            }
+          }
+
+          const imageRows = uploadedUrls.map(
             (imageUrl, index) => ({
-              adventure_id:
-                createdAdventure.id,
+              adventure_id: createdAdventureId,
               image_url: imageUrl,
               position: index,
             })
@@ -433,10 +550,7 @@ export function AdventuresProvider({
             .insert(imageRows);
 
           if (imagesInsertError) {
-            console.error(
-              'Erreur d’enregistrement des images :',
-              imagesInsertError.message
-            );
+            throw new Error(imagesInsertError.message);
           }
         }
 
@@ -448,6 +562,19 @@ export function AdventuresProvider({
           'Erreur inattendue pendant la création :',
           error
         );
+
+        if (uploadedStoragePaths.length > 0) {
+          await supabase.storage
+            .from(STORAGE_BUCKET)
+            .remove(uploadedStoragePaths);
+        }
+
+        if (createdAdventureId) {
+          await supabase
+            .from('adventures')
+            .delete()
+            .eq('id', createdAdventureId);
+        }
 
         return false;
       }
