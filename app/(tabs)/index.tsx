@@ -119,7 +119,7 @@ function AdventureCard({
           onPress={onOpen}
         >
           <Text style={styles.openAdventureButtonText}>
-            Voir l'aventure
+            {"Voir l'aventure"}
           </Text>
           <Text style={styles.openAdventureArrow}>›</Text>
         </Pressable>

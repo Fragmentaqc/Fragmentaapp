@@ -36,7 +36,7 @@ export default function AdventureDetailsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#62E6B1" />
-          <Text style={styles.loadingText}>Chargement de l'aventure…</Text>
+          <Text style={styles.loadingText}>{"Chargement de l'aventure…"}</Text>
         </View>
       </SafeAreaView>
     );
@@ -49,7 +49,7 @@ export default function AdventureDetailsScreen() {
           <Text style={styles.emptyEmoji}>🧭</Text>
           <Text style={styles.emptyTitle}>Aventure introuvable</Text>
           <Text style={styles.emptyText}>
-            Cette aventure n'existe plus ou n'est pas accessible.
+            {"Cette aventure n'existe plus ou n'est pas accessible."}
           </Text>
           <Pressable style={styles.primaryButton} onPress={router.back}>
             <Text style={styles.primaryButtonText}>Revenir</Text>
@@ -122,8 +122,8 @@ export default function AdventureDetailsScreen() {
         </View>
 
         <View style={styles.descriptionCard}>
-          <Text style={styles.sectionEyebrow}>L'HISTOIRE</Text>
-          <Text style={styles.sectionTitle}>À propos de l'aventure</Text>
+          <Text style={styles.sectionEyebrow}>{"L'HISTOIRE"}</Text>
+          <Text style={styles.sectionTitle}>{"À propos de l'aventure"}</Text>
           <Text style={styles.description}>{adventure.description}</Text>
         </View>
 
