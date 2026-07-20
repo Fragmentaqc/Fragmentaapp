@@ -48,6 +48,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="curiosity/[id]" />
 
+              <Stack.Screen name="adventure/[id]" />
+
               <Stack.Screen
                 name="modal"
                 options={{

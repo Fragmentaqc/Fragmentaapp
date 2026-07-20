@@ -1,4 +1,5 @@
 import { useAdventures, type Adventure } from '@/context/adventures-context';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   Dimensions,
@@ -60,14 +61,29 @@ export default function HomeScreen() {
         </View>
 
         {adventures.map((adventure) => (
-          <AdventureCard key={adventure.id} adventure={adventure} />
+          <AdventureCard
+            key={adventure.id}
+            adventure={adventure}
+            onOpen={() =>
+              router.push({
+                pathname: '/adventure/[id]',
+                params: { id: adventure.id },
+              })
+            }
+          />
         ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function AdventureCard({ adventure }: { adventure: Adventure }) {
+function AdventureCard({
+  adventure,
+  onOpen,
+}: {
+  adventure: Adventure;
+  onOpen: () => void;
+}) {
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -87,7 +103,9 @@ function AdventureCard({ adventure }: { adventure: Adventure }) {
         </Pressable>
       </View>
 
-      <AdventureGallery adventure={adventure} />
+      <Pressable onPress={onOpen}>
+        <AdventureGallery adventure={adventure} />
+      </Pressable>
 
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{adventure.title}</Text>
@@ -95,6 +113,16 @@ function AdventureCard({ adventure }: { adventure: Adventure }) {
         <Text style={styles.description}>
           {adventure.description}
         </Text>
+
+        <Pressable
+          style={styles.openAdventureButton}
+          onPress={onOpen}
+        >
+          <Text style={styles.openAdventureButtonText}>
+            {"Voir l'aventure"}
+          </Text>
+          <Text style={styles.openAdventureArrow}>›</Text>
+        </Pressable>
 
         <View style={styles.statsRow}>
           <View style={styles.statPill}>
@@ -450,6 +478,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     marginTop: 9,
+  },
+  openAdventureButton: {
+    minHeight: 45,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 15,
+    backgroundColor: '#173D31',
+    marginTop: 15,
+  },
+  openAdventureButtonText: {
+    color: '#DFFFF2',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  openAdventureArrow: {
+    color: '#62E6B1',
+    fontSize: 23,
+    fontWeight: '900',
+    marginLeft: 7,
   },
   statsRow: {
     flexDirection: 'row',

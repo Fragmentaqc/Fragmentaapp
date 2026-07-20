@@ -227,10 +227,12 @@ export default function ExploreScreen() {
   }
 
   function openAdventure(adventure: Adventure) {
-    Alert.alert(
-      adventure.title,
-      `${adventure.location}\n\n${adventure.description}`
-    );
+    router.push({
+      pathname: '/adventure/[id]',
+      params: {
+        id: adventure.id,
+      },
+    });
   }
 
   return (
