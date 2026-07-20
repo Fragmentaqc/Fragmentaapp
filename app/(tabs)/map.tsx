@@ -7,12 +7,11 @@ import {
   useCuriosities,
 } from '@/context/curiosities-context';
 import { router } from 'expo-router';
+import * as Location from 'expo-location';
 import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  PermissionsAndroid,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -148,7 +147,6 @@ function getVerificationLabel(status: string) {
 
 export default function MapScreen() {
   const mapRef = useRef<MapView | null>(null);
-  const centerWhenLocated = useRef(false);
 
   const {
     adventures,
@@ -168,39 +166,30 @@ export default function MapScreen() {
   const [selectedItem, setSelectedItem] =
     useState<SelectedMapItem>(null);
   const [locationEnabled, setLocationEnabled] = useState(false);
-  const [userCoordinate, setUserCoordinate] = useState<MapCoordinate | null>(null);
+  const [locating, setLocating] = useState(false);
 
   async function centerOnUser() {
-    if (Platform.OS === 'android') {
-      const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Ta position sur Fragmenta',
-          message: 'Autorise Fragmenta à utiliser ta position pour te situer sur la carte.',
-          buttonPositive: 'Autoriser',
-          buttonNegative: 'Plus tard',
-        }
-      );
-      if (result !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Localisation désactivée', 'Tu peux autoriser la localisation dans les réglages de ton téléphone.');
+    if (locating) return;
+    setLocating(true);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Localisation désactivée', 'Autorise la localisation dans les réglages du téléphone pour utiliser le bouton Ma position.');
         return;
       }
-    }
-    setLocationEnabled(true);
-    if (userCoordinate) {
-      mapRef.current?.animateToRegion({ ...userCoordinate, latitudeDelta: 0.025, longitudeDelta: 0.025 }, 600);
-    } else {
-      centerWhenLocated.current = true;
-    }
-  }
-
-  function receiveUserLocation(event: { nativeEvent: { coordinate?: MapCoordinate } }) {
-    const coordinate = event.nativeEvent.coordinate;
-    if (!coordinate) return;
-    setUserCoordinate(coordinate);
-    if (centerWhenLocated.current) {
-      centerWhenLocated.current = false;
+      setLocationEnabled(true);
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const coordinate = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
       mapRef.current?.animateToRegion({ ...coordinate, latitudeDelta: 0.025, longitudeDelta: 0.025 }, 600);
+    } catch {
+      Alert.alert('GPS indisponible', 'Vérifie que la localisation du téléphone est activée, puis réessaie.');
+    } finally {
+      setLocating(false);
     }
   }
 
@@ -438,7 +427,6 @@ export default function MapScreen() {
           showsTraffic={false}
           showsMyLocationButton={false}
           showsUserLocation={locationEnabled}
-          onUserLocationChange={receiveUserLocation}
           toolbarEnabled={false}
           onPress={() => setSelectedItem(null)}
         >
@@ -620,9 +608,10 @@ export default function MapScreen() {
               void centerOnUser();
             }}
             accessibilityLabel="Ma position"
+            disabled={locating}
           >
             <Text style={styles.mapButtonIcon}>
-              ◎
+              {locating ? '…' : '◎'}
             </Text>
           </Pressable>
         </View>
