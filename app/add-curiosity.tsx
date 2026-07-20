@@ -1,6 +1,7 @@
 import { useAdventures } from '@/context/adventures-context';
 import { useAuth } from '@/context/auth-context';
 import { useCuriosities } from '@/context/curiosities-context';
+import { LocationPicker } from '@/components/location-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -465,6 +466,18 @@ export default function AddCuriosityScreen() {
               />
             </View>
           </View>
+
+          <LocationPicker
+            coordinate={
+              parseCoordinate(latitude) !== null && parseCoordinate(longitude) !== null
+                ? { latitude: parseCoordinate(latitude) as number, longitude: parseCoordinate(longitude) as number }
+                : null
+            }
+            onSelect={(coordinate) => {
+              setLatitude(coordinate.latitude.toFixed(6));
+              setLongitude(coordinate.longitude.toFixed(6));
+            }}
+          />
 
           <Text style={styles.helperText}>
             Les coordonnées permettront d’afficher la curiosité
