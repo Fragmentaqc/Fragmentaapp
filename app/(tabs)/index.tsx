@@ -60,7 +60,9 @@ export default function HomeScreen() {
           <Text style={styles.liveArrow}>›</Text>
         </View>
 
-        {adventures.map((adventure) => (
+        {adventures
+          .filter((adventure) => adventure.publicationStatus === 'published')
+          .map((adventure) => (
           <AdventureCard
             key={adventure.id}
             adventure={adventure}
@@ -71,7 +73,7 @@ export default function HomeScreen() {
               })
             }
           />
-        ))}
+          ))}
       </ScrollView>
     </SafeAreaView>
   );

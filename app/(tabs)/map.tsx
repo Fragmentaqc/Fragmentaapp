@@ -165,7 +165,11 @@ export default function MapScreen() {
     useState<SelectedMapItem>(null);
 
   const adventuresWithCoordinates = useMemo(() => {
-    return adventures.filter(hasAdventureCoordinates);
+    return adventures.filter(
+      (adventure) =>
+        adventure.publicationStatus === 'published' &&
+        hasAdventureCoordinates(adventure)
+    );
   }, [adventures]);
 
   const curiositiesWithCoordinates = useMemo(() => {

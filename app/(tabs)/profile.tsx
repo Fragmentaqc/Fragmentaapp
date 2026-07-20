@@ -213,7 +213,11 @@ export default function ProfileScreen() {
                   title={adventure.title}
                   subtitle={adventure.location}
                   imageUrl={adventure.images[0]}
-                  badge={adventure.status}
+                  badge={
+                    adventure.publicationStatus === 'draft'
+                      ? 'Brouillon'
+                      : adventure.status
+                  }
                   onPress={() =>
                     router.push({
                       pathname: '/adventure/[id]',

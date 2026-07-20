@@ -66,6 +66,7 @@ Projet de voyage ou défi appartenant à un utilisateur.
 | `start_location` | texte | Point de départ facultatif |
 | `destination` | texte | Destination facultative |
 | `status` | texte | État de progression |
+| `publication_status` | texte | État de publication (`draft` ou `published`) |
 | `visibility` | texte | Niveau de visibilité |
 | `day_label` | texte | Libellé chronologique actuel |
 | `distance_km` | nombre | Distance connue |
@@ -80,6 +81,11 @@ Valeurs permises pour `status` :
 - `preparation`
 - `active`
 - `completed`
+
+Valeurs permises pour `publication_status` :
+
+- `draft`
+- `published`
 
 Valeurs permises pour `visibility` :
 

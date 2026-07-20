@@ -142,6 +142,10 @@ export default function ExploreScreen() {
     const normalizedSearch = search.trim().toLowerCase();
 
     return adventures.filter((adventure) => {
+      if (adventure.publicationStatus !== 'published') {
+        return false;
+      }
+
       const searchableContent = [
         adventure.title,
         adventure.description,
