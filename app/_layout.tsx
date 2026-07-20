@@ -50,6 +50,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="adventure/[id]" />
 
+              <Stack.Screen name="edit-adventure/[id]" />
+
               <Stack.Screen name="user/[id]" />
 
               <Stack.Screen

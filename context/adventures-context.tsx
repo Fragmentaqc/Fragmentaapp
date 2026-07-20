@@ -47,6 +47,11 @@ export type NewAdventure = {
   publicationStatus?: 'draft' | 'published';
 };
 
+export type AdventureUpdate = Pick<
+  NewAdventure,
+  'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus'
+>;
+
 type AdventuresContextValue = {
   adventures: Adventure[];
   loading: boolean;
@@ -54,6 +59,7 @@ type AdventuresContextValue = {
     adventure: NewAdventure
   ) => Promise<boolean>;
   deleteAdventure: (adventureId: string) => Promise<boolean>;
+  updateAdventure: (adventureId: string, update: AdventureUpdate) => Promise<boolean>;
   refreshAdventures: () => Promise<void>;
 };
 
@@ -605,6 +611,35 @@ export function AdventuresProvider({
     [refreshAdventures, user]
   );
 
+  const updateAdventure = useCallback(async (
+    adventureId: string,
+    update: AdventureUpdate
+  ) => {
+    if (!user || !update.title.trim() || !update.description.trim()) return false;
+
+    const { error } = await supabase
+      .from('adventures')
+      .update({
+        title: update.title.trim(),
+        description: update.description.trim(),
+        start_location: update.startLocation.trim() || null,
+        destination: update.destination.trim() || null,
+        category: update.category.trim() || 'Autre',
+        publication_status: update.publicationStatus || 'published',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', adventureId)
+      .eq('owner_id', user.id);
+
+    if (error) {
+      console.error("Erreur de modification de l'aventure :", error.message);
+      return false;
+    }
+
+    await refreshAdventures();
+    return true;
+  }, [refreshAdventures, user]);
+
   const deleteAdventure = useCallback(async (adventureId: string) => {
     if (!user) return false;
 
@@ -647,6 +682,7 @@ export function AdventuresProvider({
       loading,
       addAdventure,
       deleteAdventure,
+      updateAdventure,
       refreshAdventures,
     }),
     [
@@ -654,6 +690,7 @@ export function AdventuresProvider({
       loading,
       addAdventure,
       deleteAdventure,
+      updateAdventure,
       refreshAdventures,
     ]
   );
