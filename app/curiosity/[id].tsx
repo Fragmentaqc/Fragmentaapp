@@ -1,6 +1,9 @@
 import { useCuriosities } from '@/context/curiosities-context';
+import { useAuth } from '@/context/auth-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import {
+    Alert,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -14,11 +17,35 @@ export default function CuriosityDetailsScreen() {
     id: string;
   }>();
 
-  const { curiosities } = useCuriosities();
+  const { curiosities, deleteCuriosity } = useCuriosities();
+  const { user } = useAuth();
+  const [deleting, setDeleting] = useState(false);
 
   const curiosity = curiosities.find(
     (item) => item.id === id
   );
+
+  function confirmDelete() {
+    if (!curiosity || deleting) return;
+    Alert.alert(
+      'Supprimer la curiosité',
+      'Cette action est définitive. Les photos associées seront aussi supprimées.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            const success = await deleteCuriosity(curiosity.id);
+            setDeleting(false);
+            if (success) router.replace('/profile');
+            else Alert.alert('Erreur', 'Impossible de supprimer la curiosité.');
+          },
+        },
+      ]
+    );
+  }
 
   if (!curiosity) {
     return (
@@ -148,6 +175,13 @@ export default function CuriosityDetailsScreen() {
             </Text>
           </View>
         </Pressable>
+        {user?.id === curiosity.ownerId ? (
+          <Pressable style={styles.deleteButton} onPress={confirmDelete} disabled={deleting}>
+            <Text style={styles.deleteButtonText}>
+              {deleting ? 'Suppression…' : 'Supprimer la curiosité'}
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -397,4 +431,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
   },
+  deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414', marginTop: 22 },
+  deleteButtonText: { color: '#FFB8B8', fontSize: 14, fontWeight: '900' },
 });

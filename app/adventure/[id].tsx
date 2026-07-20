@@ -3,8 +3,11 @@ import {
   useAdventures,
 } from '@/context/adventures-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useAuth } from '@/context/auth-context';
+import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   Pressable,
@@ -25,11 +28,35 @@ function getStatusLabel(status: string) {
 
 export default function AdventureDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
-  const { adventures, loading } = useAdventures();
+  const { adventures, loading, deleteAdventure } = useAdventures();
+  const { user } = useAuth();
+  const [deleting, setDeleting] = useState(false);
   const adventureId = Array.isArray(params.id)
     ? params.id[0]
     : params.id;
   const adventure = adventures.find((item) => item.id === adventureId);
+
+  function confirmDelete() {
+    if (!adventure || deleting) return;
+    Alert.alert(
+      "Supprimer l'aventure",
+      'Cette action est définitive. Les photos associées seront aussi supprimées.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            const success = await deleteAdventure(adventure.id);
+            setDeleting(false);
+            if (success) router.replace('/profile');
+            else Alert.alert('Erreur', "Impossible de supprimer l'aventure.");
+          },
+        },
+      ]
+    );
+  }
 
   if (loading) {
     return (
@@ -142,6 +169,13 @@ export default function AdventureDetailsScreen() {
               </Text>
             </View>
           </View>
+        ) : null}
+        {user?.id === adventure.ownerId ? (
+          <Pressable style={styles.deleteButton} onPress={confirmDelete} disabled={deleting}>
+            <Text style={styles.deleteButtonText}>
+              {deleting ? 'Suppression…' : "Supprimer l'aventure"}
+            </Text>
+          </Pressable>
         ) : null}
       </ScrollView>
     </SafeAreaView>
@@ -403,4 +437,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   primaryButtonText: { color: '#071310', fontSize: 13, fontWeight: '900' },
+  deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414', marginHorizontal: 18, marginTop: 22 },
+  deleteButtonText: { color: '#FFB8B8', fontSize: 14, fontWeight: '900' },
 });

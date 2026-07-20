@@ -57,6 +57,7 @@ type CuriositiesContextValue = {
   addCuriosity: (
     curiosity: NewCuriosity
   ) => Promise<boolean>;
+  deleteCuriosity: (curiosityId: string) => Promise<boolean>;
   refreshCuriosities: () => Promise<void>;
 };
 
@@ -549,12 +550,41 @@ export function CuriositiesProvider({
     [refreshCuriosities, user]
   );
 
+  const deleteCuriosity = useCallback(async (curiosityId: string) => {
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('curiosities')
+      .delete()
+      .eq('id', curiosityId)
+      .eq('owner_id', user.id);
+
+    if (error) {
+      console.error('Erreur de suppression de la curiosité :', error.message);
+      return false;
+    }
+
+    const folder = `${user.id}/${curiosityId}`;
+    const { data: files } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .list(folder);
+    if (files && files.length > 0) {
+      await supabase.storage
+        .from(STORAGE_BUCKET)
+        .remove(files.map((file) => `${folder}/${file.name}`));
+    }
+
+    await refreshCuriosities();
+    return true;
+  }, [refreshCuriosities, user]);
+
   const value = useMemo(
     () => ({
       curiosities,
       loading,
       uploading,
       addCuriosity,
+      deleteCuriosity,
       refreshCuriosities,
     }),
     [
@@ -562,6 +592,7 @@ export function CuriositiesProvider({
       loading,
       uploading,
       addCuriosity,
+      deleteCuriosity,
       refreshCuriosities,
     ]
   );
