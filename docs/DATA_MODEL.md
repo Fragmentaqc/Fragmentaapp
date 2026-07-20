@@ -28,6 +28,7 @@ Profil applicatif associé à `auth.users` par une relation un-à-un.
 | `display_name` | texte | Nom public |
 | `bio` | texte | Présentation publique |
 | `avatar_url` | texte | URL de l'avatar |
+| `social_links` | JSON | Liste flexible de réseaux sociaux et liens externes |
 | `country` | texte | Pays facultatif |
 | `created_at` | horodatage | Date de création |
 | `updated_at` | horodatage | Dernière modification |

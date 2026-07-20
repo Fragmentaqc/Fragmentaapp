@@ -87,7 +87,10 @@ export default function AdventureDetailsScreen() {
           <Text style={styles.location}>⌖ {adventure.location}</Text>
         </View>
 
-        <View style={styles.authorCard}>
+        <Pressable
+          style={styles.authorCard}
+          onPress={() => router.push({ pathname: '/user/[id]', params: { id: adventure.ownerId } })}
+        >
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {adventure.user.charAt(0).toUpperCase()}
@@ -99,7 +102,7 @@ export default function AdventureDetailsScreen() {
             <Text style={styles.authorHandle}>{adventure.handle}</Text>
           </View>
           <Text style={styles.date}>{adventure.day}</Text>
-        </View>
+        </Pressable>
 
         <View style={styles.routeCard}>
           <Text style={styles.sectionEyebrow}>ITINÉRAIRE</Text>

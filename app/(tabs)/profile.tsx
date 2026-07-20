@@ -2,6 +2,7 @@ import { useAuth } from '@/context/auth-context';
 import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
 import { supabase } from '@/lib/supabase';
+import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -9,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,6 +24,7 @@ type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  social_links: SocialLink[] | null;
 };
 
 export default function ProfileScreen() {
@@ -45,7 +48,7 @@ export default function ProfileScreen() {
     try {
       const profileResult = await supabase
         .from('profiles')
-        .select('username, display_name, bio, avatar_url')
+        .select('username, display_name, bio, avatar_url, social_links')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -132,6 +135,11 @@ export default function ProfileScreen() {
         <View style={styles.topLabel}>
           <Text style={styles.brand}>FRAGMENTA</Text>
           <Text style={styles.sectionLabel}>PROFIL</Text>
+          {user ? (
+            <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')}>
+              <Text style={styles.settingsIcon}>⚙</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <View style={styles.avatar}>
@@ -261,6 +269,21 @@ export default function ProfileScreen() {
                 {"Aucune curiosité publiée pour le moment."}
               </Text>
             )}
+          </View>
+        ) : null}
+
+        {user && parseSocialLinks(profile?.social_links).length > 0 ? (
+          <View style={styles.socialLinks}>
+            {parseSocialLinks(profile?.social_links).map((link, index) => (
+              <Pressable
+                key={`${link.platform}-${index}`}
+                style={styles.socialLink}
+                onPress={() => void Linking.openURL(normalizeSocialUrl(link.url))}
+              >
+                <Text style={styles.socialLinkText}>{link.platform}</Text>
+                <Text style={styles.socialLinkArrow}>↗</Text>
+              </Pressable>
+            ))}
           </View>
         ) : null}
 
@@ -495,6 +518,12 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
   },
+  settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 19, backgroundColor: '#173D31' },
+  settingsIcon: { color: '#62E6B1', fontSize: 19 },
+  socialLinks: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },
+  socialLink: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 },
+  socialLinkText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' },
+  socialLinkArrow: { color: '#62E6B1', fontSize: 13, marginLeft: 6 },
 
   library: {
     width: '100%',
