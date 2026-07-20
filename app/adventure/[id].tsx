@@ -4,6 +4,7 @@ import {
 } from '@/context/adventures-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
+import { openDirections } from '@/lib/directions';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -168,6 +169,16 @@ export default function AdventureDetailsScreen() {
                 {adventure.longitude.toFixed(5)}
               </Text>
             </View>
+            <Pressable
+              style={styles.directionsButton}
+              onPress={() => void openDirections(
+                adventure.latitude as number,
+                adventure.longitude as number,
+                adventure.title
+              )}
+            >
+              <Text style={styles.directionsButtonText}>Itinéraire ↗</Text>
+            </Pressable>
           </View>
         ) : null}
         {user?.id === adventure.ownerId ? (
@@ -426,6 +437,8 @@ const styles = StyleSheet.create({
   coordinatesIcon: { color: '#62E6B1', fontSize: 25, marginRight: 12 },
   coordinatesTitle: { color: '#F3FFF9', fontSize: 12, fontWeight: '900' },
   coordinatesText: { color: '#82AA99', fontSize: 11, marginTop: 4 },
+  directionsButton: { marginLeft: 'auto', borderRadius: 13, backgroundColor: '#62E6B1', paddingHorizontal: 12, paddingVertical: 9 },
+  directionsButtonText: { color: '#071310', fontSize: 11, fontWeight: '900' },
   emptyEmoji: { fontSize: 48 },
   emptyTitle: { color: '#F3FFF9', fontSize: 21, fontWeight: '900', marginTop: 13 },
   emptyText: {
