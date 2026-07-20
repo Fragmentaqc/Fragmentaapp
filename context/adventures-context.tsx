@@ -53,6 +53,7 @@ type AdventuresContextValue = {
   addAdventure: (
     adventure: NewAdventure
   ) => Promise<boolean>;
+  deleteAdventure: (adventureId: string) => Promise<boolean>;
   refreshAdventures: () => Promise<void>;
 };
 
@@ -604,17 +605,55 @@ export function AdventuresProvider({
     [refreshAdventures, user]
   );
 
+  const deleteAdventure = useCallback(async (adventureId: string) => {
+    if (!user) return false;
+
+    const { data: imageRows, error: imageError } = await supabase
+      .from('adventure_images')
+      .select('storage_path')
+      .eq('adventure_id', adventureId)
+      .eq('owner_id', user.id);
+
+    if (imageError) {
+      console.error('Erreur de lecture des images :', imageError.message);
+      return false;
+    }
+
+    const { error } = await supabase
+      .from('adventures')
+      .delete()
+      .eq('id', adventureId)
+      .eq('owner_id', user.id);
+
+    if (error) {
+      console.error("Erreur de suppression de l'aventure :", error.message);
+      return false;
+    }
+
+    const paths = (imageRows ?? [])
+      .map((row) => row.storage_path as string | null)
+      .filter((path): path is string => Boolean(path));
+    if (paths.length > 0) {
+      await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+    }
+
+    await refreshAdventures();
+    return true;
+  }, [refreshAdventures, user]);
+
   const value = useMemo(
     () => ({
       adventures,
       loading,
       addAdventure,
+      deleteAdventure,
       refreshAdventures,
     }),
     [
       adventures,
       loading,
       addAdventure,
+      deleteAdventure,
       refreshAdventures,
     ]
   );
