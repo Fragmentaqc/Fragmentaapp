@@ -23,7 +23,7 @@ export function LocationPicker({
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locating, setLocating] = useState(false);
 
-  async function useCurrentLocation() {
+  async function handleCurrentLocation() {
     if (Platform.OS === 'android') {
       const permission = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -77,7 +77,7 @@ export function LocationPicker({
       </MapView>
       <Pressable
         style={styles.gpsButton}
-        onPress={() => void useCurrentLocation()}
+        onPress={() => void handleCurrentLocation()}
         disabled={locating}
       >
         <Text style={styles.gpsButtonText}>
