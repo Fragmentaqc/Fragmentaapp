@@ -1,4 +1,6 @@
 import { useAuth } from '@/context/auth-context';
+import { useAdventures } from '@/context/adventures-context';
+import { useCuriosities } from '@/context/curiosities-context';
 import { supabase } from '@/lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -25,15 +27,15 @@ type Profile = {
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { adventures } = useAdventures();
+  const { curiosities } = useCuriosities();
 
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [adventureCount, setAdventureCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const loadProfile = useCallback(async () => {
     if (!user) {
       setProfile(null);
-      setAdventureCount(0);
       setLoading(false);
       return;
     }
@@ -56,22 +58,6 @@ export default function ProfileScreen() {
         setProfile(profileResult.data);
       }
 
-      const adventuresResult = await supabase
-        .from('adventures')
-        .select('id', {
-          count: 'exact',
-          head: true,
-        })
-        .eq('owner_id', user.id);
-
-      if (adventuresResult.error) {
-        console.error(
-          'Erreur de comptage des aventures :',
-          adventuresResult.error.message
-        );
-      } else {
-        setAdventureCount(adventuresResult.count ?? 0);
-      }
     } catch (error) {
       console.error('Erreur inattendue du profil :', error);
     } finally {
@@ -100,7 +86,6 @@ export default function ProfileScreen() {
           onPress: async () => {
             await signOut();
             setProfile(null);
-            setAdventureCount(0);
           },
         },
       ]
@@ -117,6 +102,12 @@ export default function ProfileScreen() {
     : 'Profil Fragmenta';
 
   const initial = displayName.charAt(0).toUpperCase();
+  const myAdventures = user
+    ? adventures.filter((adventure) => adventure.ownerId === user.id)
+    : [];
+  const myCuriosities = user
+    ? curiosities.filter((curiosity) => curiosity.ownerId === user.id)
+    : [];
 
   if (loading) {
     return (
@@ -189,14 +180,14 @@ export default function ProfileScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>
-              {user ? adventureCount : 0}
+              {myAdventures.length}
             </Text>
             <Text style={styles.statLabel}>Aventures</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Fragments</Text>
+            <Text style={styles.statValue}>{myCuriosities.length}</Text>
+            <Text style={styles.statLabel}>Curiosités</Text>
           </View>
 
           <View style={styles.statCard}>
@@ -204,6 +195,70 @@ export default function ProfileScreen() {
             <Text style={styles.statLabel}>Abonnés</Text>
           </View>
         </View>
+
+        {user ? (
+          <View style={styles.library}>
+            <View style={styles.libraryHeader}>
+              <View>
+                <Text style={styles.libraryEyebrow}>MA COLLECTION</Text>
+                <Text style={styles.libraryTitle}>{"Mes aventures"}</Text>
+              </View>
+              <Text style={styles.libraryCount}>{myAdventures.length}</Text>
+            </View>
+
+            {myAdventures.length > 0 ? (
+              myAdventures.map((adventure) => (
+                <ProfileContentCard
+                  key={adventure.id}
+                  title={adventure.title}
+                  subtitle={adventure.location}
+                  imageUrl={adventure.images[0]}
+                  badge={adventure.status}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/adventure/[id]',
+                      params: { id: adventure.id },
+                    })
+                  }
+                />
+              ))
+            ) : (
+              <Text style={styles.emptyLibraryText}>
+                {"Aucune aventure publiée pour le moment."}
+              </Text>
+            )}
+
+            <View style={[styles.libraryHeader, styles.curiosityHeader]}>
+              <View>
+                <Text style={styles.libraryEyebrow}>MES DÉCOUVERTES</Text>
+                <Text style={styles.libraryTitle}>{"Mes curiosités"}</Text>
+              </View>
+              <Text style={styles.libraryCount}>{myCuriosities.length}</Text>
+            </View>
+
+            {myCuriosities.length > 0 ? (
+              myCuriosities.map((curiosity) => (
+                <ProfileContentCard
+                  key={curiosity.id}
+                  title={curiosity.title}
+                  subtitle={curiosity.locationName || curiosity.address}
+                  imageUrl={curiosity.images[0]}
+                  badge={curiosity.verificationStatus}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/curiosity/[id]',
+                      params: { id: curiosity.id },
+                    })
+                  }
+                />
+              ))
+            ) : (
+              <Text style={styles.emptyLibraryText}>
+                {"Aucune curiosité publiée pour le moment."}
+              </Text>
+            )}
+          </View>
+        ) : null}
 
         {user ? (
           <>
@@ -259,6 +314,38 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function ProfileContentCard({
+  title,
+  subtitle,
+  imageUrl,
+  badge,
+  onPress,
+}: {
+  title: string;
+  subtitle: string;
+  imageUrl?: string;
+  badge: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable style={styles.contentCard} onPress={onPress}>
+      {imageUrl ? (
+        <Image source={{ uri: imageUrl }} style={styles.contentImage} />
+      ) : (
+        <View style={styles.contentImageFallback}>
+          <Text style={styles.contentImageFallbackText}>⌖</Text>
+        </View>
+      )}
+      <View style={styles.contentInfo}>
+        <Text style={styles.contentBadge}>{badge.toUpperCase()}</Text>
+        <Text style={styles.contentTitle} numberOfLines={1}>{title}</Text>
+        <Text style={styles.contentSubtitle} numberOfLines={1}>{subtitle}</Text>
+      </View>
+      <Text style={styles.contentArrow}>›</Text>
+    </Pressable>
   );
 }
 
@@ -403,6 +490,115 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 6,
     textAlign: 'center',
+  },
+
+  library: {
+    width: '100%',
+    marginTop: 30,
+  },
+
+  libraryHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+
+  curiosityHeader: {
+    marginTop: 28,
+  },
+
+  libraryEyebrow: {
+    color: '#62E6B1',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1.3,
+  },
+
+  libraryTitle: {
+    color: '#F3FFF9',
+    fontSize: 21,
+    fontWeight: '900',
+    marginTop: 4,
+  },
+
+  libraryCount: {
+    color: '#8FA69B',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+
+  contentCard: {
+    minHeight: 86,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#19392E',
+    backgroundColor: '#0C1C17',
+    padding: 10,
+    marginBottom: 10,
+  },
+
+  contentImage: {
+    width: 66,
+    height: 66,
+    borderRadius: 13,
+  },
+
+  contentImageFallback: {
+    width: 66,
+    height: 66,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 13,
+    backgroundColor: '#173D31',
+  },
+
+  contentImageFallbackText: {
+    color: '#62E6B1',
+    fontSize: 23,
+  },
+
+  contentInfo: {
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+
+  contentBadge: {
+    color: '#62E6B1',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+
+  contentTitle: {
+    color: '#F3FFF9',
+    fontSize: 15,
+    fontWeight: '900',
+    marginTop: 4,
+  },
+
+  contentSubtitle: {
+    color: '#81958C',
+    fontSize: 11,
+    marginTop: 4,
+  },
+
+  contentArrow: {
+    color: '#62E6B1',
+    fontSize: 27,
+    paddingRight: 5,
+  },
+
+  emptyLibraryText: {
+    color: '#6F8279',
+    fontSize: 13,
+    lineHeight: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#19392E',
+    padding: 18,
   },
 
   primaryButton: {
