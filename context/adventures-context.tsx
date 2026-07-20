@@ -513,7 +513,10 @@ export function AdventuresProvider({
           );
 
         if (validImages.length > 0) {
-          const uploadedUrls: string[] = [];
+          const uploadedImages: {
+            publicUrl: string;
+            storagePath: string;
+          }[] = [];
 
           for (
             let index = 0;
@@ -528,17 +531,26 @@ export function AdventuresProvider({
                 position: index,
               });
 
-            uploadedUrls.push(publicUrl);
-
-            if (storagePath) {
-              uploadedStoragePaths.push(storagePath);
+            if (!storagePath) {
+              throw new Error(
+                'Le chemin Storage de la photo est absent.'
+              );
             }
+
+            uploadedImages.push({
+              publicUrl,
+              storagePath,
+            });
+
+            uploadedStoragePaths.push(storagePath);
           }
 
-          const imageRows = uploadedUrls.map(
-            (imageUrl, index) => ({
+          const imageRows = uploadedImages.map(
+            (image, index) => ({
               adventure_id: createdAdventureId,
-              image_url: imageUrl,
+              owner_id: user.id,
+              image_url: image.publicUrl,
+              storage_path: image.storagePath,
               position: index,
             })
           );

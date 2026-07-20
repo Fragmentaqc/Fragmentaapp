@@ -459,7 +459,6 @@ export function CuriositiesProvider({
               null,
             status:
               newCuriosity.status || 'published',
-            verification_status: 'unverified',
           })
           .select('id')
           .single();
