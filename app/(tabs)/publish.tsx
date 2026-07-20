@@ -1,4 +1,5 @@
 import { useAdventures } from '@/context/adventures-context';
+import { LocationPicker } from '@/components/location-picker';
 import { useAuth } from '@/context/auth-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -39,6 +40,7 @@ export default function PublishScreen() {
   const [destination, setDestination] = useState('');
   const [category, setCategory] = useState('Vélo');
   const [images, setImages] = useState<string[]>([]);
+  const [coordinate, setCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
   const [publishing, setPublishing] = useState(false);
 
   async function pickImages() {
@@ -176,6 +178,8 @@ export default function PublishScreen() {
         category,
         images,
         publicationStatus,
+        latitude: coordinate?.latitude,
+        longitude: coordinate?.longitude,
       });
 
       if (!success) {
@@ -194,6 +198,7 @@ export default function PublishScreen() {
       setDestination('');
       setCategory('Vélo');
       setImages([]);
+      setCoordinate(null);
 
       Alert.alert(
         publicationStatus === 'draft'
@@ -462,6 +467,14 @@ export default function PublishScreen() {
             maxLength={100}
             editable={!publishing}
           />
+
+          <Text style={styles.label}>Position sur la carte</Text>
+          <LocationPicker coordinate={coordinate} onSelect={setCoordinate} />
+          <Text style={styles.mapHelper}>
+            {coordinate
+              ? `${coordinate.latitude.toFixed(5)}, ${coordinate.longitude.toFixed(5)}`
+              : 'Facultatif — touche la carte pour choisir un point.'}
+          </Text>
 
           <View style={styles.visibilityCard}>
             <View style={styles.visibilityIcon}>
@@ -759,6 +772,7 @@ const styles = StyleSheet.create({
     marginTop: 22,
     marginBottom: 22,
   },
+  mapHelper: { color: '#63766D', fontSize: 11, marginTop: 8 },
 
   visibilityIcon: {
     width: 46,
