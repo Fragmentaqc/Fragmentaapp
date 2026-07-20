@@ -10,6 +10,9 @@ import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  PermissionsAndroid,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -145,6 +148,7 @@ function getVerificationLabel(status: string) {
 
 export default function MapScreen() {
   const mapRef = useRef<MapView | null>(null);
+  const centerWhenLocated = useRef(false);
 
   const {
     adventures,
@@ -163,6 +167,42 @@ export default function MapScreen() {
 
   const [selectedItem, setSelectedItem] =
     useState<SelectedMapItem>(null);
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [userCoordinate, setUserCoordinate] = useState<MapCoordinate | null>(null);
+
+  async function centerOnUser() {
+    if (Platform.OS === 'android') {
+      const result = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Ta position sur Fragmenta',
+          message: 'Autorise Fragmenta à utiliser ta position pour te situer sur la carte.',
+          buttonPositive: 'Autoriser',
+          buttonNegative: 'Plus tard',
+        }
+      );
+      if (result !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Localisation désactivée', 'Tu peux autoriser la localisation dans les réglages de ton téléphone.');
+        return;
+      }
+    }
+    setLocationEnabled(true);
+    if (userCoordinate) {
+      mapRef.current?.animateToRegion({ ...userCoordinate, latitudeDelta: 0.025, longitudeDelta: 0.025 }, 600);
+    } else {
+      centerWhenLocated.current = true;
+    }
+  }
+
+  function receiveUserLocation(event: { nativeEvent: { coordinate?: MapCoordinate } }) {
+    const coordinate = event.nativeEvent.coordinate;
+    if (!coordinate) return;
+    setUserCoordinate(coordinate);
+    if (centerWhenLocated.current) {
+      centerWhenLocated.current = false;
+      mapRef.current?.animateToRegion({ ...coordinate, latitudeDelta: 0.025, longitudeDelta: 0.025 }, 600);
+    }
+  }
 
   const adventuresWithCoordinates = useMemo(() => {
     return adventures.filter(
@@ -245,18 +285,6 @@ export default function MapScreen() {
       },
       animated: true,
     });
-  }
-
-  function centerOnMontreal() {
-    mapRef.current?.animateToRegion(
-      {
-        latitude: 45.5019,
-        longitude: -73.5674,
-        latitudeDelta: 0.25,
-        longitudeDelta: 0.25,
-      },
-      700
-    );
   }
 
   function selectContentFilter(
@@ -409,6 +437,8 @@ export default function MapScreen() {
           showsBuildings
           showsTraffic={false}
           showsMyLocationButton={false}
+          showsUserLocation={locationEnabled}
+          onUserLocationChange={receiveUserLocation}
           toolbarEnabled={false}
           onPress={() => setSelectedItem(null)}
         >
@@ -586,7 +616,10 @@ export default function MapScreen() {
 
           <Pressable
             style={styles.mapButton}
-            onPress={centerOnMontreal}
+            onPress={() => {
+              void centerOnUser();
+            }}
+            accessibilityLabel="Ma position"
           >
             <Text style={styles.mapButtonIcon}>
               ◎
