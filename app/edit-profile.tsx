@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
+import { SOCIAL_PLATFORMS, normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -24,6 +25,7 @@ type ProfileForm = {
   bio: string;
   country: string;
   avatarUrl: string | null;
+  socialLinks: SocialLink[];
 };
 
 export default function EditProfileScreen() {
@@ -36,6 +38,7 @@ export default function EditProfileScreen() {
     bio: '',
     country: '',
     avatarUrl: null,
+    socialLinks: [],
   });
 
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
@@ -54,7 +57,7 @@ export default function EditProfileScreen() {
 
     const { data, error } = await supabase
       .from('profiles')
-      .select('display_name, username, bio, country, avatar_url')
+      .select('display_name, username, bio, country, avatar_url, social_links')
      .eq('id', user.id)
 .maybeSingle();
 
@@ -71,6 +74,7 @@ if (data) {
     bio: data.bio ?? '',
     country: data.country ?? '',
     avatarUrl: data.avatar_url ?? null,
+    socialLinks: parseSocialLinks(data.social_links),
   });
 }
 
@@ -175,6 +179,12 @@ if (data) {
       bio: form.bio.trim(),
       country: form.country.trim(),
       avatar_url: avatarUrl,
+      social_links: form.socialLinks
+        .map((link) => ({
+          platform: link.platform.trim() || 'Autre',
+          url: normalizeSocialUrl(link.url),
+        }))
+        .filter((link) => link.url),
       updated_at: new Date().toISOString(),
     },
     {
@@ -328,6 +338,82 @@ if (data) {
             style={styles.input}
             maxLength={60}
           />
+
+          <View style={styles.socialHeader}>
+            <View>
+              <Text style={styles.label}>Réseaux sociaux</Text>
+              <Text style={styles.socialHint}>Ajoute un lien complet ou un nom de domaine.</Text>
+            </View>
+            <Pressable
+              style={styles.addSocialButton}
+              onPress={() => setForm((current) => ({
+                ...current,
+                socialLinks: [...current.socialLinks, { platform: 'Instagram', url: '' }],
+              }))}
+            >
+              <Text style={styles.addSocialText}>+ Ajouter</Text>
+            </Pressable>
+          </View>
+
+          {form.socialLinks.map((link, index) => (
+            <View key={`${index}-${link.platform}`} style={styles.socialEditor}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.platforms}>
+                {SOCIAL_PLATFORMS.map((platform) => (
+                  <Pressable
+                    key={platform}
+                    style={[styles.platformChip, link.platform === platform && styles.platformChipActive]}
+                    onPress={() => setForm((current) => ({
+                      ...current,
+                      socialLinks: current.socialLinks.map((item, itemIndex) =>
+                        itemIndex === index ? { ...item, platform } : item
+                      ),
+                    }))}
+                  >
+                    <Text style={styles.platformChipText}>{platform}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+              <TextInput
+                value={link.platform}
+                onChangeText={(platform) => setForm((current) => ({
+                  ...current,
+                  socialLinks: current.socialLinks.map((item, itemIndex) =>
+                    itemIndex === index ? { ...item, platform } : item
+                  ),
+                }))}
+                placeholder="Nom du réseau"
+                placeholderTextColor="#63766D"
+                maxLength={40}
+                style={[styles.input, styles.platformInput]}
+              />
+              <View style={styles.socialUrlRow}>
+                <TextInput
+                  value={link.url}
+                  onChangeText={(url) => setForm((current) => ({
+                    ...current,
+                    socialLinks: current.socialLinks.map((item, itemIndex) =>
+                      itemIndex === index ? { ...item, url } : item
+                    ),
+                  }))}
+                  placeholder="instagram.com/tonprofil"
+                  placeholderTextColor="#63766D"
+                  autoCapitalize="none"
+                  keyboardType="url"
+                  maxLength={300}
+                  style={[styles.input, styles.socialUrlInput]}
+                />
+                <Pressable
+                  style={styles.removeSocialButton}
+                  onPress={() => setForm((current) => ({
+                    ...current,
+                    socialLinks: current.socialLinks.filter((_, itemIndex) => itemIndex !== index),
+                  }))}
+                >
+                  <Text style={styles.removeSocialText}>×</Text>
+                </Pressable>
+              </View>
+            </View>
+          ))}
 
           <Pressable
             onPress={saveProfile}
@@ -499,6 +585,20 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginTop: 5,
   },
+  socialHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
+  socialHint: { color: '#63766D', fontSize: 11, marginTop: -4 },
+  addSocialButton: { borderRadius: 14, backgroundColor: '#173D31', paddingHorizontal: 13, paddingVertical: 10 },
+  addSocialText: { color: '#62E6B1', fontSize: 12, fontWeight: '900' },
+  socialEditor: { borderRadius: 17, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', padding: 10, marginTop: 10 },
+  platforms: { marginBottom: 9 },
+  platformInput: { minHeight: 46, marginBottom: 8 },
+  platformChip: { borderRadius: 12, backgroundColor: '#10251E', paddingHorizontal: 11, paddingVertical: 8, marginRight: 7 },
+  platformChipActive: { backgroundColor: '#28634F' },
+  platformChipText: { color: '#DFFFF2', fontSize: 11, fontWeight: '800' },
+  socialUrlRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  socialUrlInput: { flex: 1, minHeight: 48 },
+  removeSocialButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: '#351919' },
+  removeSocialText: { color: '#FFB8B8', fontSize: 24, fontWeight: '700' },
 
   saveButton: {
     minHeight: 58,

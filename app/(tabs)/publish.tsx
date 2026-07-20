@@ -158,7 +158,9 @@ export default function PublishScreen() {
     await publishAdventure();
   }
 
-  async function publishAdventure() {
+  async function saveAdventure(
+    publicationStatus: 'draft' | 'published'
+  ) {
     if (publishing) {
       return;
     }
@@ -173,12 +175,15 @@ export default function PublishScreen() {
         destination,
         category,
         images,
+        publicationStatus,
       });
 
       if (!success) {
         Alert.alert(
           'Erreur',
-          'Impossible de publier cette aventure.'
+          publicationStatus === 'draft'
+            ? "Impossible d'enregistrer ce brouillon."
+            : 'Impossible de publier cette aventure.'
         );
         return;
       }
@@ -191,12 +196,22 @@ export default function PublishScreen() {
       setImages([]);
 
       Alert.alert(
-        'Aventure publiée',
-        'Ton aventure est maintenant dans le fil.',
+        publicationStatus === 'draft'
+          ? 'Brouillon enregistré'
+          : 'Aventure publiée',
+        publicationStatus === 'draft'
+          ? 'Tu peux retrouver ce brouillon dans ton profil.'
+          : 'Ton aventure est maintenant dans le fil.',
         [
           {
-            text: 'Voir le fil',
-            onPress: () => router.replace('/'),
+            text:
+              publicationStatus === 'draft'
+                ? 'Voir mon profil'
+                : 'Voir le fil',
+            onPress: () =>
+              router.replace(
+                publicationStatus === 'draft' ? '/profile' : '/'
+              ),
           },
         ]
       );
@@ -213,6 +228,30 @@ export default function PublishScreen() {
     } finally {
       setPublishing(false);
     }
+  }
+
+  async function publishAdventure() {
+    await saveAdventure('published');
+  }
+
+  async function saveDraft() {
+    if (!user) {
+      Alert.alert(
+        'Compte requis',
+        'Tu dois être connecté pour enregistrer un brouillon.'
+      );
+      return;
+    }
+
+    if (!title.trim() || !description.trim()) {
+      Alert.alert(
+        'Informations manquantes',
+        'Ajoute au minimum un titre et une description.'
+      );
+      return;
+    }
+
+    await saveAdventure('draft');
   }
 
   return (
@@ -475,6 +514,9 @@ export default function PublishScreen() {
           <Pressable
             style={styles.draftButton}
             disabled={publishing}
+            onPress={() => {
+              void saveDraft();
+            }}
           >
             <Text style={styles.draftButtonText}>
               Enregistrer comme brouillon

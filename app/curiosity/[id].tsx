@@ -122,7 +122,10 @@ export default function CuriosityDetailsScreen() {
           />
         ) : null}
 
-        <View style={styles.authorCard}>
+        <Pressable
+          style={styles.authorCard}
+          onPress={() => router.push({ pathname: '/user/[id]', params: { id: curiosity.ownerId } })}
+        >
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {curiosity.authorName
@@ -144,7 +147,7 @@ export default function CuriosityDetailsScreen() {
               {curiosity.authorHandle}
             </Text>
           </View>
-        </View>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );

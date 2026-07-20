@@ -28,6 +28,7 @@ Profil applicatif associé à `auth.users` par une relation un-à-un.
 | `display_name` | texte | Nom public |
 | `bio` | texte | Présentation publique |
 | `avatar_url` | texte | URL de l'avatar |
+| `social_links` | JSON | Liste flexible de réseaux sociaux et liens externes |
 | `country` | texte | Pays facultatif |
 | `created_at` | horodatage | Date de création |
 | `updated_at` | horodatage | Dernière modification |
@@ -66,6 +67,7 @@ Projet de voyage ou défi appartenant à un utilisateur.
 | `start_location` | texte | Point de départ facultatif |
 | `destination` | texte | Destination facultative |
 | `status` | texte | État de progression |
+| `publication_status` | texte | État de publication (`draft` ou `published`) |
 | `visibility` | texte | Niveau de visibilité |
 | `day_label` | texte | Libellé chronologique actuel |
 | `distance_km` | nombre | Distance connue |
@@ -80,6 +82,11 @@ Valeurs permises pour `status` :
 - `preparation`
 - `active`
 - `completed`
+
+Valeurs permises pour `publication_status` :
+
+- `draft`
+- `published`
 
 Valeurs permises pour `visibility` :
 

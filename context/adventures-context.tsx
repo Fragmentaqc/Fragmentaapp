@@ -31,6 +31,7 @@ export type Adventure = {
   latitude: number | null;
   longitude: number | null;
   status: string;
+  publicationStatus: 'draft' | 'published';
   createdAt: string | null;
 };
 
@@ -43,6 +44,7 @@ export type NewAdventure = {
   images: string[];
   latitude?: number | null;
   longitude?: number | null;
+  publicationStatus?: 'draft' | 'published';
 };
 
 type AdventuresContextValue = {
@@ -63,6 +65,7 @@ type AdventureRow = {
   destination: string | null;
   category: string | null;
   status: string | null;
+  publication_status: 'draft' | 'published' | null;
   created_at: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -247,6 +250,7 @@ export function AdventuresProvider({
           destination,
           category,
           status,
+          publication_status,
           created_at,
           latitude,
           longitude
@@ -406,6 +410,10 @@ export function AdventuresProvider({
                 : null,
             status:
               adventure.status?.trim() || 'active',
+            publicationStatus:
+              adventure.publication_status === 'draft'
+                ? 'draft'
+                : 'published',
             createdAt: adventure.created_at,
           };
         });
@@ -472,6 +480,8 @@ export function AdventuresProvider({
               destination || null,
             category,
             status: 'active',
+            publication_status:
+              newAdventure.publicationStatus || 'published',
             latitude:
               typeof newAdventure.latitude ===
               'number'
