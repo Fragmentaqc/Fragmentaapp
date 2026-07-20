@@ -368,10 +368,12 @@ export default function MapScreen() {
       return;
     }
 
-    /*
-      La page détaillée des aventures sera ajoutée ensuite.
-      Pour le moment, le bouton garde l’élément sélectionné.
-    */
+    router.push({
+      pathname: '/adventure/[id]',
+      params: {
+        id: selectedItem.data.id,
+      },
+    });
   }
 
   if (loading) {
