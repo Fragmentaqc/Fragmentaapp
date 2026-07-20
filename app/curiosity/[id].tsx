@@ -176,11 +176,14 @@ export default function CuriosityDetailsScreen() {
           </View>
         </Pressable>
         {user?.id === curiosity.ownerId ? (
-          <Pressable style={styles.deleteButton} onPress={confirmDelete} disabled={deleting}>
-            <Text style={styles.deleteButtonText}>
-              {deleting ? 'Suppression…' : 'Supprimer la curiosité'}
-            </Text>
-          </Pressable>
+          <View style={styles.ownerActions}>
+            <Pressable style={styles.editButton} onPress={() => router.push({ pathname: '/edit-curiosity/[id]', params: { id: curiosity.id } })}>
+              <Text style={styles.editButtonText}>Modifier la curiosité</Text>
+            </Pressable>
+            <Pressable style={styles.deleteButton} onPress={confirmDelete} disabled={deleting}>
+              <Text style={styles.deleteButtonText}>{deleting ? 'Suppression…' : 'Supprimer la curiosité'}</Text>
+            </Pressable>
+          </View>
         ) : null}
       </ScrollView>
     </SafeAreaView>
@@ -431,6 +434,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
   },
-  deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414', marginTop: 22 },
+  ownerActions: { marginTop: 22, gap: 10 },
+  editButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, backgroundColor: '#62E6B1' },
+  editButtonText: { color: '#071310', fontSize: 14, fontWeight: '900' },
+  deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414' },
   deleteButtonText: { color: '#FFB8B8', fontSize: 14, fontWeight: '900' },
 });
