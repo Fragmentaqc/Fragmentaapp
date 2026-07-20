@@ -15,7 +15,8 @@ begin
 
   if has_column_privilege(
     'authenticated',
-    'public.profiles.premium_status',
+    'public.profiles',
+    'premium_status',
     'UPDATE'
   ) then
     raise exception 'premium_status reste modifiable par authenticated.';
@@ -23,7 +24,8 @@ begin
 
   if has_column_privilege(
     'authenticated',
-    'public.profiles.identity_status',
+    'public.profiles',
+    'identity_status',
     'UPDATE'
   ) then
     raise exception 'identity_status reste modifiable par authenticated.';
@@ -31,11 +33,13 @@ begin
 
   if has_column_privilege(
     'anon',
-    'public.profiles.stripe_verification_session_id',
+    'public.profiles',
+    'stripe_verification_session_id',
     'SELECT'
   ) or has_column_privilege(
     'authenticated',
-    'public.profiles.stripe_verification_session_id',
+    'public.profiles',
+    'stripe_verification_session_id',
     'SELECT'
   ) then
     raise exception 'Le champ Stripe reste lisible depuis le client.';
@@ -43,11 +47,13 @@ begin
 
   if has_column_privilege(
     'authenticated',
-    'public.curiosities.verification_status',
+    'public.curiosities',
+    'verification_status',
     'INSERT'
   ) or has_column_privilege(
     'authenticated',
-    'public.curiosities.verification_status',
+    'public.curiosities',
+    'verification_status',
     'UPDATE'
   ) then
     raise exception 'verification_status reste contrôlable par le propriétaire.';
