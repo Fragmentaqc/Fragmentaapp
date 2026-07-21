@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { normalizeUsername } from '@/lib/account-validation';
 import type { Session, User } from '@supabase/supabase-js';
 import {
     createContext,
@@ -57,10 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     username: string,
     displayName: string
   ) {
-    const normalizedUsername = username
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9._-]/g, '');
+    const normalizedUsername = normalizeUsername(username);
 
     if (!normalizedUsername) {
       return 'Le nom d’utilisateur est invalide.';

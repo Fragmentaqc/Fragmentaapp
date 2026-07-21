@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { SOCIAL_PLATFORMS, normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -45,11 +45,7 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadProfile();
-  }, [user]);
-
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -79,7 +75,11 @@ if (data) {
 }
 
     setLoading(false);
-  }
+  }, [user]);
+
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
 
   async function selectAvatar() {
     const permission =
