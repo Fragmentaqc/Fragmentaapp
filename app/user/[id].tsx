@@ -90,8 +90,8 @@ export default function PublicProfileScreen() {
             {profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>}
           </View>
         </View>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.handle}>{profile?.username ? `@${profile.username}` : 'Profil Fragmenta'}</Text>
+        <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{name}</Text>
+        <Text style={styles.handle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{profile?.username ? `@${profile.username}` : 'Profil Fragmenta'}</Text>
         {profile?.country ? <Text style={styles.country}>⌖ {profile.country}</Text> : null}
         {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
         {user?.id !== userId ? <Pressable style={[styles.followButton, isFollowing && styles.followingButton]} onPress={() => user ? void toggleFollow(userId).then((success) => { if (success) setCounts((current) => ({ ...current, followers: Math.max(0, current.followers + (isFollowing ? -1 : 1)) })); }) : router.push('/auth')}><Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>{isFollowing ? 'Abonné' : 'Suivre'}</Text></Pressable> : null}

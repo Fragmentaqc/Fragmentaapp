@@ -173,7 +173,7 @@ export default function ProfileScreen() {
           <View style={styles.heroTop}><View><Text style={styles.heroEyebrow}>PASSEPORT D’AVENTURIER</Text><Text style={styles.heroBrand}>FRAGMENTA</Text></View>{user ? <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')}><Text style={styles.settingsIcon}>⚙</Text></Pressable> : null}</View>
           <View style={styles.heroIdentity}>
             <View style={styles.avatar}>{user && profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{user ? initial : '?'}</Text>}</View>
-            <View style={styles.identityText}><Text style={styles.title}>{user ? displayName : 'Bienvenue sur Fragmenta'}</Text><Text style={styles.username}>{user ? username : 'Le réseau des aventures vécues'}</Text>{profile?.country ? <Text style={styles.heroCountry}>⌖ {profile.country}</Text> : null}</View>
+            <View style={styles.identityText}><Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{user ? displayName : 'Bienvenue sur Fragmenta'}</Text><Text style={styles.username} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{user ? username : 'Le réseau des aventures vécues'}</Text>{profile?.country ? <Text style={styles.heroCountry} numberOfLines={1}>⌖ {profile.country}</Text> : null}</View>
           </View>
         </View>
 
@@ -441,8 +441,8 @@ const styles = StyleSheet.create({
   heroTop: { position: 'absolute', top: 20, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   heroEyebrow: { color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
   heroBrand: { color: '#FFFFFF', fontSize: 18, fontWeight: '900', letterSpacing: 2.5, marginTop: 5 },
-  heroIdentity: { position: 'absolute', left: 20, right: 20, bottom: 22, flexDirection: 'row', alignItems: 'flex-end' },
-  identityText: { flex: 1, marginLeft: 15, paddingBottom: 3 },
+  heroIdentity: { position: 'absolute', left: 20, right: 20, bottom: 20, alignItems: 'flex-start' },
+  identityText: { width: '100%', marginTop: 13 },
   heroCountry: { color: '#C4D9D0', fontSize: 11, fontWeight: '700', marginTop: 7 },
   profileIntro: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, marginTop: 16 },
   editProfilePill: { borderRadius: 18, borderWidth: 1, borderColor: '#28634F', paddingHorizontal: 13, paddingVertical: 9 },
