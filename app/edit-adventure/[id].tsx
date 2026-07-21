@@ -1,5 +1,6 @@
 import { type AdventureStatus, useAdventures } from '@/context/adventures-context';
 import { useAuth } from '@/context/auth-context';
+import type { RouteProfile } from '@/lib/routing';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -10,6 +11,11 @@ const progressStatuses: { value: AdventureStatus; label: string }[] = [
   { value: 'preparation', label: 'En préparation' },
   { value: 'active', label: 'En cours' },
   { value: 'completed', label: 'Terminée' },
+];
+const routeProfiles: { value: RouteProfile; label: string }[] = [
+  { value: 'cycling', label: 'Vélo / pistes cyclables' },
+  { value: 'walking', label: 'Marche / sentiers' },
+  { value: 'driving', label: 'Auto / routes' },
 ];
 
 export default function EditAdventureScreen() {
@@ -23,6 +29,7 @@ export default function EditAdventureScreen() {
   const [startLocation, setStartLocation] = useState('');
   const [destination, setDestination] = useState('');
   const [category, setCategory] = useState('Autre');
+  const [routingProfile, setRoutingProfile] = useState<RouteProfile>('walking');
   const [publicationStatus, setPublicationStatus] = useState<'draft' | 'published'>('published');
   const [status, setStatus] = useState<AdventureStatus>('preparation');
   const [saving, setSaving] = useState(false);
@@ -34,6 +41,7 @@ export default function EditAdventureScreen() {
     setStartLocation(adventure.startLocation);
     setDestination(adventure.destination);
     setCategory(adventure.category);
+    setRoutingProfile(adventure.routingProfile);
     setPublicationStatus(adventure.publicationStatus);
     setStatus(adventure.status);
   }, [adventure]);
@@ -45,7 +53,7 @@ export default function EditAdventureScreen() {
       return;
     }
     setSaving(true);
-    const success = await updateAdventure(adventure.id, { title, description, startLocation, destination, category, publicationStatus, status });
+    const success = await updateAdventure(adventure.id, { title, description, startLocation, destination, category, routingProfile, publicationStatus, status });
     setSaving(false);
     if (success) {
       Alert.alert('Aventure modifiée', 'Tes changements sont enregistrés.', [{ text: 'Voir la fiche', onPress: () => router.back() }]);
@@ -67,6 +75,8 @@ export default function EditAdventureScreen() {
           <Text style={styles.label}>Départ</Text><TextInput value={startLocation} onChangeText={setStartLocation} style={styles.input} />
           <Text style={styles.label}>Destination</Text><TextInput value={destination} onChangeText={setDestination} style={styles.input} />
           <Text style={styles.label}>Catégorie</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>{categories.map((item) => <Pressable key={item} style={[styles.chip, category === item && styles.chipActive]} onPress={() => setCategory(item)}><Text style={styles.chipText}>{item}</Text></Pressable>)}</ScrollView>
+          <Text style={styles.label}>Mode du trajet</Text>
+          <View style={styles.progressColumn}>{routeProfiles.map((item) => <Pressable key={item.value} style={[styles.progressButton, routingProfile === item.value && styles.statusActive]} onPress={() => setRoutingProfile(item.value)}><View style={[styles.progressDot, routingProfile === item.value && styles.progressDotActive]} /><Text style={styles.statusText}>{item.label}</Text></Pressable>)}</View>
           <Text style={styles.label}>Progression de l’aventure</Text>
           <View style={styles.progressColumn}>{progressStatuses.map((item) => <Pressable key={item.value} style={[styles.progressButton, status === item.value && styles.statusActive]} onPress={() => setStatus(item.value)}><View style={[styles.progressDot, status === item.value && styles.progressDotActive]} /><Text style={styles.statusText}>{item.label}</Text></Pressable>)}</View>
           <Text style={styles.label}>Publication</Text><View style={styles.statusRow}><Pressable style={[styles.statusButton, publicationStatus === 'draft' && styles.statusActive]} onPress={() => setPublicationStatus('draft')}><Text style={styles.statusText}>Brouillon</Text></Pressable><Pressable style={[styles.statusButton, publicationStatus === 'published' && styles.statusActive]} onPress={() => setPublicationStatus('published')}><Text style={styles.statusText}>Publié</Text></Pressable></View>

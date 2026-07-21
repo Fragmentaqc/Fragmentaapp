@@ -34,6 +34,7 @@ Fragmenta est une application Expo/React Native permettant de documenter des ave
    ```dotenv
    EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
    EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+   EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN=pk.your-public-mapbox-token
    ```
 
    Utiliser uniquement la clé publique/publishable. Une clé `service_role` ne doit jamais être incluse dans une application cliente.
@@ -68,6 +69,8 @@ Fragmenta est une application Expo/React Native permettant de documenter des ave
 ## Variables d'environnement
 
 Les variables préfixées par `EXPO_PUBLIC_` sont intégrées au code client par Expo. Elles ne doivent donc contenir aucun secret. Les accès aux données doivent être protégés par les politiques Row Level Security de Supabase.
+
+Le jeton Mapbox est un jeton public destiné au calcul des itinéraires. Il doit être restreint aux API et aux applications autorisées depuis le tableau de bord Mapbox. Sans ce jeton, la carte reste utilisable et affiche un trajet direct approximatif.
 
 Le fichier `.env` est ignoré par Git. Le fichier `.env.example` documente uniquement les noms et formats attendus.
 

@@ -7,7 +7,9 @@ import { useAuth } from '@/context/auth-context';
 import { useFragments } from '@/context/fragments-context';
 import { useFavorites } from '@/context/favorites-context';
 import { openDirections } from '@/lib/directions';
-import { useEffect, useState } from 'react';
+import { useAdventureRoute } from '@/hooks/use-adventure-route';
+import type { RouteCoordinate } from '@/lib/routing';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -43,8 +45,23 @@ export default function AdventureDetailsScreen() {
     ? params.id[0]
     : params.id;
   const adventure = adventures.find((item) => item.id === adventureId);
-  const fragments = adventureId ? fragmentsByAdventure[adventureId] ?? [] : [];
+  const fragments = useMemo(
+    () => adventureId ? fragmentsByAdventure[adventureId] ?? [] : [],
+    [adventureId, fragmentsByAdventure]
+  );
   const favorite = adventureId ? isFavorite({ type: 'adventure', id: adventureId }) : false;
+  const routePoints = useMemo<RouteCoordinate[]>(() => [
+    ...(typeof adventure?.latitude === 'number' && typeof adventure.longitude === 'number'
+      ? [{ latitude: adventure.latitude, longitude: adventure.longitude }]
+      : []),
+    ...fragments
+      .filter((fragment) => typeof fragment.latitude === 'number' && typeof fragment.longitude === 'number')
+      .map((fragment) => ({ latitude: fragment.latitude as number, longitude: fragment.longitude as number })),
+  ], [adventure?.latitude, adventure?.longitude, fragments]);
+  const { route, loading: routeLoading, usedFallback } = useAdventureRoute(
+    routePoints,
+    adventure?.routingProfile ?? 'walking'
+  );
 
   async function handleFavorite() {
     if (!adventure || savingFavorite) return;
@@ -227,11 +244,15 @@ export default function AdventureDetailsScreen() {
         )) : <View style={styles.emptyFragments}><Text style={styles.emptyFragmentsText}>Aucun fragment pour le moment.</Text></View>}
 
         {loadingAdventureId !== adventure.id ? (
-          <AdventureStats adventure={adventure} fragments={fragments} />
+          <AdventureStats adventure={adventure} fragments={fragments} distanceKm={route.distanceKm} />
         ) : null}
 
         <AdventureRouteMap
           adventure={adventure}
+          routeCoordinates={route.coordinates}
+          distanceKm={route.distanceKm}
+          loading={routeLoading}
+          usedFallback={usedFallback}
           fragmentCoordinates={fragments
             .filter((fragment) => typeof fragment.latitude === 'number' && typeof fragment.longitude === 'number')
             .map((fragment) => ({
@@ -354,37 +375,11 @@ function DetailPill({ label, value }: { label: string; value: string }) {
   );
 }
 
-function distanceBetween(
-  first: { latitude: number; longitude: number },
-  second: { latitude: number; longitude: number }
-) {
-  const earthRadiusKm = 6371;
-  const toRadians = (value: number) => value * Math.PI / 180;
-  const latitudeDelta = toRadians(second.latitude - first.latitude);
-  const longitudeDelta = toRadians(second.longitude - first.longitude);
-  const firstLatitude = toRadians(first.latitude);
-  const secondLatitude = toRadians(second.latitude);
-  const a = Math.sin(latitudeDelta / 2) ** 2
-    + Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
-  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function AdventureStats({ adventure, fragments }: {
+function AdventureStats({ adventure, fragments, distanceKm }: {
   adventure: Adventure;
   fragments: ReturnType<typeof useFragments>['fragmentsByAdventure'][string];
+  distanceKm: number;
 }) {
-  const coordinates = [
-    ...(typeof adventure.latitude === 'number' && typeof adventure.longitude === 'number'
-      ? [{ latitude: adventure.latitude, longitude: adventure.longitude }]
-      : []),
-    ...fragments
-      .filter((fragment) => typeof fragment.latitude === 'number' && typeof fragment.longitude === 'number')
-      .map((fragment) => ({ latitude: fragment.latitude as number, longitude: fragment.longitude as number })),
-  ];
-  const distance = coordinates.slice(1).reduce(
-    (total, coordinate, index) => total + distanceBetween(coordinates[index], coordinate),
-    0
-  );
   const photoCount = adventure.images.length + fragments.reduce((total, fragment) => total + fragment.images.length, 0);
   const dates = fragments
     .map((fragment) => fragment.occurredAt ? new Date(fragment.occurredAt).getTime() : Number.NaN)
@@ -400,10 +395,10 @@ function AdventureStats({ adventure, fragments }: {
       <View style={styles.statsGrid}>
         <StatCard value={`${fragments.length}`} label="Fragments" />
         <StatCard value={`${photoCount}`} label="Photos" />
-        <StatCard value={distance >= 10 ? `${Math.round(distance)} km` : `${distance.toFixed(1)} km`} label="Distance GPS" />
+        <StatCard value={distanceKm >= 10 ? `${Math.round(distanceKm)} km` : `${distanceKm.toFixed(1)} km`} label="Distance parcourue" />
         <StatCard value={durationDays ? `${durationDays} j` : '—'} label="Durée racontée" />
       </View>
-      {coordinates.length < 2 ? <Text style={styles.statsHelper}>Ajoute au moins deux positions GPS pour calculer la distance.</Text> : null}
+      {distanceKm === 0 ? <Text style={styles.statsHelper}>Ajoute au moins deux positions GPS pour calculer la distance.</Text> : null}
     </View>
   );
 }
@@ -415,22 +410,31 @@ function StatCard({ value, label }: { value: string; label: string }) {
 function AdventureRouteMap({
   adventure,
   fragmentCoordinates,
+  routeCoordinates,
+  distanceKm,
+  loading,
+  usedFallback,
 }: {
   adventure: Adventure;
   fragmentCoordinates: { id: string; title: string; latitude: number; longitude: number }[];
+  routeCoordinates: RouteCoordinate[];
+  distanceKm: number;
+  loading: boolean;
+  usedFallback: boolean;
 }) {
   const adventureCoordinate = typeof adventure.latitude === 'number' && typeof adventure.longitude === 'number'
     ? { latitude: adventure.latitude, longitude: adventure.longitude }
     : null;
-  const coordinates = [
+  const waypointCoordinates = [
     ...(adventureCoordinate ? [adventureCoordinate] : []),
     ...fragmentCoordinates.map(({ latitude, longitude }) => ({ latitude, longitude })),
   ];
 
-  if (!coordinates.length) return null;
+  if (!waypointCoordinates.length) return null;
 
-  const latitudes = coordinates.map((coordinate) => coordinate.latitude);
-  const longitudes = coordinates.map((coordinate) => coordinate.longitude);
+  const displayedCoordinates = routeCoordinates.length ? routeCoordinates : waypointCoordinates;
+  const latitudes = displayedCoordinates.map((coordinate) => coordinate.latitude);
+  const longitudes = displayedCoordinates.map((coordinate) => coordinate.longitude);
   const minLatitude = Math.min(...latitudes);
   const maxLatitude = Math.max(...latitudes);
   const minLongitude = Math.min(...longitudes);
@@ -449,18 +453,33 @@ function AdventureRouteMap({
           <Text style={styles.sectionEyebrow}>PARCOURS</Text>
           <Text style={styles.routeMapTitle}>Sur la carte</Text>
         </View>
-        <Text style={styles.routeMapCount}>{coordinates.length} point{coordinates.length > 1 ? 's' : ''}</Text>
+        <View style={styles.routeMapMeta}>
+          <Text style={styles.routeMapDistance}>{distanceKm >= 10 ? Math.round(distanceKm) : distanceKm.toFixed(1)} km</Text>
+          <Text style={styles.routeMapCount}>{getRouteProfileLabel(adventure.routingProfile)}</Text>
+        </View>
       </View>
       <MapView style={styles.routeMap} initialRegion={initialRegion} scrollEnabled zoomEnabled>
-        {coordinates.length > 1 ? <Polyline coordinates={coordinates} strokeColor="#62E6B1" strokeWidth={4} /> : null}
+        {displayedCoordinates.length > 1 ? <Polyline coordinates={displayedCoordinates} strokeColor="#62E6B1" strokeWidth={5} /> : null}
         {adventureCoordinate ? <Marker coordinate={adventureCoordinate} title={adventure.title} description="Point de l’aventure" pinColor="#E9B949" /> : null}
         {fragmentCoordinates.map((fragment, index) => (
           <Marker key={fragment.id} coordinate={fragment} title={fragment.title} description={`Fragment ${index + 1}`} pinColor="#62E6B1" />
         ))}
       </MapView>
-      <Text style={styles.routeMapHelper}>La ligne relie les positions dans l’ordre chronologique.</Text>
+      <Text style={styles.routeMapHelper}>
+        {loading
+          ? 'Calcul du trajet réel…'
+          : usedFallback
+            ? 'Trajet approximatif. Configure Mapbox ou reconnecte-toi pour suivre le réseau réel.'
+            : 'Le trajet suit le réseau adapté au mode choisi et les fragments dans l’ordre chronologique.'}
+      </Text>
     </View>
   );
+}
+
+function getRouteProfileLabel(profile: Adventure['routingProfile']) {
+  if (profile === 'cycling') return 'Vélo';
+  if (profile === 'driving') return 'Auto';
+  return 'Marche';
 }
 
 const styles = StyleSheet.create({
@@ -656,6 +675,8 @@ const styles = StyleSheet.create({
   routeMapHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   routeMapTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900', marginTop: 4 },
   routeMapCount: { color: '#82AA99', fontSize: 10, fontWeight: '800' },
+  routeMapMeta: { alignItems: 'flex-end' },
+  routeMapDistance: { color: '#62E6B1', fontSize: 18, fontWeight: '900' },
   routeMap: { width: '100%', height: 260 },
   routeMapHelper: { color: '#71877D', fontSize: 10, lineHeight: 15, paddingHorizontal: 16, paddingVertical: 12 },
   coordinatesCard: {
