@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/auth-context';
+import { useBlocks } from '@/context/blocks-context';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -195,6 +196,7 @@ export function CuriositiesProvider({
   children: ReactNode;
 }) {
   const { user } = useAuth();
+  const { hiddenUserIds } = useBlocks();
 
   const [curiosities, setCuriosities] = useState<
     Curiosity[]
@@ -244,8 +246,8 @@ export function CuriositiesProvider({
         return;
       }
 
-      const rows =
-        (curiosityRows ?? []) as CuriosityRow[];
+      const rows = ((curiosityRows ?? []) as CuriosityRow[])
+        .filter((curiosity) => !hiddenUserIds.includes(curiosity.owner_id));
 
       if (rows.length === 0) {
         setCuriosities([]);
@@ -392,7 +394,7 @@ export function CuriositiesProvider({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [hiddenUserIds]);
 
   useEffect(() => {
     void refreshCuriosities();

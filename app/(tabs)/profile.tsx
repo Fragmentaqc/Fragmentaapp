@@ -323,6 +323,7 @@ export default function ProfileScreen() {
                 Se déconnecter
               </Text>
             </Pressable>
+            <Pressable style={styles.blockedUsersButton} onPress={() => router.push('/blocked-users')}><Text style={styles.blockedUsersText}>Gérer les comptes bloqués</Text></Pressable>
             <Pressable style={styles.deleteAccountButton} onPress={() => router.push('/delete-account')}><Text style={styles.deleteAccountText}>Supprimer mon compte</Text></Pressable>
           </>
         ) : (
@@ -723,6 +724,8 @@ const styles = StyleSheet.create({
   },
   deleteAccountButton: { width: '100%', minHeight: 48, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   deleteAccountText: { color: '#B77A7A', fontSize: 12, fontWeight: '800' },
+  blockedUsersButton: { width: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  blockedUsersText: { color: '#8FA69B', fontSize: 12, fontWeight: '800' },
 
   quoteCard: {
     width: '100%',
