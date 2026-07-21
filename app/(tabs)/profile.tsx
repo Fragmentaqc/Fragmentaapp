@@ -323,6 +323,7 @@ export default function ProfileScreen() {
                 Se déconnecter
               </Text>
             </Pressable>
+            <Pressable style={styles.deleteAccountButton} onPress={() => router.push('/delete-account')}><Text style={styles.deleteAccountText}>Supprimer mon compte</Text></Pressable>
           </>
         ) : (
           <>
@@ -720,6 +721,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
   },
+  deleteAccountButton: { width: '100%', minHeight: 48, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  deleteAccountText: { color: '#B77A7A', fontSize: 12, fontWeight: '800' },
 
   quoteCard: {
     width: '100%',

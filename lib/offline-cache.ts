@@ -19,3 +19,13 @@ export async function writeOfflineCache(key: string, value: unknown) {
     console.error('Écriture du cache hors ligne impossible :', error);
   }
 }
+
+export async function clearOfflineCache() {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const fragmentaKeys = keys.filter((key) => key.startsWith(PREFIX));
+    if (fragmentaKeys.length) await AsyncStorage.multiRemove(fragmentaKeys);
+  } catch (error) {
+    console.error('Nettoyage du cache hors ligne impossible :', error);
+  }
+}

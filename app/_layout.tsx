@@ -70,6 +70,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="moderation" />
 
+              <Stack.Screen name="delete-account" />
+
               <Stack.Screen
                 name="modal"
                 options={{
