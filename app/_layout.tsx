@@ -11,6 +11,7 @@ import { AdventuresProvider } from '@/context/adventures-context';
 import { AuthProvider } from '@/context/auth-context';
 import { CuriositiesProvider } from '@/context/curiosities-context';
 import { FragmentsProvider } from '@/context/fragments-context';
+import { OfflineBanner } from '@/components/offline-banner';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -76,6 +77,7 @@ export default function RootLayout() {
               style="light"
               backgroundColor="#071310"
             />
+            <OfflineBanner />
           </ThemeProvider>
           </FragmentsProvider>
         </CuriositiesProvider>
