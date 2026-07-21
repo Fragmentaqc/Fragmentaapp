@@ -59,6 +59,7 @@ export default function PublicProfileScreen() {
   const isBlocked = Boolean(userId && blockedUserIds.includes(userId));
   const isHidden = Boolean(userId && hiddenUserIds.includes(userId));
   const isFollowing = followingIds.includes(userId);
+  const coverImage = userAdventures.find((item) => item.images[0])?.images[0];
 
   function confirmBlock() {
     if (!user) { router.push('/auth'); return; }
@@ -80,8 +81,13 @@ export default function PublicProfileScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>‹ Retour</Text></Pressable>
-        <View style={styles.avatar}>
-          {profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>}
+        <View style={styles.publicHero}>
+          {coverImage ? <Image source={{ uri: coverImage }} style={styles.publicCover} /> : <View style={styles.publicCoverFallback}><Text style={styles.coverLetter}>F</Text></View>}
+          <View style={styles.publicShade} />
+          <Text style={styles.passportLabel}>PASSEPORT D’AVENTURIER</Text>
+          <View style={styles.avatar}>
+            {profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>}
+          </View>
         </View>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.handle}>{profile?.username ? `@${profile.username}` : 'Profil Fragmenta'}</Text>
@@ -136,7 +142,8 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#071310' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   hiddenContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 16 }, hiddenTitle: { color: '#F3FFF9', fontSize: 24, fontWeight: '900' }, hiddenText: { color: '#8FA69B', textAlign: 'center' }, unblockButton: { borderRadius: 15, backgroundColor: '#174B3B', paddingHorizontal: 20, paddingVertical: 12 }, unblockText: { color: '#62E6B1', fontWeight: '900' },
   container: { padding: 20, paddingBottom: 80 }, back: { alignSelf: 'flex-start', paddingVertical: 8 }, backText: { color: '#62E6B1', fontSize: 15, fontWeight: '800' },
-  avatar: { width: 104, height: 104, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', borderRadius: 52, overflow: 'hidden', backgroundColor: '#174B3B', borderWidth: 2, borderColor: '#62E6B1', marginTop: 12 },
+  publicHero: { height: 270, overflow: 'hidden', borderRadius: 25, borderWidth: 1, borderColor: '#285345', backgroundColor: '#12382D', marginTop: 10 }, publicCover: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }, publicCoverFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', justifyContent: 'center' }, coverLetter: { color: 'rgba(98,230,177,0.08)', fontSize: 210, fontWeight: '900', marginRight: -10 }, publicShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,12,9,0.48)' }, passportLabel: { position: 'absolute', top: 18, left: 18, color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.6 },
+  avatar: { position: 'absolute', left: 18, bottom: 18, width: 94, height: 94, alignItems: 'center', justifyContent: 'center', borderRadius: 47, overflow: 'hidden', backgroundColor: '#174B3B', borderWidth: 3, borderColor: '#62E6B1' },
   avatarImage: { width: '100%', height: '100%' }, avatarText: { color: '#F3FFF9', fontSize: 40, fontWeight: '900' },
   name: { color: '#F3FFF9', fontSize: 28, fontWeight: '900', textAlign: 'center', marginTop: 16 }, handle: { color: '#62E6B1', textAlign: 'center', marginTop: 5 }, country: { color: '#8FA69B', textAlign: 'center', marginTop: 8 }, bio: { color: '#B7C9C1', fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 16 },
   socials: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 20 }, social: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 }, socialText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' }, socialArrow: { color: '#62E6B1', marginLeft: 6 },

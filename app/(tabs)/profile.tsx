@@ -44,6 +44,7 @@ export default function ProfileScreen() {
   const [isModerator, setIsModerator] = useState(false);
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
+  const [profileSection, setProfileSection] = useState<'activity' | 'collections' | 'about'>('activity');
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -135,6 +136,7 @@ export default function ProfileScreen() {
     : [];
   const favoriteAdventures = adventures.filter((adventure) => favoriteAdventureIds.includes(adventure.id));
   const favoriteCuriosities = curiosities.filter((curiosity) => favoriteCuriosityIds.includes(curiosity.id));
+  const coverImage = myAdventures.find((adventure) => adventure.images[0])?.images[0];
 
   if (loading) {
     return (
@@ -156,90 +158,43 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.topLabel}>
-          <Text style={styles.brand}>FRAGMENTA</Text>
-          <Text style={styles.sectionLabel}>PROFIL</Text>
-          {user ? (
-            <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')}>
-              <Text style={styles.settingsIcon}>⚙</Text>
-            </Pressable>
-          ) : null}
+        <View style={styles.passportHero}>
+          {coverImage ? <Image source={{ uri: coverImage }} style={styles.coverImage} /> : <View style={styles.coverFallback}><Text style={styles.coverMark}>F</Text></View>}
+          <View style={styles.coverShade} />
+          <View style={styles.heroTop}><View><Text style={styles.heroEyebrow}>PASSEPORT D’AVENTURIER</Text><Text style={styles.heroBrand}>FRAGMENTA</Text></View>{user ? <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')}><Text style={styles.settingsIcon}>⚙</Text></Pressable> : null}</View>
+          <View style={styles.heroIdentity}>
+            <View style={styles.avatar}>{user && profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{user ? initial : '?'}</Text>}</View>
+            <View style={styles.identityText}><Text style={styles.title}>{user ? displayName : 'Bienvenue sur Fragmenta'}</Text><Text style={styles.username}>{user ? username : 'Le réseau des aventures vécues'}</Text>{profile?.country ? <Text style={styles.heroCountry}>⌖ {profile.country}</Text> : null}</View>
+          </View>
         </View>
 
-        <View style={styles.avatar}>
-          {user && profile?.avatar_url ? (
-            <Image
-              source={{ uri: profile.avatar_url }}
-              style={styles.avatarImage}
-            />
-          ) : (
-            <Text style={styles.avatarText}>
-              {user ? initial : '?'}
-            </Text>
-          )}
-        </View>
-
-        <Text style={styles.title}>
-          {user ? displayName : 'Bienvenue sur Fragmenta'}
-        </Text>
-
-        <Text style={styles.username}>
-          {user
-            ? username
-            : 'Le réseau social des aventures vécues'}
-        </Text>
-
-        {user?.email ? (
-          <><Text style={styles.email}>{user.email}</Text><View style={[styles.emailStatus, user.email_confirmed_at && styles.emailStatusConfirmed]}><Text style={[styles.emailStatusText, user.email_confirmed_at && styles.emailStatusTextConfirmed]}>{user.email_confirmed_at ? '✓ Courriel confirmé' : 'Courriel à confirmer'}</Text></View>{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer le courriel de confirmation'}</Text></Pressable> : null}</>
-        ) : null}
-
-        {user ? (
-          profile?.bio ? (
-            <Text style={styles.bio}>{profile.bio}</Text>
-          ) : (
-            <Text style={styles.bioPlaceholder}>
-              Ajoute une bio pour raconter le genre d’aventures
-              que tu veux vivre.
-            </Text>
-          )
-        ) : (
-          <Text style={styles.bioPlaceholder}>
-            Crée ton compte pour publier tes aventures et raconter
-            chaque fragment de ton histoire.
-          </Text>
-        )}
+        {user ? <View style={styles.profileIntro}><Text style={profile?.bio ? styles.bio : styles.bioPlaceholder}>{profile?.bio || 'Ajoute une bio pour raconter le genre d’aventures que tu veux vivre.'}</Text><Pressable style={styles.editProfilePill} onPress={() => router.push('/edit-profile')}><Text style={styles.editProfilePillText}>Modifier le profil</Text></Pressable></View> : null}
 
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>
-              {myAdventures.length}
-            </Text>
-            <Text style={styles.statLabel}>Aventures</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{myCuriosities.length}</Text>
-            <Text style={styles.statLabel}>Curiosités</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{followCounts.followers}</Text>
-            <Text style={styles.statLabel}>Abonnés</Text>
-          </View>
+          <View style={styles.statCard}><Text style={styles.statValue}>{myAdventures.length}</Text><Text style={styles.statLabel}>Aventures</Text></View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCard}><Text style={styles.statValue}>{myCuriosities.length}</Text><Text style={styles.statLabel}>Curiosités</Text></View>
+          <View style={styles.statDivider} />
+          <Pressable style={styles.statCard} onPress={() => user && router.push({ pathname: '/members', params: { mode: 'followers', userId: user.id } } as never)}><Text style={styles.statValue}>{followCounts.followers}</Text><Text style={styles.statLabel}>Abonnés</Text></Pressable>
+          <View style={styles.statDivider} />
+          <Pressable style={styles.statCard} onPress={() => user && router.push({ pathname: '/members', params: { mode: 'following', userId: user.id } } as never)}><Text style={styles.statValue}>{followCounts.following}</Text><Text style={styles.statLabel}>Suivis</Text></Pressable>
         </View>
 
         {user ? <>
-          <View style={styles.followingRow}>
-            <Pressable style={styles.followingCard} onPress={() => router.push({ pathname: '/members', params: { mode: 'followers', userId: user.id } } as never)}><Text style={styles.followingValue}>{followCounts.followers}</Text><Text style={styles.followingLabel}>Mes abonnés</Text></Pressable>
-            <Pressable style={styles.followingCard} onPress={() => router.push({ pathname: '/members', params: { mode: 'following', userId: user.id } } as never)}><Text style={styles.followingValue}>{followCounts.following}</Text><Text style={styles.followingLabel}>Mes abonnements</Text></Pressable>
+          <View style={styles.profileNav}>
+            <Pressable style={[styles.navItem, profileSection === 'activity' && styles.navItemActive]} onPress={() => setProfileSection('activity')}><Text style={styles.navIcon}>◷</Text><Text style={[styles.navLabel, profileSection === 'activity' && styles.navLabelActive]}>Activité</Text></Pressable>
+            <Pressable style={styles.navItem} onPress={() => router.push('/map')}><Text style={styles.navIcon}>⌖</Text><Text style={styles.navLabel}>Carte</Text></Pressable>
+            <Pressable style={[styles.navItem, profileSection === 'collections' && styles.navItemActive]} onPress={() => setProfileSection('collections')}><Text style={styles.navIcon}>◇</Text><Text style={[styles.navLabel, profileSection === 'collections' && styles.navLabelActive]}>Collections</Text></Pressable>
+            <Pressable style={[styles.navItem, profileSection === 'about' && styles.navItemActive]} onPress={() => setProfileSection('about')}><Text style={styles.navIcon}>○</Text><Text style={[styles.navLabel, profileSection === 'about' && styles.navLabelActive]}>À propos</Text></Pressable>
           </View>
-          <Pressable style={styles.findMembersButton} onPress={() => router.push('/members' as never)}><Text style={styles.findMembersIcon}>⌕</Text><View style={styles.findMembersContent}><Text style={styles.findMembersTitle}>Trouver des aventuriers</Text><Text style={styles.findMembersText}>Recherche par membre, pays et type d’aventure</Text></View><Text style={styles.findMembersArrow}>›</Text></Pressable>
-          <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}</View>
-          <View style={styles.activityHeader}><Text style={styles.libraryEyebrow}>FIL D’ACTIVITÉ</Text><Text style={styles.aboutTitle}>Mes dernières publications</Text></View>
+          {profileSection === 'about' ? <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View> : null}
+          {profileSection === 'collections' ? <View style={styles.sectionIntro}><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes souvenirs sauvegardés</Text><Text style={styles.aboutText}>{favoriteAdventures.length + favoriteCuriosities.length} élément{favoriteAdventures.length + favoriteCuriosities.length === 1 ? '' : 's'} dans tes favoris.</Text></View> : null}
+          {profileSection === 'activity' ? <View style={styles.activityHeader}><Text style={styles.libraryEyebrow}>FIL D’ACTIVITÉ</Text><Text style={styles.aboutTitle}>Mes dernières publications</Text></View> : null}
         </> : null}
 
         {user ? (
           <View style={styles.library}>
+            {profileSection === 'activity' ? <>
             <View style={styles.libraryHeader}>
               <View>
                 <Text style={styles.libraryEyebrow}>MA COLLECTION</Text>
@@ -304,13 +259,16 @@ export default function ProfileScreen() {
               </Text>
             )}
 
-            <View style={[styles.libraryHeader, styles.curiosityHeader]}>
+            </> : null}
+            {profileSection === 'collections' ? <>
+            <View style={styles.libraryHeader}>
               <View><Text style={styles.libraryEyebrow}>ENREGISTRÉS</Text><Text style={styles.libraryTitle}>Mes favoris</Text></View>
               <Text style={styles.libraryCount}>{favoriteAdventures.length + favoriteCuriosities.length}</Text>
             </View>
             {favoriteAdventures.map((adventure) => <ProfileContentCard key={`favorite-adventure-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}
             {favoriteCuriosities.map((curiosity) => <ProfileContentCard key={`favorite-curiosity-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}
             {favoriteAdventures.length + favoriteCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Aucun favori enregistré pour le moment.</Text> : null}
+            </> : null}
           </View>
         ) : null}
 
@@ -444,10 +402,36 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 18,
+    paddingHorizontal: 16,
+    paddingTop: 8,
     paddingBottom: 120,
   },
+
+  passportHero: { width: '100%', height: 350, overflow: 'hidden', borderRadius: 28, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E' },
+  coverImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  coverFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', justifyContent: 'center', backgroundColor: '#12382D' },
+  coverMark: { color: 'rgba(98,230,177,0.08)', fontSize: 260, fontWeight: '900', marginRight: -20 },
+  coverShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,12,9,0.52)' },
+  heroTop: { position: 'absolute', top: 20, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  heroEyebrow: { color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
+  heroBrand: { color: '#FFFFFF', fontSize: 18, fontWeight: '900', letterSpacing: 2.5, marginTop: 5 },
+  heroIdentity: { position: 'absolute', left: 20, right: 20, bottom: 22, flexDirection: 'row', alignItems: 'flex-end' },
+  identityText: { flex: 1, marginLeft: 15, paddingBottom: 3 },
+  heroCountry: { color: '#C4D9D0', fontSize: 11, fontWeight: '700', marginTop: 7 },
+  profileIntro: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, marginTop: 16 },
+  editProfilePill: { borderRadius: 18, borderWidth: 1, borderColor: '#28634F', paddingHorizontal: 13, paddingVertical: 9 },
+  editProfilePillText: { color: '#62E6B1', fontSize: 10, fontWeight: '900' },
+  statDivider: { width: 1, height: 30, backgroundColor: '#24483B', alignSelf: 'center' },
+  profileNav: { width: '100%', flexDirection: 'row', borderRadius: 18, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 6, marginTop: 18 },
+  navItem: { flex: 1, minHeight: 58, alignItems: 'center', justifyContent: 'center', borderRadius: 13 },
+  navItemActive: { backgroundColor: '#173D31' },
+  navIcon: { color: '#62E6B1', fontSize: 18 },
+  navLabel: { color: '#71877D', fontSize: 9, fontWeight: '800', marginTop: 5 },
+  navLabelActive: { color: '#E4FFF4' },
+  aboutMeta: { color: '#81958C', fontSize: 11, marginTop: 10 },
+  discoverButton: { alignSelf: 'flex-start', borderRadius: 18, backgroundColor: '#173D31', paddingHorizontal: 15, paddingVertical: 10, marginTop: 15 },
+  discoverButtonText: { color: '#62E6B1', fontSize: 11, fontWeight: '900' },
+  sectionIntro: { width: '100%', borderRadius: 18, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 18, marginTop: 22 },
 
   topLabel: {
     width: '100%',
@@ -472,14 +456,14 @@ const styles = StyleSheet.create({
   },
 
   avatar: {
-    width: 104,
-    height: 104,
-    borderRadius: 52,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     backgroundColor: '#174B3B',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#62E6B1',
   },
 
@@ -490,24 +474,23 @@ const styles = StyleSheet.create({
 
   avatarText: {
     color: '#F3FFF9',
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: '900',
   },
 
   title: {
     color: '#F3FFF9',
-    fontSize: 28,
+    fontSize: 25,
     fontWeight: '900',
-    marginTop: 18,
-    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowRadius: 8,
   },
 
   username: {
     color: '#62E6B1',
     fontSize: 14,
     fontWeight: '800',
-    marginTop: 7,
-    textAlign: 'center',
+    marginTop: 5,
   },
 
   email: {
@@ -521,41 +504,38 @@ const styles = StyleSheet.create({
     color: '#B7C9C1',
     fontSize: 14,
     lineHeight: 21,
-    textAlign: 'center',
-    marginTop: 18,
-    paddingHorizontal: 14,
+    flex: 1,
   },
 
   bioPlaceholder: {
     color: '#6F8279',
     fontSize: 13,
     lineHeight: 20,
-    textAlign: 'center',
-    marginTop: 18,
-    paddingHorizontal: 20,
+    flex: 1,
   },
 
   statsRow: {
     width: '100%',
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 30,
+    alignItems: 'center',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#19392E',
+    backgroundColor: '#0C1C17',
+    paddingVertical: 15,
+    marginTop: 16,
   },
 
   statCard: {
     flex: 1,
-    minHeight: 102,
+    minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0C1C17',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#19392E',
   },
 
   statValue: {
     color: '#F3FFF9',
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: '900',
   },
 
