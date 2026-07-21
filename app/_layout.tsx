@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 import { AdventuresProvider } from '@/context/adventures-context';
 import { AuthProvider } from '@/context/auth-context';
 import { CuriositiesProvider } from '@/context/curiosities-context';
+import { FragmentsProvider } from '@/context/fragments-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -23,6 +24,7 @@ export default function RootLayout() {
     <AuthProvider>
       <AdventuresProvider>
         <CuriositiesProvider>
+          <FragmentsProvider>
           <ThemeProvider
             value={
               colorScheme === 'dark'
@@ -54,6 +56,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="edit-adventure/[id]" />
 
+              <Stack.Screen name="add-fragment/[adventureId]" />
+
               <Stack.Screen name="user/[id]" />
 
               <Stack.Screen
@@ -71,6 +75,7 @@ export default function RootLayout() {
               backgroundColor="#071310"
             />
           </ThemeProvider>
+          </FragmentsProvider>
         </CuriositiesProvider>
       </AdventuresProvider>
     </AuthProvider>

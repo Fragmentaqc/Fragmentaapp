@@ -4,8 +4,9 @@ import {
 } from '@/context/adventures-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
+import { useFragments } from '@/context/fragments-context';
 import { openDirections } from '@/lib/directions';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -31,11 +32,17 @@ export default function AdventureDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const { adventures, loading, deleteAdventure } = useAdventures();
   const { user } = useAuth();
+  const { fragmentsByAdventure, loadingAdventureId, loadFragments } = useFragments();
   const [deleting, setDeleting] = useState(false);
   const adventureId = Array.isArray(params.id)
     ? params.id[0]
     : params.id;
   const adventure = adventures.find((item) => item.id === adventureId);
+  const fragments = adventureId ? fragmentsByAdventure[adventureId] ?? [] : [];
+
+  useEffect(() => {
+    if (adventureId) void loadFragments(adventureId);
+  }, [adventureId, loadFragments]);
 
   function confirmDelete() {
     if (!adventure || deleting) return;
@@ -157,6 +164,30 @@ export default function AdventureDetailsScreen() {
           <Text style={styles.sectionTitle}>{"À propos de l'aventure"}</Text>
           <Text style={styles.description}>{adventure.description}</Text>
         </View>
+
+        <View style={styles.fragmentsHeader}>
+          <View>
+            <Text style={styles.sectionEyebrow}>JOURNAL DE BORD</Text>
+            <Text style={styles.sectionTitle}>Fragments</Text>
+          </View>
+          {user?.id === adventure.ownerId ? (
+            <Pressable style={styles.addFragmentButton} onPress={() => router.push({ pathname: '/add-fragment/[adventureId]', params: { adventureId: adventure.id } })}>
+              <Text style={styles.addFragmentButtonText}>＋ Ajouter</Text>
+            </Pressable>
+          ) : null}
+        </View>
+        {loadingAdventureId === adventure.id ? <ActivityIndicator color="#62E6B1" style={styles.fragmentLoader} /> : fragments.length ? fragments.map((fragment) => (
+          <View key={fragment.id} style={styles.fragmentCard}>
+            <View style={styles.fragmentTopRow}>
+              <Text style={styles.fragmentDate}>{fragment.occurredAt ? new Date(fragment.occurredAt).toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Date à venir'}</Text>
+              {fragment.status === 'draft' ? <Text style={styles.draftBadge}>BROUILLON</Text> : null}
+            </View>
+            <Text style={styles.fragmentTitle}>{fragment.title}</Text>
+            <Text style={styles.fragmentBody}>{fragment.body}</Text>
+            {fragment.images[0] ? <Image source={{ uri: fragment.images[0] }} style={styles.fragmentImage} /> : null}
+            {fragment.images.length > 1 ? <Text style={styles.fragmentImageCount}>＋ {fragment.images.length - 1} autre{fragment.images.length > 2 ? 's' : ''} photo{fragment.images.length > 2 ? 's' : ''}</Text> : null}
+          </View>
+        )) : <View style={styles.emptyFragments}><Text style={styles.emptyFragmentsText}>Aucun fragment pour le moment.</Text></View>}
 
         {typeof adventure.latitude === 'number' &&
         typeof adventure.longitude === 'number' ? (
@@ -425,6 +456,20 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { color: '#F3FFF9', fontSize: 19, fontWeight: '900', marginTop: 5 },
   description: { color: '#A2B3AB', fontSize: 14, lineHeight: 22, marginTop: 11 },
+  fragmentsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 18, marginTop: 25 },
+  addFragmentButton: { borderRadius: 14, backgroundColor: '#62E6B1', paddingHorizontal: 13, paddingVertical: 10 },
+  addFragmentButtonText: { color: '#071310', fontSize: 11, fontWeight: '900' },
+  fragmentLoader: { marginTop: 24 },
+  fragmentCard: { borderRadius: 22, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', padding: 17, marginHorizontal: 18, marginTop: 12 },
+  fragmentTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  fragmentDate: { color: '#62E6B1', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' },
+  draftBadge: { color: '#071310', backgroundColor: '#E9B949', fontSize: 8, fontWeight: '900', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 5 },
+  fragmentTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900', marginTop: 10 },
+  fragmentBody: { color: '#A2B3AB', fontSize: 13, lineHeight: 20, marginTop: 7 },
+  fragmentImage: { width: '100%', height: 190, borderRadius: 16, marginTop: 13 },
+  fragmentImageCount: { color: '#82AA99', fontSize: 10, fontWeight: '800', marginTop: 8 },
+  emptyFragments: { borderRadius: 18, borderWidth: 1, borderColor: '#19392E', padding: 18, marginHorizontal: 18, marginTop: 12 },
+  emptyFragmentsText: { color: '#71877D', fontSize: 12, textAlign: 'center' },
   coordinatesCard: {
     flexDirection: 'row',
     alignItems: 'center',
