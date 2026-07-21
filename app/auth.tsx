@@ -183,6 +183,8 @@ export default function AuthScreen() {
             )}
           </Pressable>
 
+          {mode === 'login' ? <Pressable style={styles.forgotButton} onPress={() => router.push('/forgot-password')}><Text style={styles.forgotText}>Mot de passe oublié?</Text></Pressable> : null}
+
           <Pressable
             onPress={() =>
               setMode((current) =>
@@ -299,6 +301,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
   },
+  forgotButton: { alignItems: 'center', paddingTop: 15 },
+  forgotText: { color: '#62E6B1', fontSize: 12, fontWeight: '800' },
   visitorNote: { color: '#E9B949', fontSize: 12, lineHeight: 18, marginTop: -16, marginBottom: 16 },
   consentBox: { borderRadius: 16, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 14, marginTop: 18, gap: 13 },
   consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },

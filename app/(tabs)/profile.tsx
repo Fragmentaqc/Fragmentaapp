@@ -5,6 +5,7 @@ import { useFavorites } from '@/context/favorites-context';
 import { supabase } from '@/lib/supabase';
 import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { useFocusEffect } from '@react-navigation/native';
+import * as ExpoLinking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -38,6 +39,7 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
+  const [resendingConfirmation, setResendingConfirmation] = useState(false);
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -99,6 +101,15 @@ export default function ProfileScreen() {
         },
       ]
     );
+  }
+
+  async function resendConfirmation() {
+    if (!user?.email || resendingConfirmation) return;
+    setResendingConfirmation(true);
+    const { error } = await supabase.auth.resend({ type: 'signup', email: user.email, options: { emailRedirectTo: ExpoLinking.createURL('/') } });
+    setResendingConfirmation(false);
+    if (error) Alert.alert('Envoi impossible', error.message);
+    else Alert.alert('Courriel envoyé', 'Consulte ta boîte de réception pour confirmer ton adresse.');
   }
 
   const displayName =
@@ -174,7 +185,7 @@ export default function ProfileScreen() {
         </Text>
 
         {user?.email ? (
-          <Text style={styles.email}>{user.email}</Text>
+          <><Text style={styles.email}>{user.email}</Text><View style={[styles.emailStatus, user.email_confirmed_at && styles.emailStatusConfirmed]}><Text style={[styles.emailStatusText, user.email_confirmed_at && styles.emailStatusTextConfirmed]}>{user.email_confirmed_at ? '✓ Courriel confirmé' : 'Courriel à confirmer'}</Text></View>{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer le courriel de confirmation'}</Text></Pressable> : null}</>
         ) : null}
 
         {user ? (
@@ -730,6 +741,11 @@ const styles = StyleSheet.create({
   blockedUsersText: { color: '#8FA69B', fontSize: 12, fontWeight: '800' },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 22, marginTop: 12 },
   legalText: { color: '#62E6B1', fontSize: 11, fontWeight: '800', textDecorationLine: 'underline' },
+  emailStatus: { alignSelf: 'center', borderRadius: 999, backgroundColor: '#2A2412', paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
+  emailStatusConfirmed: { backgroundColor: '#173D31' },
+  emailStatusText: { color: '#E9B949', fontSize: 9, fontWeight: '900' },
+  emailStatusTextConfirmed: { color: '#62E6B1' },
+  resendText: { color: '#8FA69B', fontSize: 10, fontWeight: '800', textAlign: 'center', marginTop: 8, textDecorationLine: 'underline' },
 
   quoteCard: {
     width: '100%',
