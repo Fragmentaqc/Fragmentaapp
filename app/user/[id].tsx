@@ -1,5 +1,6 @@
 import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
+import { useAuth } from '@/context/auth-context';
 import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { supabase } from '@/lib/supabase';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -21,6 +22,7 @@ export default function PublicProfileScreen() {
   const userId = Array.isArray(id) ? id[0] : id;
   const { adventures } = useAdventures();
   const { curiosities } = useCuriosities();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -64,6 +66,7 @@ export default function PublicProfileScreen() {
         <Text style={styles.handle}>{profile?.username ? `@${profile.username}` : 'Profil Fragmenta'}</Text>
         {profile?.country ? <Text style={styles.country}>⌖ {profile.country}</Text> : null}
         {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
+        {user?.id !== userId ? <Pressable style={styles.reportButton} onPress={() => user ? router.push({ pathname: '/report', params: { type: 'user', id: userId, label: name } }) : router.push('/auth')}><Text style={styles.reportText}>⚑ Signaler cet utilisateur</Text></Pressable> : null}
 
         {socialLinks.length > 0 ? (
           <View style={styles.socials}>
@@ -107,5 +110,6 @@ const styles = StyleSheet.create({
   name: { color: '#F3FFF9', fontSize: 28, fontWeight: '900', textAlign: 'center', marginTop: 16 }, handle: { color: '#62E6B1', textAlign: 'center', marginTop: 5 }, country: { color: '#8FA69B', textAlign: 'center', marginTop: 8 }, bio: { color: '#B7C9C1', fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 16 },
   socials: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 20 }, social: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 }, socialText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' }, socialArrow: { color: '#62E6B1', marginLeft: 6 },
   stats: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 24 }, stat: { color: '#B7C9C1', borderRadius: 13, backgroundColor: '#0C1C17', padding: 12 },
+  reportButton: { alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 10, marginTop: 12 }, reportText: { color: '#81958C', fontSize: 11, fontWeight: '800' },
   sectionTitle: { color: '#F3FFF9', fontSize: 20, fontWeight: '900', marginTop: 28, marginBottom: 10 }, card: { minHeight: 78, flexDirection: 'row', alignItems: 'center', borderRadius: 17, backgroundColor: '#0C1C17', borderWidth: 1, borderColor: '#19392E', padding: 9, marginBottom: 9 }, cardImage: { width: 60, height: 60, borderRadius: 12, backgroundColor: '#173D31' }, cardContent: { flex: 1, paddingHorizontal: 12 }, cardTitle: { color: '#F3FFF9', fontSize: 14, fontWeight: '900' }, cardSubtitle: { color: '#81958C', fontSize: 11, marginTop: 5 }, arrow: { color: '#62E6B1', fontSize: 27, paddingRight: 5 },
 });

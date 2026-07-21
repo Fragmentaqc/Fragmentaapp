@@ -66,6 +66,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="user/[id]" />
 
+              <Stack.Screen name="report" />
+
               <Stack.Screen
                 name="modal"
                 options={{
