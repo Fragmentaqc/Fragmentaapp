@@ -118,6 +118,41 @@ Le chemin suit la convention :
 
 La politique RLS vérifie que l'image, son chemin et l'aventure appartiennent au même utilisateur.
 
+## `fragments`
+
+Étape chronologique documentant la progression d'une aventure.
+
+| Colonne | Type | Utilisation |
+|---|---|---|
+| `id` | UUID | Clé primaire |
+| `adventure_id` | UUID | Aventure parente |
+| `owner_id` | UUID | Propriétaire de l'aventure |
+| `title` | texte | Titre de l'étape |
+| `body` | texte | Récit ou note |
+| `occurred_at` | horodatage | Date réelle du fragment |
+| `latitude` | nombre | Latitude facultative |
+| `longitude` | nombre | Longitude facultative |
+| `position` | entier | Ordre dans la chronologie |
+| `status` | texte | `draft` ou `published` |
+| `created_at` | horodatage | Date de création |
+| `updated_at` | horodatage | Dernière modification |
+
+Un fragment appartient obligatoirement à une aventure du même propriétaire. Un brouillon est visible uniquement par son propriétaire. Un fragment publié est public seulement lorsque son aventure est elle-même publiée et publique.
+
+## `fragment_images`
+
+Photos ordonnées d'un fragment. Le chemin Storage suit le format `utilisateur/fragment/fichier` dans le bucket `fragment-images`. La limite est de 10 Mo par image, aux formats JPEG, PNG, WebP ou HEIC.
+
+| Colonne | Type | Utilisation |
+|---|---|---|
+| `id` | UUID | Clé primaire |
+| `fragment_id` | UUID | Fragment parent |
+| `owner_id` | UUID | Propriétaire |
+| `image_url` | texte | URL publique |
+| `storage_path` | texte | Chemin interne sécurisé |
+| `position` | entier | Ordre d'affichage |
+| `created_at` | horodatage | Date de création |
+
 ## `curiosities`
 
 Lieu remarquable documenté par la communauté.
@@ -178,6 +213,7 @@ La propriété est déterminée par la curiosité parente. Les images sont lisib
 |---|---:|---:|---|
 | `adventure-images` | Oui | 10 Mo | JPEG, PNG, WebP, HEIC |
 | `curiosity-images` | Oui | 10 Mo | JPEG, PNG, WebP, HEIC |
+| `fragment-images` | Oui | 10 Mo | JPEG, PNG, WebP, HEIC |
 | `avatars` | Oui | 5 Mo | JPEG, PNG |
 
 Les écritures sont limitées à un dossier dont le premier segment correspond à l'identifiant de l'utilisateur connecté.
@@ -195,7 +231,6 @@ Les écritures sont limitées à un dossier dont le premier segment correspond �
 
 Le modèle devra être étendu pour ajouter :
 
-- les fragments chronologiques;
 - les abonnements;
 - les favoris;
 - les signalements;
