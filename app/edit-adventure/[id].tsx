@@ -1,4 +1,4 @@
-import { useAdventures } from '@/context/adventures-context';
+import { type AdventureStatus, useAdventures } from '@/context/adventures-context';
 import { useAuth } from '@/context/auth-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -6,6 +6,11 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, Sc
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const categories = ['Vélo', 'Road trip', 'À pied', 'Camping', 'Urbain', 'Défi', 'Autre'];
+const progressStatuses: { value: AdventureStatus; label: string }[] = [
+  { value: 'preparation', label: 'En préparation' },
+  { value: 'active', label: 'En cours' },
+  { value: 'completed', label: 'Terminée' },
+];
 
 export default function EditAdventureScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -19,6 +24,7 @@ export default function EditAdventureScreen() {
   const [destination, setDestination] = useState('');
   const [category, setCategory] = useState('Autre');
   const [publicationStatus, setPublicationStatus] = useState<'draft' | 'published'>('published');
+  const [status, setStatus] = useState<AdventureStatus>('preparation');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -29,6 +35,7 @@ export default function EditAdventureScreen() {
     setDestination(adventure.destination);
     setCategory(adventure.category);
     setPublicationStatus(adventure.publicationStatus);
+    setStatus(adventure.status);
   }, [adventure]);
 
   async function save() {
@@ -38,7 +45,7 @@ export default function EditAdventureScreen() {
       return;
     }
     setSaving(true);
-    const success = await updateAdventure(adventure.id, { title, description, startLocation, destination, category, publicationStatus });
+    const success = await updateAdventure(adventure.id, { title, description, startLocation, destination, category, publicationStatus, status });
     setSaving(false);
     if (success) {
       Alert.alert('Aventure modifiée', 'Tes changements sont enregistrés.', [{ text: 'Voir la fiche', onPress: () => router.back() }]);
@@ -60,6 +67,8 @@ export default function EditAdventureScreen() {
           <Text style={styles.label}>Départ</Text><TextInput value={startLocation} onChangeText={setStartLocation} style={styles.input} />
           <Text style={styles.label}>Destination</Text><TextInput value={destination} onChangeText={setDestination} style={styles.input} />
           <Text style={styles.label}>Catégorie</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>{categories.map((item) => <Pressable key={item} style={[styles.chip, category === item && styles.chipActive]} onPress={() => setCategory(item)}><Text style={styles.chipText}>{item}</Text></Pressable>)}</ScrollView>
+          <Text style={styles.label}>Progression de l’aventure</Text>
+          <View style={styles.progressColumn}>{progressStatuses.map((item) => <Pressable key={item.value} style={[styles.progressButton, status === item.value && styles.statusActive]} onPress={() => setStatus(item.value)}><View style={[styles.progressDot, status === item.value && styles.progressDotActive]} /><Text style={styles.statusText}>{item.label}</Text></Pressable>)}</View>
           <Text style={styles.label}>Publication</Text><View style={styles.statusRow}><Pressable style={[styles.statusButton, publicationStatus === 'draft' && styles.statusActive]} onPress={() => setPublicationStatus('draft')}><Text style={styles.statusText}>Brouillon</Text></Pressable><Pressable style={[styles.statusButton, publicationStatus === 'published' && styles.statusActive]} onPress={() => setPublicationStatus('published')}><Text style={styles.statusText}>Publié</Text></Pressable></View>
           <Text style={styles.photoNote}>Les photos actuelles seront conservées.</Text>
           <Pressable style={styles.primaryButton} onPress={() => void save()} disabled={saving}>{saving ? <ActivityIndicator color="#071310" /> : <Text style={styles.primaryText}>Enregistrer les changements</Text>}</Pressable>
@@ -75,5 +84,6 @@ const styles = StyleSheet.create({
   label: { color: '#DFFFF2', fontSize: 13, fontWeight: '800', marginTop: 16, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 16, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', color: '#F3FFF9', paddingHorizontal: 15, paddingVertical: 13 }, textarea: { minHeight: 145 },
   chip: { borderRadius: 14, backgroundColor: '#10251E', paddingHorizontal: 14, paddingVertical: 10, marginRight: 8 }, chipActive: { backgroundColor: '#28634F' }, chipText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' },
   statusRow: { flexDirection: 'row', gap: 9 }, statusButton: { flex: 1, alignItems: 'center', borderRadius: 15, borderWidth: 1, borderColor: '#285345', padding: 14 }, statusActive: { backgroundColor: '#28634F' }, statusText: { color: '#F3FFF9', fontWeight: '800' }, photoNote: { color: '#81958C', fontSize: 12, marginTop: 20 },
+  progressColumn: { gap: 8 }, progressButton: { minHeight: 50, flexDirection: 'row', alignItems: 'center', borderRadius: 15, borderWidth: 1, borderColor: '#285345', paddingHorizontal: 14 }, progressDot: { width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: '#71877D', marginRight: 11 }, progressDotActive: { borderColor: '#62E6B1', backgroundColor: '#62E6B1' },
   primaryButton: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 18, backgroundColor: '#62E6B1', paddingHorizontal: 20, marginTop: 24 }, primaryText: { color: '#071310', fontSize: 14, fontWeight: '900' }, errorTitle: { color: '#F3FFF9', fontSize: 20, fontWeight: '900' },
 });

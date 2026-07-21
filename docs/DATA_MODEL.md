@@ -83,6 +83,8 @@ Valeurs permises pour `status` :
 - `active`
 - `completed`
 
+Le propriétaire choisit ce statut depuis l’écran de modification de son aventure.
+
 Valeurs permises pour `publication_status` :
 
 - `draft`

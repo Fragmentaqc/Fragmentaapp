@@ -30,7 +30,7 @@ export type Adventure = {
   images: string[];
   latitude: number | null;
   longitude: number | null;
-  status: string;
+  status: AdventureStatus;
   publicationStatus: 'draft' | 'published';
   createdAt: string | null;
 };
@@ -47,10 +47,12 @@ export type NewAdventure = {
   publicationStatus?: 'draft' | 'published';
 };
 
+export type AdventureStatus = 'preparation' | 'active' | 'completed';
+
 export type AdventureUpdate = Pick<
   NewAdventure,
   'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus'
->;
+> & { status: AdventureStatus };
 
 type AdventuresContextValue = {
   adventures: Adventure[];
@@ -416,7 +418,9 @@ export function AdventuresProvider({
                 ? adventure.longitude
                 : null,
             status:
-              adventure.status?.trim() || 'active',
+              adventure.status === 'completed' || adventure.status === 'preparation'
+                ? adventure.status
+                : 'active',
             publicationStatus:
               adventure.publication_status === 'draft'
                 ? 'draft'
@@ -625,6 +629,7 @@ export function AdventuresProvider({
         start_location: update.startLocation.trim() || null,
         destination: update.destination.trim() || null,
         category: update.category.trim() || 'Autre',
+        status: update.status,
         publication_status: update.publicationStatus || 'published',
         updated_at: new Date().toISOString(),
       })
