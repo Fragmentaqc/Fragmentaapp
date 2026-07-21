@@ -10,7 +10,8 @@ Les textes officiels affichés dans l’application sont définis dans `lib/lega
 - la géolocalisation et la visibilité du contenu;
 - les fournisseurs techniques et les communications;
 - la conservation, la sécurité, l’accès, la rectification, l’export et la suppression;
-- l’âge minimal de 18 ans pour créer un compte;
+- la consultation publique permise sans compte aux visiteurs de tout âge;
+- l’âge minimal de 18 ans pour créer un compte, publier, interagir ou utiliser une éventuelle messagerie;
 - la licence nécessaire au fonctionnement du contenu publié;
 - les règles communautaires, la modération et la sécurité des aventures;
 - le droit applicable au Québec et les coordonnées de contact.

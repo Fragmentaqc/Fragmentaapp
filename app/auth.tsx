@@ -108,6 +108,8 @@ export default function AuthScreen() {
               : 'Reconnecte-toi à ton compte.'}
           </Text>
 
+          {mode === 'signup' ? <Text style={styles.visitorNote}>Moins de 18 ans? Tu peux quand même explorer les cartes, lieux et voyages publics sans créer de compte.</Text> : null}
+
           {mode === 'signup' && (
             <>
               <Text style={styles.label}>Nom affiché</Text>
@@ -297,6 +299,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
   },
+  visitorNote: { color: '#E9B949', fontSize: 12, lineHeight: 18, marginTop: -16, marginBottom: 16 },
   consentBox: { borderRadius: 16, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 14, marginTop: 18, gap: 13 },
   consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1, borderColor: '#386B59', alignItems: 'center', justifyContent: 'center' },
