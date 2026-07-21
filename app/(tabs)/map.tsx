@@ -8,7 +8,8 @@ import {
 } from '@/context/curiosities-context';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
-import { useMemo, useRef, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -167,6 +168,15 @@ export default function MapScreen() {
     useState<SelectedMapItem>(null);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locating, setLocating] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([
+        refreshAdventures(),
+        refreshCuriosities(),
+      ]);
+    }, [refreshAdventures, refreshCuriosities])
+  );
 
   async function centerOnUser() {
     if (locating) return;
@@ -366,13 +376,6 @@ export default function MapScreen() {
     );
   }
 
-  async function refreshMap() {
-    await Promise.all([
-      refreshAdventures(),
-      refreshCuriosities(),
-    ]);
-  }
-
   function openSelectedItem() {
     if (!selectedItem) {
       return;
@@ -485,16 +488,6 @@ export default function MapScreen() {
               </Text>
             </View>
 
-            <Pressable
-              style={styles.refreshButton}
-              onPress={() => {
-                void refreshMap();
-              }}
-            >
-              <Text style={styles.refreshIcon}>
-                ↻
-              </Text>
-            </Pressable>
           </View>
 
           <ScrollView
@@ -882,22 +875,6 @@ const styles = StyleSheet.create({
     color: '#8FA69B',
     fontSize: 12,
     marginTop: 5,
-  },
-
-  refreshButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 24,
-    backgroundColor: '#62E6B1',
-    marginLeft: 12,
-  },
-
-  refreshIcon: {
-    color: '#071310',
-    fontSize: 26,
-    fontWeight: '900',
   },
 
   filters: {
