@@ -1,0 +1,149 @@
+import { useAuth } from '@/context/auth-context';
+import { supabase } from '@/lib/supabase';
+import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system/legacy';
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+
+export type Fragment = {
+  id: string;
+  adventureId: string;
+  ownerId: string;
+  title: string;
+  body: string;
+  occurredAt: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  status: 'draft' | 'published';
+  images: string[];
+};
+
+type NewFragment = {
+  adventureId: string;
+  title: string;
+  body: string;
+  occurredAt?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  status: 'draft' | 'published';
+  images: string[];
+};
+
+type FragmentsContextValue = {
+  fragmentsByAdventure: Record<string, Fragment[]>;
+  loadingAdventureId: string | null;
+  loadFragments: (adventureId: string) => Promise<void>;
+  addFragment: (fragment: NewFragment) => Promise<boolean>;
+};
+
+const FragmentsContext = createContext<FragmentsContextValue | undefined>(undefined);
+const STORAGE_BUCKET = 'fragment-images';
+
+function fileDetails(uri: string) {
+  const extension = uri.split('?')[0].split('.').pop()?.toLowerCase();
+  const safeExtension = ['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(extension ?? '')
+    ? extension as string
+    : 'jpg';
+  const types: Record<string, string> = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic',
+  };
+  return { extension: safeExtension, contentType: types[safeExtension] };
+}
+
+export function FragmentsProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  const [fragmentsByAdventure, setFragmentsByAdventure] = useState<Record<string, Fragment[]>>({});
+  const [loadingAdventureId, setLoadingAdventureId] = useState<string | null>(null);
+
+  const loadFragments = useCallback(async (adventureId: string) => {
+    setLoadingAdventureId(adventureId);
+    try {
+      const { data: rows, error } = await supabase
+        .from('fragments')
+        .select('id, adventure_id, owner_id, title, body, occurred_at, latitude, longitude, status, position, created_at')
+        .eq('adventure_id', adventureId)
+        .order('position', { ascending: true })
+        .order('occurred_at', { ascending: true, nullsFirst: false });
+      if (error) throw error;
+
+      const ids = (rows ?? []).map((row) => row.id as string);
+      const imageResult = ids.length
+        ? await supabase.from('fragment_images').select('fragment_id, image_url, position').in('fragment_id', ids).order('position')
+        : { data: [], error: null };
+      if (imageResult.error) throw imageResult.error;
+
+      const fragments: Fragment[] = (rows ?? []).map((row) => ({
+        id: row.id,
+        adventureId: row.adventure_id,
+        ownerId: row.owner_id,
+        title: row.title,
+        body: row.body ?? '',
+        occurredAt: row.occurred_at,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        status: row.status === 'draft' ? 'draft' : 'published',
+        images: (imageResult.data ?? [])
+          .filter((image) => image.fragment_id === row.id)
+          .map((image) => image.image_url),
+      }));
+      setFragmentsByAdventure((current) => ({ ...current, [adventureId]: fragments }));
+    } catch (error) {
+      console.error('Erreur de chargement des fragments :', error);
+    } finally {
+      setLoadingAdventureId(null);
+    }
+  }, []);
+
+  const addFragment = useCallback(async (input: NewFragment) => {
+    if (!user || !input.title.trim() || !input.body.trim()) return false;
+    let fragmentId: string | null = null;
+    const uploadedPaths: string[] = [];
+    try {
+      const current = fragmentsByAdventure[input.adventureId] ?? [];
+      const { data, error } = await supabase.from('fragments').insert({
+        adventure_id: input.adventureId,
+        owner_id: user.id,
+        title: input.title.trim(),
+        body: input.body.trim(),
+        occurred_at: input.occurredAt || null,
+        latitude: input.latitude ?? null,
+        longitude: input.longitude ?? null,
+        position: current.length,
+        status: input.status,
+      }).select('id').single();
+      if (error || !data?.id) throw error ?? new Error('Identifiant de fragment absent.');
+      fragmentId = data.id;
+
+      const imageRows = [];
+      for (let index = 0; index < input.images.length; index += 1) {
+        const { extension, contentType } = fileDetails(input.images[index]);
+        const storagePath = `${user.id}/${fragmentId}/${Date.now()}-${index}.${extension}`;
+        const base64 = await FileSystem.readAsStringAsync(input.images[index], { encoding: FileSystem.EncodingType.Base64 });
+        const upload = await supabase.storage.from(STORAGE_BUCKET).upload(storagePath, decode(base64), { contentType, cacheControl: '3600' });
+        if (upload.error) throw upload.error;
+        uploadedPaths.push(storagePath);
+        const { data: publicData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
+        imageRows.push({ fragment_id: fragmentId, owner_id: user.id, image_url: publicData.publicUrl, storage_path: storagePath, position: index });
+      }
+      if (imageRows.length) {
+        const insertImages = await supabase.from('fragment_images').insert(imageRows);
+        if (insertImages.error) throw insertImages.error;
+      }
+      await loadFragments(input.adventureId);
+      return true;
+    } catch (error) {
+      console.error('Erreur de création du fragment :', error);
+      if (uploadedPaths.length) await supabase.storage.from(STORAGE_BUCKET).remove(uploadedPaths);
+      if (fragmentId) await supabase.from('fragments').delete().eq('id', fragmentId);
+      return false;
+    }
+  }, [fragmentsByAdventure, loadFragments, user]);
+
+  const value = useMemo(() => ({ fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment }), [fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment]);
+  return <FragmentsContext.Provider value={value}>{children}</FragmentsContext.Provider>;
+}
+
+export function useFragments() {
+  const context = useContext(FragmentsContext);
+  if (!context) throw new Error('useFragments doit être utilisé dans FragmentsProvider.');
+  return context;
+}
