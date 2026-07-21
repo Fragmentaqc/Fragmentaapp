@@ -28,11 +28,15 @@ type NewFragment = {
   images: string[];
 };
 
+export type FragmentUpdate = Pick<NewFragment, 'title' | 'body' | 'occurredAt' | 'latitude' | 'longitude' | 'status'>;
+
 type FragmentsContextValue = {
   fragmentsByAdventure: Record<string, Fragment[]>;
   loadingAdventureId: string | null;
   loadFragments: (adventureId: string) => Promise<void>;
   addFragment: (fragment: NewFragment) => Promise<boolean>;
+  updateFragment: (fragmentId: string, adventureId: string, update: FragmentUpdate) => Promise<boolean>;
+  deleteFragment: (fragmentId: string, adventureId: string) => Promise<boolean>;
 };
 
 const FragmentsContext = createContext<FragmentsContextValue | undefined>(undefined);
@@ -138,7 +142,44 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
     }
   }, [fragmentsByAdventure, loadFragments, user]);
 
-  const value = useMemo(() => ({ fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment }), [fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment]);
+  const updateFragment = useCallback(async (fragmentId: string, adventureId: string, update: FragmentUpdate) => {
+    if (!user || !update.title.trim() || !update.body.trim()) return false;
+    const { error } = await supabase.from('fragments').update({
+      title: update.title.trim(),
+      body: update.body.trim(),
+      occurred_at: update.occurredAt || null,
+      latitude: update.latitude ?? null,
+      longitude: update.longitude ?? null,
+      status: update.status,
+      updated_at: new Date().toISOString(),
+    }).eq('id', fragmentId).eq('owner_id', user.id);
+    if (error) {
+      console.error('Erreur de modification du fragment :', error.message);
+      return false;
+    }
+    await loadFragments(adventureId);
+    return true;
+  }, [loadFragments, user]);
+
+  const deleteFragment = useCallback(async (fragmentId: string, adventureId: string) => {
+    if (!user) return false;
+    const imageResult = await supabase.from('fragment_images').select('storage_path').eq('fragment_id', fragmentId).eq('owner_id', user.id);
+    if (imageResult.error) return false;
+    const { error } = await supabase.from('fragments').delete().eq('id', fragmentId).eq('owner_id', user.id);
+    if (error) {
+      console.error('Erreur de suppression du fragment :', error.message);
+      return false;
+    }
+    const paths = (imageResult.data ?? []).map((row) => row.storage_path as string).filter(Boolean);
+    if (paths.length) {
+      const storageResult = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+      if (storageResult.error) console.error('Nettoyage incomplet des photos :', storageResult.error.message);
+    }
+    await loadFragments(adventureId);
+    return true;
+  }, [loadFragments, user]);
+
+  const value = useMemo(() => ({ fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment, updateFragment, deleteFragment }), [fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment, updateFragment, deleteFragment]);
   return <FragmentsContext.Provider value={value}>{children}</FragmentsContext.Provider>;
 }
 

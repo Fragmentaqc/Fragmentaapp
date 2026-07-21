@@ -58,6 +58,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="add-fragment/[adventureId]" />
 
+              <Stack.Screen name="edit-fragment/[id]" />
+
               <Stack.Screen name="user/[id]" />
 
               <Stack.Screen

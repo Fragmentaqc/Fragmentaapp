@@ -33,8 +33,9 @@ export default function AdventureDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const { adventures, loading, deleteAdventure } = useAdventures();
   const { user } = useAuth();
-  const { fragmentsByAdventure, loadingAdventureId, loadFragments } = useFragments();
+  const { fragmentsByAdventure, loadingAdventureId, loadFragments, deleteFragment } = useFragments();
   const [deleting, setDeleting] = useState(false);
+  const [deletingFragmentId, setDeletingFragmentId] = useState<string | null>(null);
   const adventureId = Array.isArray(params.id)
     ? params.id[0]
     : params.id;
@@ -65,6 +66,19 @@ export default function AdventureDetailsScreen() {
         },
       ]
     );
+  }
+
+  function confirmDeleteFragment(fragmentId: string, fragmentTitle: string) {
+    if (!adventure || deletingFragmentId) return;
+    Alert.alert('Supprimer le fragment', `Supprimer « ${fragmentTitle} » et toutes ses photos?`, [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: async () => {
+        setDeletingFragmentId(fragmentId);
+        const success = await deleteFragment(fragmentId, adventure.id);
+        setDeletingFragmentId(null);
+        if (!success) Alert.alert('Erreur', 'Impossible de supprimer le fragment.');
+      } },
+    ]);
   }
 
   if (loading) {
@@ -185,8 +199,11 @@ export default function AdventureDetailsScreen() {
             </View>
             <Text style={styles.fragmentTitle}>{fragment.title}</Text>
             <Text style={styles.fragmentBody}>{fragment.body}</Text>
-            {fragment.images[0] ? <Image source={{ uri: fragment.images[0] }} style={styles.fragmentImage} /> : null}
-            {fragment.images.length > 1 ? <Text style={styles.fragmentImageCount}>＋ {fragment.images.length - 1} autre{fragment.images.length > 2 ? 's' : ''} photo{fragment.images.length > 2 ? 's' : ''}</Text> : null}
+            {fragment.images.length ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fragmentGallery}>{fragment.images.map((imageUrl, imageIndex) => <Image key={`${fragment.id}-${imageIndex}`} source={{ uri: imageUrl }} style={styles.fragmentImage} />)}</ScrollView> : null}
+            {user?.id === fragment.ownerId ? <View style={styles.fragmentActions}>
+              <Pressable style={styles.fragmentEditButton} onPress={() => router.push({ pathname: '/edit-fragment/[id]', params: { id: fragment.id } })}><Text style={styles.fragmentEditText}>Modifier</Text></Pressable>
+              <Pressable style={styles.fragmentDeleteButton} disabled={deletingFragmentId === fragment.id} onPress={() => confirmDeleteFragment(fragment.id, fragment.title)}><Text style={styles.fragmentDeleteText}>{deletingFragmentId === fragment.id ? 'Suppression…' : 'Supprimer'}</Text></Pressable>
+            </View> : null}
           </View>
         )) : <View style={styles.emptyFragments}><Text style={styles.emptyFragmentsText}>Aucun fragment pour le moment.</Text></View>}
 
@@ -592,8 +609,13 @@ const styles = StyleSheet.create({
   draftBadge: { color: '#071310', backgroundColor: '#E9B949', fontSize: 8, fontWeight: '900', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 5 },
   fragmentTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900', marginTop: 10 },
   fragmentBody: { color: '#A2B3AB', fontSize: 13, lineHeight: 20, marginTop: 7 },
-  fragmentImage: { width: '100%', height: 190, borderRadius: 16, marginTop: 13 },
-  fragmentImageCount: { color: '#82AA99', fontSize: 10, fontWeight: '800', marginTop: 8 },
+  fragmentGallery: { gap: 10, paddingTop: 13 },
+  fragmentImage: { width: 245, height: 190, borderRadius: 16 },
+  fragmentActions: { flexDirection: 'row', gap: 9, marginTop: 13 },
+  fragmentEditButton: { flex: 1, alignItems: 'center', borderRadius: 13, backgroundColor: '#28634F', padding: 11 },
+  fragmentEditText: { color: '#F3FFF9', fontSize: 11, fontWeight: '900' },
+  fragmentDeleteButton: { flex: 1, alignItems: 'center', borderRadius: 13, borderWidth: 1, borderColor: '#7B3535', padding: 11 },
+  fragmentDeleteText: { color: '#FFB8B8', fontSize: 11, fontWeight: '900' },
   emptyFragments: { borderRadius: 18, borderWidth: 1, borderColor: '#19392E', padding: 18, marginHorizontal: 18, marginTop: 12 },
   emptyFragmentsText: { color: '#71877D', fontSize: 12, textAlign: 'center' },
   statsSection: { marginHorizontal: 18, marginTop: 24 },
