@@ -190,6 +190,10 @@ export default function AdventureDetailsScreen() {
           </View>
         )) : <View style={styles.emptyFragments}><Text style={styles.emptyFragmentsText}>Aucun fragment pour le moment.</Text></View>}
 
+        {loadingAdventureId !== adventure.id ? (
+          <AdventureStats adventure={adventure} fragments={fragments} />
+        ) : null}
+
         <AdventureRouteMap
           adventure={adventure}
           fragmentCoordinates={fragments
@@ -308,6 +312,64 @@ function DetailPill({ label, value }: { label: string; value: string }) {
       <Text style={styles.detailValue}>{value}</Text>
     </View>
   );
+}
+
+function distanceBetween(
+  first: { latitude: number; longitude: number },
+  second: { latitude: number; longitude: number }
+) {
+  const earthRadiusKm = 6371;
+  const toRadians = (value: number) => value * Math.PI / 180;
+  const latitudeDelta = toRadians(second.latitude - first.latitude);
+  const longitudeDelta = toRadians(second.longitude - first.longitude);
+  const firstLatitude = toRadians(first.latitude);
+  const secondLatitude = toRadians(second.latitude);
+  const a = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function AdventureStats({ adventure, fragments }: {
+  adventure: Adventure;
+  fragments: ReturnType<typeof useFragments>['fragmentsByAdventure'][string];
+}) {
+  const coordinates = [
+    ...(typeof adventure.latitude === 'number' && typeof adventure.longitude === 'number'
+      ? [{ latitude: adventure.latitude, longitude: adventure.longitude }]
+      : []),
+    ...fragments
+      .filter((fragment) => typeof fragment.latitude === 'number' && typeof fragment.longitude === 'number')
+      .map((fragment) => ({ latitude: fragment.latitude as number, longitude: fragment.longitude as number })),
+  ];
+  const distance = coordinates.slice(1).reduce(
+    (total, coordinate, index) => total + distanceBetween(coordinates[index], coordinate),
+    0
+  );
+  const photoCount = adventure.images.length + fragments.reduce((total, fragment) => total + fragment.images.length, 0);
+  const dates = fragments
+    .map((fragment) => fragment.occurredAt ? new Date(fragment.occurredAt).getTime() : Number.NaN)
+    .filter(Number.isFinite);
+  const durationDays = dates.length
+    ? Math.max(1, Math.floor((Math.max(...dates) - Math.min(...dates)) / 86400000) + 1)
+    : 0;
+
+  return (
+    <View style={styles.statsSection}>
+      <Text style={styles.sectionEyebrow}>STATISTIQUES</Text>
+      <Text style={styles.statsTitle}>L’aventure en chiffres</Text>
+      <View style={styles.statsGrid}>
+        <StatCard value={`${fragments.length}`} label="Fragments" />
+        <StatCard value={`${photoCount}`} label="Photos" />
+        <StatCard value={distance >= 10 ? `${Math.round(distance)} km` : `${distance.toFixed(1)} km`} label="Distance GPS" />
+        <StatCard value={durationDays ? `${durationDays} j` : '—'} label="Durée racontée" />
+      </View>
+      {coordinates.length < 2 ? <Text style={styles.statsHelper}>Ajoute au moins deux positions GPS pour calculer la distance.</Text> : null}
+    </View>
+  );
+}
+
+function StatCard({ value, label }: { value: string; label: string }) {
+  return <View style={styles.statCard}><Text style={styles.statValue}>{value}</Text><Text style={styles.statLabel}>{label}</Text></View>;
 }
 
 function AdventureRouteMap({
@@ -534,6 +596,13 @@ const styles = StyleSheet.create({
   fragmentImageCount: { color: '#82AA99', fontSize: 10, fontWeight: '800', marginTop: 8 },
   emptyFragments: { borderRadius: 18, borderWidth: 1, borderColor: '#19392E', padding: 18, marginHorizontal: 18, marginTop: 12 },
   emptyFragmentsText: { color: '#71877D', fontSize: 12, textAlign: 'center' },
+  statsSection: { marginHorizontal: 18, marginTop: 24 },
+  statsTitle: { color: '#F3FFF9', fontSize: 19, fontWeight: '900', marginTop: 5, marginBottom: 12 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  statCard: { width: '48%', minHeight: 88, justifyContent: 'center', borderRadius: 18, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 14 },
+  statValue: { color: '#62E6B1', fontSize: 20, fontWeight: '900' },
+  statLabel: { color: '#81958C', fontSize: 10, fontWeight: '800', marginTop: 5 },
+  statsHelper: { color: '#63766D', fontSize: 10, lineHeight: 15, marginTop: 9 },
   routeMapCard: { overflow: 'hidden', borderRadius: 22, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', marginHorizontal: 18, marginTop: 16 },
   routeMapHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   routeMapTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900', marginTop: 4 },
