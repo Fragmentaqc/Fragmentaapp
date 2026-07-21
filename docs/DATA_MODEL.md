@@ -24,6 +24,7 @@ Profil applicatif associé à `auth.users` par une relation un-à-un.
 | Colonne | Type | Utilisation |
 |---|---|---|
 | `id` | UUID | Identifiant du compte et clé primaire |
+| `role` | texte | Rôle protégé : `user`, `moderator` ou `admin` |
 | `username` | texte | Nom d'utilisateur unique |
 | `display_name` | texte | Nom public |
 | `bio` | texte | Présentation publique |
@@ -225,7 +226,7 @@ Un favori référence exactement une aventure ou une curiosité. Les doublons so
 
 ## Signalements
 
-La table `reports` reçoit les signalements d'aventures, de curiosités ou de profils. Chaque ligne possède exactement une cible, un motif, des détails facultatifs et un état de traitement. Un utilisateur peut consulter ses propres signalements, mais ne peut ni les modifier ni accéder à ceux des autres. Le traitement administratif utilisera ultérieurement un accès serveur privilégié et journalisé.
+La table `reports` reçoit les signalements d'aventures, de curiosités ou de profils. Chaque ligne possède exactement une cible, un motif, des détails facultatifs et un état de traitement. Un utilisateur peut consulter ses propres signalements, mais ne peut ni les modifier ni accéder à ceux des autres. Les modérateurs et administrateurs peuvent consulter la file et modifier uniquement l'état de traitement et sa date.
 
 ## Buckets Storage
 
