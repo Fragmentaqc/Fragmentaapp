@@ -12,6 +12,7 @@ import { AuthProvider } from '@/context/auth-context';
 import { CuriositiesProvider } from '@/context/curiosities-context';
 import { FragmentsProvider } from '@/context/fragments-context';
 import { OfflineBanner } from '@/components/offline-banner';
+import { ConnectionSync } from '@/components/connection-sync';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -78,6 +79,7 @@ export default function RootLayout() {
               backgroundColor="#071310"
             />
             <OfflineBanner />
+            <ConnectionSync />
           </ThemeProvider>
           </FragmentsProvider>
         </CuriositiesProvider>
