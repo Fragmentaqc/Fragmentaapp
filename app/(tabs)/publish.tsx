@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
     height: 190,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#386B59',
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
   imageCard: {
     width: 150,
     height: 180,
-    borderRadius: 4,
+    borderRadius: 0,
     overflow: 'hidden',
     backgroundColor: '#0C1C17',
   },
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
     left: 8,
     bottom: 8,
     backgroundColor: '#62E6B1',
-    borderRadius: 4,
+    borderRadius: 0,
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
     right: 8,
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.65)',
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
   addMoreButton: {
     width: 110,
     height: 180,
-    borderRadius: 5,
+    borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#386B59',
@@ -750,7 +750,7 @@ const styles = StyleSheet.create({
 
   input: {
     minHeight: 55,
-    borderRadius: 5,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 4,
+    borderRadius: 0,
     backgroundColor: '#10251E',
     borderWidth: 1,
     borderColor: '#1D4538',
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
   visibilityCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     backgroundColor: '#0C1C17',
     borderWidth: 1,
     borderColor: '#19392E',
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
   routeHint: { color: '#81958C', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
   durationInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#62E6B1', fontSize: 13, fontWeight: '900', paddingRight: 8 },
   routeProfiles: { gap: 8 },
-  routeProfileButton: { borderRadius: 6, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
+  routeProfileButton: { borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
   routeProfileButtonActive: { borderColor: '#62E6B1', backgroundColor: '#173D31' },
   routeProfileLabel: { color: '#DFFFF2', fontSize: 13, fontWeight: '900' },
   routeProfileLabelActive: { color: '#62E6B1' },
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
   visibilityIcon: {
     width: 46,
     height: 46,
-    borderRadius: 23,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#173D31',
@@ -860,7 +860,7 @@ const styles = StyleSheet.create({
     minHeight: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
   },
 

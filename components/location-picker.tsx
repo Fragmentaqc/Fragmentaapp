@@ -154,15 +154,15 @@ export function LocationPicker({
 }
 
 const styles = StyleSheet.create({
-  container: { height: 230, overflow: 'hidden', borderRadius: 20, borderWidth: 1, borderColor: '#285345', marginTop: 10 },
+  container: { height: 230, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#285345', marginTop: 10 },
   map: { flex: 1 },
   hint: { position: 'absolute', left: 12, right: 12, bottom: 12, alignItems: 'center' },
-  hintText: { color: '#F3FFF9', fontSize: 11, fontWeight: '800', borderRadius: 13, backgroundColor: 'rgba(7, 19, 16, 0.84)', paddingHorizontal: 12, paddingVertical: 8 },
+  hintText: { color: '#F3FFF9', fontSize: 11, fontWeight: '800', borderRadius: 0, backgroundColor: 'rgba(7, 19, 16, 0.84)', paddingHorizontal: 12, paddingVertical: 8 },
   attribution: { position: 'absolute', left: 7, bottom: 5, color: '#50645B', fontSize: 8 },
   searchRow: { position: 'absolute', top: 12, left: 12, right: 12, flexDirection: 'row', gap: 7 },
-  searchInput: { flex: 1, minHeight: 42, borderRadius: 14, backgroundColor: 'rgba(7, 19, 16, 0.92)', color: '#F3FFF9', fontSize: 12, paddingHorizontal: 13 },
-  searchButton: { width: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: '#62E6B1' },
+  searchInput: { flex: 1, minHeight: 42, borderRadius: 0, backgroundColor: 'rgba(7, 19, 16, 0.92)', color: '#F3FFF9', fontSize: 12, paddingHorizontal: 13 },
+  searchButton: { width: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#62E6B1' },
   searchButtonText: { color: '#071310', fontSize: 21, fontWeight: '900' },
-  gpsButton: { position: 'absolute', top: 62, right: 12, borderRadius: 14, backgroundColor: '#62E6B1', paddingHorizontal: 12, paddingVertical: 9 },
+  gpsButton: { position: 'absolute', top: 62, right: 12, borderRadius: 0, backgroundColor: '#62E6B1', paddingHorizontal: 12, paddingVertical: 9 },
   gpsButtonText: { color: '#071310', fontSize: 11, fontWeight: '900' },
 });
