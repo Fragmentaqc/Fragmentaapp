@@ -62,7 +62,6 @@ export default function HomeScreen() {
           <View style={styles.heroTop}>
             <View style={styles.heroLogoLockup} pointerEvents="none">
               <Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" />
-              <Text style={styles.heroWordmark}>FRAGMENTA</Text>
             </View>
           </View>
           <View style={styles.heroContent}>
@@ -273,13 +272,12 @@ function RecentAdventure({ adventure, index }: { adventure: Adventure; index: nu
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#071310' },
   container: { paddingBottom: 48 },
-  hero: { height: 540, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
+  hero: { height: 540, marginHorizontal: 18, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,10,8,.42)' },
   heroTop: { position: 'absolute', top: 18, left: 18, right: 18, alignItems: 'flex-end' },
-  heroLogoLockup: { position: 'absolute', top: -55, left: -55, height: 190, flexDirection: 'row', alignItems: 'center' },
+  heroLogoLockup: { position: 'absolute', top: -55, left: '50%', width: 190, height: 190, marginLeft: -95 },
   heroLogo: { width: 190, height: 190 },
-  heroWordmark: { color: '#FFFFFF', fontSize: 20, fontWeight: '900', letterSpacing: 2.4, marginLeft: -30, textShadowColor: 'rgba(0,0,0,.6)', textShadowRadius: 8 },
   heroContent: { position: 'absolute', left: 18, right: 18, bottom: 22 },
   heroEyebrow: { color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.3 },
   heroTitle: { maxWidth: 410, color: '#FFFFFF', fontSize: 36, lineHeight: 40, fontWeight: '900', marginTop: 10, textShadowColor: 'rgba(0,0,0,.7)', textShadowRadius: 10 },
