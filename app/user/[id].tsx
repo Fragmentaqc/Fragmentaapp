@@ -1,11 +1,12 @@
 import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
 import { useAuth } from '@/context/auth-context';
+import { useBlocks } from '@/context/blocks-context';
 import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { supabase } from '@/lib/supabase';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type PublicProfile = {
@@ -23,6 +24,7 @@ export default function PublicProfileScreen() {
   const { adventures } = useAdventures();
   const { curiosities } = useCuriosities();
   const { user } = useAuth();
+  const { blockedUserIds, hiddenUserIds, blockUser, unblockUser } = useBlocks();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,9 +52,23 @@ export default function PublicProfileScreen() {
   );
   const socialLinks = parseSocialLinks(profile?.social_links);
   const name = profile?.display_name || profile?.username || 'Aventurier';
+  const isBlocked = Boolean(userId && blockedUserIds.includes(userId));
+  const isHidden = Boolean(userId && hiddenUserIds.includes(userId));
+
+  function confirmBlock() {
+    if (!user) { router.push('/auth'); return; }
+    Alert.alert('Bloquer cet utilisateur?', 'Vous ne verrez plus vos profils, publications et interactions respectifs.', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Bloquer', style: 'destructive', onPress: () => void blockUser(userId).then((success) => { if (success) router.back(); }) },
+    ]);
+  }
 
   if (loading) {
     return <SafeAreaView style={styles.safeArea}><View style={styles.center}><ActivityIndicator color="#62E6B1" size="large" /></View></SafeAreaView>;
+  }
+
+  if (isHidden) {
+    return <SafeAreaView style={styles.safeArea}><View style={styles.hiddenContainer}><Text style={styles.hiddenTitle}>Profil indisponible</Text><Text style={styles.hiddenText}>Ce profil et ses publications ne sont pas visibles.</Text>{isBlocked ? <Pressable style={styles.unblockButton} onPress={() => void unblockUser(userId)}><Text style={styles.unblockText}>Débloquer</Text></Pressable> : null}<Pressable onPress={() => router.back()}><Text style={styles.backText}>Retour</Text></Pressable></View></SafeAreaView>;
   }
 
   return (
@@ -66,7 +82,7 @@ export default function PublicProfileScreen() {
         <Text style={styles.handle}>{profile?.username ? `@${profile.username}` : 'Profil Fragmenta'}</Text>
         {profile?.country ? <Text style={styles.country}>⌖ {profile.country}</Text> : null}
         {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
-        {user?.id !== userId ? <Pressable style={styles.reportButton} onPress={() => user ? router.push({ pathname: '/report', params: { type: 'user', id: userId, label: name } }) : router.push('/auth')}><Text style={styles.reportText}>⚑ Signaler cet utilisateur</Text></Pressable> : null}
+        {user?.id !== userId ? <View style={styles.safetyActions}><Pressable style={styles.reportButton} onPress={() => user ? router.push({ pathname: '/report', params: { type: 'user', id: userId, label: name } }) : router.push('/auth')}><Text style={styles.reportText}>⚑ Signaler</Text></Pressable><Pressable style={styles.reportButton} onPress={confirmBlock}><Text style={styles.blockText}>Bloquer</Text></Pressable></View> : null}
 
         {socialLinks.length > 0 ? (
           <View style={styles.socials}>
@@ -104,12 +120,13 @@ export default function PublicProfileScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#071310' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  hiddenContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 16 }, hiddenTitle: { color: '#F3FFF9', fontSize: 24, fontWeight: '900' }, hiddenText: { color: '#8FA69B', textAlign: 'center' }, unblockButton: { borderRadius: 15, backgroundColor: '#174B3B', paddingHorizontal: 20, paddingVertical: 12 }, unblockText: { color: '#62E6B1', fontWeight: '900' },
   container: { padding: 20, paddingBottom: 80 }, back: { alignSelf: 'flex-start', paddingVertical: 8 }, backText: { color: '#62E6B1', fontSize: 15, fontWeight: '800' },
   avatar: { width: 104, height: 104, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', borderRadius: 52, overflow: 'hidden', backgroundColor: '#174B3B', borderWidth: 2, borderColor: '#62E6B1', marginTop: 12 },
   avatarImage: { width: '100%', height: '100%' }, avatarText: { color: '#F3FFF9', fontSize: 40, fontWeight: '900' },
   name: { color: '#F3FFF9', fontSize: 28, fontWeight: '900', textAlign: 'center', marginTop: 16 }, handle: { color: '#62E6B1', textAlign: 'center', marginTop: 5 }, country: { color: '#8FA69B', textAlign: 'center', marginTop: 8 }, bio: { color: '#B7C9C1', fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 16 },
   socials: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 20 }, social: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 }, socialText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' }, socialArrow: { color: '#62E6B1', marginLeft: 6 },
   stats: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 24 }, stat: { color: '#B7C9C1', borderRadius: 13, backgroundColor: '#0C1C17', padding: 12 },
-  reportButton: { alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 10, marginTop: 12 }, reportText: { color: '#81958C', fontSize: 11, fontWeight: '800' },
+  safetyActions: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12 }, reportButton: { paddingHorizontal: 14, paddingVertical: 10 }, reportText: { color: '#81958C', fontSize: 11, fontWeight: '800' }, blockText: { color: '#B77A7A', fontSize: 11, fontWeight: '800' },
   sectionTitle: { color: '#F3FFF9', fontSize: 20, fontWeight: '900', marginTop: 28, marginBottom: 10 }, card: { minHeight: 78, flexDirection: 'row', alignItems: 'center', borderRadius: 17, backgroundColor: '#0C1C17', borderWidth: 1, borderColor: '#19392E', padding: 9, marginBottom: 9 }, cardImage: { width: 60, height: 60, borderRadius: 12, backgroundColor: '#173D31' }, cardContent: { flex: 1, paddingHorizontal: 12 }, cardTitle: { color: '#F3FFF9', fontSize: 14, fontWeight: '900' }, cardSubtitle: { color: '#81958C', fontSize: 11, marginTop: 5 }, arrow: { color: '#62E6B1', fontSize: 27, paddingRight: 5 },
 });

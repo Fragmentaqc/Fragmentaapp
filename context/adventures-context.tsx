@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/auth-context';
+import { useBlocks } from '@/context/blocks-context';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 import { readOfflineCache, writeOfflineCache } from '@/lib/offline-cache';
@@ -236,6 +237,7 @@ export function AdventuresProvider({
   children: ReactNode;
 }) {
   const { user } = useAuth();
+  const { hiddenUserIds } = useBlocks();
 
   const [adventures, setAdventures] = useState<Adventure[]>(
     []
@@ -287,8 +289,8 @@ export function AdventuresProvider({
         return;
       }
 
-      const rows =
-        (adventureRows ?? []) as AdventureRow[];
+      const rows = ((adventureRows ?? []) as AdventureRow[])
+        .filter((adventure) => !hiddenUserIds.includes(adventure.owner_id));
 
       if (rows.length === 0) {
         setAdventures([]);
@@ -453,7 +455,7 @@ export function AdventuresProvider({
     } finally {
       setLoading(false);
     }
-  }, [restoreCachedAdventures]);
+  }, [hiddenUserIds, restoreCachedAdventures]);
 
   useEffect(() => {
     void refreshAdventures();

@@ -14,6 +14,7 @@ import { FragmentsProvider } from '@/context/fragments-context';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ConnectionSync } from '@/components/connection-sync';
 import { FavoritesProvider } from '@/context/favorites-context';
+import { BlocksProvider } from '@/context/blocks-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -25,6 +26,7 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
+      <BlocksProvider>
       <AdventuresProvider>
         <CuriositiesProvider>
           <FragmentsProvider>
@@ -72,6 +74,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="delete-account" />
 
+              <Stack.Screen name="blocked-users" />
+
               <Stack.Screen
                 name="modal"
                 options={{
@@ -93,6 +97,7 @@ export default function RootLayout() {
           </FragmentsProvider>
         </CuriositiesProvider>
       </AdventuresProvider>
+      </BlocksProvider>
     </AuthProvider>
   );
 }
