@@ -78,6 +78,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="export-data" />
 
+              <Stack.Screen name="legal/[document]" />
+
               <Stack.Screen
                 name="modal"
                 options={{

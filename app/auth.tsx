@@ -25,6 +25,8 @@ export default function AuthScreen() {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
 
   async function handleSubmit() {
     if (!email.trim() || !password.trim()) {
@@ -45,6 +47,16 @@ export default function AuthScreen() {
         'Profil incomplet',
         'Ajoute ton nom et ton nom d’utilisateur.'
       );
+      return;
+    }
+
+    if (mode === 'signup' && !ageConfirmed) {
+      Alert.alert('Âge requis', 'Tu dois confirmer avoir au moins 18 ans pour créer un compte.');
+      return;
+    }
+
+    if (mode === 'signup' && !legalAccepted) {
+      Alert.alert('Acceptation requise', 'Lis et accepte les conditions d’utilisation pour continuer.');
       return;
     }
 
@@ -96,6 +108,8 @@ export default function AuthScreen() {
               : 'Reconnecte-toi à ton compte.'}
           </Text>
 
+          {mode === 'signup' ? <Text style={styles.visitorNote}>Moins de 18 ans? Tu peux quand même explorer les cartes, lieux et voyages publics sans créer de compte.</Text> : null}
+
           {mode === 'signup' && (
             <>
               <Text style={styles.label}>Nom affiché</Text>
@@ -143,6 +157,12 @@ export default function AuthScreen() {
             style={styles.input}
             secureTextEntry
           />
+
+          {mode === 'signup' ? <View style={styles.consentBox}>
+            <Pressable style={styles.consentRow} onPress={() => setAgeConfirmed((current) => !current)}><View style={[styles.checkbox, ageConfirmed && styles.checkboxActive]}><Text style={styles.checkmark}>{ageConfirmed ? '✓' : ''}</Text></View><Text style={styles.consentText}>Je confirme avoir au moins 18 ans.</Text></Pressable>
+            <Pressable style={styles.consentRow} onPress={() => setLegalAccepted((current) => !current)}><View style={[styles.checkbox, legalAccepted && styles.checkboxActive]}><Text style={styles.checkmark}>{legalAccepted ? '✓' : ''}</Text></View><Text style={styles.consentText}>J’accepte les conditions d’utilisation et reconnais avoir lu la politique de confidentialité.</Text></Pressable>
+            <View style={styles.legalLinks}><Pressable onPress={() => router.push({ pathname: '/legal/[document]', params: { document: 'terms' } })}><Text style={styles.legalLink}>Conditions</Text></Pressable><Pressable onPress={() => router.push({ pathname: '/legal/[document]', params: { document: 'privacy' } })}><Text style={styles.legalLink}>Confidentialité</Text></Pressable></View>
+          </View> : null}
 
           <Pressable
             onPress={handleSubmit}
@@ -279,4 +299,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
   },
+  visitorNote: { color: '#E9B949', fontSize: 12, lineHeight: 18, marginTop: -16, marginBottom: 16 },
+  consentBox: { borderRadius: 16, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 14, marginTop: 18, gap: 13 },
+  consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1, borderColor: '#386B59', alignItems: 'center', justifyContent: 'center' },
+  checkboxActive: { backgroundColor: '#62E6B1', borderColor: '#62E6B1' },
+  checkmark: { color: '#071310', fontSize: 13, fontWeight: '900' },
+  consentText: { flex: 1, color: '#A4B8AF', fontSize: 12, lineHeight: 18 },
+  legalLinks: { flexDirection: 'row', gap: 18, marginLeft: 32 },
+  legalLink: { color: '#62E6B1', fontSize: 11, fontWeight: '900', textDecorationLine: 'underline' },
 });

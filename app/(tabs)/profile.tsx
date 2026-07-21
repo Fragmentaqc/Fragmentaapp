@@ -325,6 +325,7 @@ export default function ProfileScreen() {
             </Pressable>
             <Pressable style={styles.blockedUsersButton} onPress={() => router.push('/blocked-users')}><Text style={styles.blockedUsersText}>Gérer les comptes bloqués</Text></Pressable>
             <Pressable style={styles.blockedUsersButton} onPress={() => router.push('/export-data')}><Text style={styles.blockedUsersText}>Exporter mes données</Text></Pressable>
+            <View style={styles.legalRow}><Pressable onPress={() => router.push({ pathname: '/legal/[document]', params: { document: 'privacy' } })}><Text style={styles.legalText}>Confidentialité</Text></Pressable><Pressable onPress={() => router.push({ pathname: '/legal/[document]', params: { document: 'terms' } })}><Text style={styles.legalText}>Conditions</Text></Pressable></View>
             <Pressable style={styles.deleteAccountButton} onPress={() => router.push('/delete-account')}><Text style={styles.deleteAccountText}>Supprimer mon compte</Text></Pressable>
           </>
         ) : (
@@ -727,6 +728,8 @@ const styles = StyleSheet.create({
   deleteAccountText: { color: '#B77A7A', fontSize: 12, fontWeight: '800' },
   blockedUsersButton: { width: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   blockedUsersText: { color: '#8FA69B', fontSize: 12, fontWeight: '800' },
+  legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 22, marginTop: 12 },
+  legalText: { color: '#62E6B1', fontSize: 11, fontWeight: '800', textDecorationLine: 'underline' },
 
   quoteCard: {
     width: '100%',

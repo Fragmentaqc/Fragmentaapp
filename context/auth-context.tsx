@@ -85,6 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: data.user.id,
         username: normalizedUsername,
         display_name: displayName.trim(),
+        terms_accepted_at: new Date().toISOString(),
+        terms_version: '2026-07-20',
+        adult_confirmed_at: new Date().toISOString(),
       });
 
     if (profileError) {
