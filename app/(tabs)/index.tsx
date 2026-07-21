@@ -1,6 +1,5 @@
 import { type Adventure, useAdventures } from '@/context/adventures-context';
 import { type Curiosity, useCuriosities } from '@/context/curiosities-context';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
@@ -65,9 +64,6 @@ export default function HomeScreen() {
               <Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" />
               <Text style={styles.heroWordmark}>FRAGMENTA</Text>
             </View>
-            <Pressable style={styles.profileButton} onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel="Ouvrir mon profil">
-              <Ionicons name="person" size={24} color="#FFFFFF" />
-            </Pressable>
           </View>
           <View style={styles.heroContent}>
             <Text style={styles.heroEyebrow}>LE MONDE EST PLEIN DE FRAGMENTS</Text>
@@ -277,7 +273,6 @@ function RecentAdventure({ adventure, index }: { adventure: Adventure; index: nu
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#071310' },
   container: { paddingBottom: 48 },
-  profileButton: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: 'rgba(255,255,255,.55)', backgroundColor: 'rgba(7,19,16,.55)' },
   hero: { height: 540, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,10,8,.42)' },
