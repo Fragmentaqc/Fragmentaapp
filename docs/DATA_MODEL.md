@@ -223,6 +223,10 @@ La table `favorites` conserve la collection privée d'un utilisateur.
 
 Un favori référence exactement une aventure ou une curiosité. Les doublons sont interdits et les politiques RLS permettent uniquement au propriétaire de lire, créer ou retirer ses favoris.
 
+## Signalements
+
+La table `reports` reçoit les signalements d'aventures, de curiosités ou de profils. Chaque ligne possède exactement une cible, un motif, des détails facultatifs et un état de traitement. Un utilisateur peut consulter ses propres signalements, mais ne peut ni les modifier ni accéder à ceux des autres. Le traitement administratif utilisera ultérieurement un accès serveur privilégié et journalisé.
+
 ## Buckets Storage
 
 | Bucket | Public | Limite | Types autorisés |
