@@ -1,10 +1,10 @@
 import { useAdventures, type Adventure } from '@/context/adventures-context';
 import { router } from 'expo-router';
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import {
   Dimensions,
   FlatList,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const CARD_WIDTH = Dimensions.get('window').width - 32;
+const CARD_WIDTH = Dimensions.get('window').width;
 
 export default function HomeScreen() {
   const { adventures } = useAdventures();
@@ -244,7 +244,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#071310',
   },
   container: {
-    paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 40,
   },
@@ -253,6 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 20,
+    paddingHorizontal: 18,
   },
   brand: {
     color: '#F3FFF9',
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   notificationButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#10251E',
@@ -282,11 +282,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginBottom: 18,
+    paddingHorizontal: 18,
   },
   activeFeedTab: {
     paddingHorizontal: 17,
     paddingVertical: 10,
-    borderRadius: 999,
+    borderRadius: 5,
     backgroundColor: '#62E6B1',
   },
   activeFeedTabText: {
@@ -297,7 +298,7 @@ const styles = StyleSheet.create({
   feedTab: {
     paddingHorizontal: 17,
     paddingVertical: 10,
-    borderRadius: 999,
+    borderRadius: 5,
     backgroundColor: '#10251E',
     borderWidth: 1,
     borderColor: '#1D4538',
@@ -312,11 +313,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#122A22',
-    borderRadius: 18,
+    borderRadius: 6,
     padding: 17,
     borderWidth: 1,
     borderColor: '#24533F',
     marginBottom: 20,
+    marginHorizontal: 18,
   },
   liveLabel: {
     color: '#62E6B1',
@@ -336,10 +338,10 @@ const styles = StyleSheet.create({
   },
   card: {
     overflow: 'hidden',
-    borderRadius: 24,
+    borderRadius: 0,
     backgroundColor: '#0C1C17',
     borderWidth: 1,
-    borderColor: '#19392E',
+    borderColor: '#24483B',
     marginBottom: 22,
   },
   cardHeader: {
@@ -380,7 +382,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   visual: {
-    height: 300,
+    height: 410,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#173D31',
@@ -395,13 +397,13 @@ const styles = StyleSheet.create({
     bottom: 14,
   },
   galleryContainer: {
-    height: 300,
+    height: 410,
     position: 'relative',
     backgroundColor: '#173D31',
   },
   galleryImage: {
     width: CARD_WIDTH,
-    height: 300,
+    height: 410,
   },
   galleryOverlay: {
     position: 'absolute',
@@ -415,7 +417,7 @@ const styles = StyleSheet.create({
     right: 12,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
   },
   imageCounterText: {
@@ -449,7 +451,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#62E6B1',
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 999,
+    borderRadius: 4,
     fontSize: 12,
     fontWeight: '900',
     overflow: 'hidden',
@@ -467,7 +469,8 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   cardContent: {
-    padding: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 20,
   },
   cardTitle: {
     color: '#F3FFF9',
@@ -486,7 +489,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15,
+    borderRadius: 6,
     backgroundColor: '#173D31',
     marginTop: 15,
   },
@@ -509,7 +512,7 @@ const styles = StyleSheet.create({
   },
   statPill: {
     backgroundColor: '#132E25',
-    borderRadius: 999,
+    borderRadius: 4,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
@@ -534,7 +537,7 @@ const styles = StyleSheet.create({
   followButton: {
     marginLeft: 'auto',
     backgroundColor: '#62E6B1',
-    borderRadius: 999,
+    borderRadius: 5,
     paddingHorizontal: 16,
     paddingVertical: 9,
   },
