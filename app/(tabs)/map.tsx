@@ -7,12 +7,11 @@ import {
   useCuriosities,
 } from '@/context/curiosities-context';
 import { router } from 'expo-router';
+import * as Location from 'expo-location';
 import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  PermissionsAndroid,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -148,7 +147,6 @@ function getVerificationLabel(status: string) {
 
 export default function MapScreen() {
   const mapRef = useRef<MapView | null>(null);
-  const centerWhenLocated = useRef(false);
 
   const {
     adventures,
@@ -168,39 +166,30 @@ export default function MapScreen() {
   const [selectedItem, setSelectedItem] =
     useState<SelectedMapItem>(null);
   const [locationEnabled, setLocationEnabled] = useState(false);
-  const [userCoordinate, setUserCoordinate] = useState<MapCoordinate | null>(null);
+  const [locating, setLocating] = useState(false);
 
   async function centerOnUser() {
-    if (Platform.OS === 'android') {
-      const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Ta position sur Fragmenta',
-          message: 'Autorise Fragmenta à utiliser ta position pour te situer sur la carte.',
-          buttonPositive: 'Autoriser',
-          buttonNegative: 'Plus tard',
-        }
-      );
-      if (result !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Localisation désactivée', 'Tu peux autoriser la localisation dans les réglages de ton téléphone.');
+    if (locating) return;
+    setLocating(true);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Localisation désactivée', 'Autorise la localisation dans les réglages du téléphone pour utiliser le bouton Ma position.');
         return;
       }
-    }
-    setLocationEnabled(true);
-    if (userCoordinate) {
-      mapRef.current?.animateToRegion({ ...userCoordinate, latitudeDelta: 0.025, longitudeDelta: 0.025 }, 600);
-    } else {
-      centerWhenLocated.current = true;
-    }
-  }
-
-  function receiveUserLocation(event: { nativeEvent: { coordinate?: MapCoordinate } }) {
-    const coordinate = event.nativeEvent.coordinate;
-    if (!coordinate) return;
-    setUserCoordinate(coordinate);
-    if (centerWhenLocated.current) {
-      centerWhenLocated.current = false;
+      setLocationEnabled(true);
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const coordinate = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
       mapRef.current?.animateToRegion({ ...coordinate, latitudeDelta: 0.025, longitudeDelta: 0.025 }, 600);
+    } catch {
+      Alert.alert('GPS indisponible', 'Vérifie que la localisation du téléphone est activée, puis réessaie.');
+    } finally {
+      setLocating(false);
     }
   }
 
@@ -438,7 +427,6 @@ export default function MapScreen() {
           showsTraffic={false}
           showsMyLocationButton={false}
           showsUserLocation={locationEnabled}
-          onUserLocationChange={receiveUserLocation}
           toolbarEnabled={false}
           onPress={() => setSelectedItem(null)}
         >
@@ -571,47 +559,15 @@ export default function MapScreen() {
             })}
           </ScrollView>
 
-          <View style={styles.legend}>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendDot,
-                  {
-                    backgroundColor: '#4DA3FF',
-                  },
-                ]}
-              />
-
-              <Text style={styles.legendText}>
-                Aventure
-              </Text>
-            </View>
-
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendDiamond,
-                  {
-                    backgroundColor: '#F6C85F',
-                  },
-                ]}
-              />
-
-              <Text style={styles.legendText}>
-                Curiosité
-              </Text>
-            </View>
-          </View>
         </View>
 
         <View style={styles.mapButtons}>
           <Pressable
-            style={styles.mapButton}
+            style={[styles.mapButton, styles.showAllButton]}
             onPress={showAllPoints}
+            accessibilityLabel="Afficher tous les points"
           >
-            <Text style={styles.mapButtonIcon}>
-              ⌗
-            </Text>
+            <Text style={styles.showAllButtonText}>Tout voir</Text>
           </Pressable>
 
           <Pressable
@@ -620,9 +576,10 @@ export default function MapScreen() {
               void centerOnUser();
             }}
             accessibilityLabel="Ma position"
+            disabled={locating}
           >
             <Text style={styles.mapButtonIcon}>
-              ◎
+              {locating ? '…' : '◎'}
             </Text>
           </Pressable>
         </View>
@@ -977,44 +934,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  legend: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    borderRadius: 999,
-    backgroundColor: 'rgba(7, 19, 16, 0.92)',
-    paddingHorizontal: 13,
-    paddingVertical: 8,
-    marginLeft: 16,
-    marginTop: 8,
-  },
-
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  legendDot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    marginRight: 6,
-  },
-
-  legendDiamond: {
-    width: 9,
-    height: 9,
-    marginRight: 7,
-    transform: [{ rotate: '45deg' }],
-  },
-
-  legendText: {
-    color: '#B6C8C0',
-    fontSize: 10,
-    fontWeight: '800',
-  },
-
   mapButtons: {
     position: 'absolute',
     right: 16,
@@ -1037,6 +956,16 @@ const styles = StyleSheet.create({
   mapButtonIcon: {
     color: '#62E6B1',
     fontSize: 23,
+    fontWeight: '900',
+  },
+
+  showAllButton: {
+    width: 78,
+  },
+
+  showAllButtonText: {
+    color: '#62E6B1',
+    fontSize: 11,
     fontWeight: '900',
   },
 
