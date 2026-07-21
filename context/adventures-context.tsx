@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
+import { readOfflineCache, writeOfflineCache } from '@/lib/offline-cache';
 import * as FileSystem from 'expo-file-system/legacy';
 import {
     createContext,
@@ -57,6 +58,7 @@ export type AdventureUpdate = Pick<
 type AdventuresContextValue = {
   adventures: Adventure[];
   loading: boolean;
+  isOffline: boolean;
   addAdventure: (
     adventure: NewAdventure
   ) => Promise<boolean>;
@@ -240,6 +242,13 @@ export function AdventuresProvider({
   );
 
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
+
+  const restoreCachedAdventures = useCallback(async () => {
+    const cached = await readOfflineCache<Adventure[]>('adventures');
+    if (cached) setAdventures(cached);
+    setIsOffline(true);
+  }, []);
 
   const refreshAdventures = useCallback(async () => {
     setLoading(true);
@@ -274,7 +283,7 @@ export function AdventuresProvider({
           adventuresError.message
         );
 
-        setAdventures([]);
+        await restoreCachedAdventures();
         return;
       }
 
@@ -283,6 +292,8 @@ export function AdventuresProvider({
 
       if (rows.length === 0) {
         setAdventures([]);
+        setIsOffline(false);
+        await writeOfflineCache('adventures', []);
         return;
       }
 
@@ -430,17 +441,19 @@ export function AdventuresProvider({
         });
 
       setAdventures(formattedAdventures);
+      setIsOffline(false);
+      await writeOfflineCache('adventures', formattedAdventures);
     } catch (error) {
       console.error(
         'Erreur inattendue pendant le chargement :',
         error
       );
 
-      setAdventures([]);
+      await restoreCachedAdventures();
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [restoreCachedAdventures]);
 
   useEffect(() => {
     void refreshAdventures();
@@ -685,6 +698,7 @@ export function AdventuresProvider({
     () => ({
       adventures,
       loading,
+      isOffline,
       addAdventure,
       deleteAdventure,
       updateAdventure,
@@ -693,6 +707,7 @@ export function AdventuresProvider({
     [
       adventures,
       loading,
+      isOffline,
       addAdventure,
       deleteAdventure,
       updateAdventure,

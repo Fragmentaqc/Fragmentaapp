@@ -2,6 +2,7 @@ import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
+import { readOfflineCache, writeOfflineCache } from '@/lib/offline-cache';
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 export type Fragment = {
@@ -33,6 +34,7 @@ export type FragmentUpdate = Pick<NewFragment, 'title' | 'body' | 'occurredAt' |
 type FragmentsContextValue = {
   fragmentsByAdventure: Record<string, Fragment[]>;
   loadingAdventureId: string | null;
+  isOffline: boolean;
   loadFragments: (adventureId: string) => Promise<void>;
   addFragment: (fragment: NewFragment) => Promise<boolean>;
   updateFragment: (fragmentId: string, adventureId: string, update: FragmentUpdate) => Promise<boolean>;
@@ -57,6 +59,7 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [fragmentsByAdventure, setFragmentsByAdventure] = useState<Record<string, Fragment[]>>({});
   const [loadingAdventureId, setLoadingAdventureId] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
 
   const loadFragments = useCallback(async (adventureId: string) => {
     setLoadingAdventureId(adventureId);
@@ -90,8 +93,13 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
           .map((image) => image.image_url),
       }));
       setFragmentsByAdventure((current) => ({ ...current, [adventureId]: fragments }));
+      setIsOffline(false);
+      await writeOfflineCache(`fragments/${adventureId}`, fragments);
     } catch (error) {
       console.error('Erreur de chargement des fragments :', error);
+      const cached = await readOfflineCache<Fragment[]>(`fragments/${adventureId}`);
+      if (cached) setFragmentsByAdventure((current) => ({ ...current, [adventureId]: cached }));
+      setIsOffline(true);
     } finally {
       setLoadingAdventureId(null);
     }
@@ -179,7 +187,7 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
     return true;
   }, [loadFragments, user]);
 
-  const value = useMemo(() => ({ fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment, updateFragment, deleteFragment }), [fragmentsByAdventure, loadingAdventureId, loadFragments, addFragment, updateFragment, deleteFragment]);
+  const value = useMemo(() => ({ fragmentsByAdventure, loadingAdventureId, isOffline, loadFragments, addFragment, updateFragment, deleteFragment }), [fragmentsByAdventure, loadingAdventureId, isOffline, loadFragments, addFragment, updateFragment, deleteFragment]);
   return <FragmentsContext.Provider value={value}>{children}</FragmentsContext.Provider>;
 }
 
