@@ -25,6 +25,7 @@ type ProfileForm = {
   bio: string;
   country: string;
   avatarUrl: string | null;
+  coverUrl: string | null;
   socialLinks: SocialLink[];
 };
 
@@ -38,10 +39,12 @@ export default function EditProfileScreen() {
     bio: '',
     country: '',
     avatarUrl: null,
+    coverUrl: null,
     socialLinks: [],
   });
 
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [selectedCover, setSelectedCover] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -53,7 +56,7 @@ export default function EditProfileScreen() {
 
     const { data, error } = await supabase
       .from('profiles')
-      .select('display_name, username, bio, country, avatar_url, social_links')
+      .select('display_name, username, bio, country, avatar_url, cover_url, social_links')
      .eq('id', user.id)
 .maybeSingle();
 
@@ -70,6 +73,7 @@ if (data) {
     bio: data.bio ?? '',
     country: data.country ?? '',
     avatarUrl: data.avatar_url ?? null,
+    coverUrl: data.cover_url ?? null,
     socialLinks: parseSocialLinks(data.social_links),
   });
 }
@@ -105,7 +109,16 @@ if (data) {
     }
   }
 
-  async function uploadAvatar(uri: string): Promise<string> {
+  async function selectCover() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission requise', 'Autorise Fragmenta à accéder à tes photos.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [16, 9], quality: 0.8 });
+    if (!result.canceled && result.assets[0]) setSelectedCover(result.assets[0].uri);
+  }
+  async function uploadProfileImage(uri: string, kind: 'avatar' | 'cover'): Promise<string> {
     if (!user) {
       throw new Error('Utilisateur non connecté.');
     }
@@ -116,7 +129,7 @@ if (data) {
     const extension =
       uri.split('.').pop()?.toLowerCase().split('?')[0] || 'jpg';
 
-    const filePath = `${user.id}/avatar-${Date.now()}.${extension}`;
+    const filePath = `${user.id}/${kind}-${Date.now()}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
@@ -164,10 +177,12 @@ if (data) {
 
     try {
       let avatarUrl = form.avatarUrl;
+      let coverUrl = form.coverUrl;
 
       if (selectedAvatar) {
-        avatarUrl = await uploadAvatar(selectedAvatar);
+        avatarUrl = await uploadProfileImage(selectedAvatar, 'avatar');
       }
+      if (selectedCover) coverUrl = await uploadProfileImage(selectedCover, 'cover');
 
       const { error } = await supabase
   .from('profiles')
@@ -179,6 +194,7 @@ if (data) {
       bio: form.bio.trim(),
       country: form.country.trim(),
       avatar_url: avatarUrl,
+      cover_url: coverUrl,
       social_links: form.socialLinks
         .map((link) => ({
           platform: link.platform.trim() || 'Autre',
@@ -215,6 +231,7 @@ if (data) {
   }
 
   const displayedAvatar = selectedAvatar || form.avatarUrl;
+  const displayedCover = selectedCover || form.coverUrl;
 
   if (loading) {
     return (
@@ -355,6 +372,11 @@ if (data) {
             </Pressable>
           </View>
 
+          <Pressable style={styles.coverButton} onPress={selectCover}>
+            {displayedCover ? <Image source={{ uri: displayedCover }} style={styles.coverImage} /> : <View style={styles.coverPlaceholder}><Text style={styles.coverPlaceholderIcon}>⌁</Text><Text style={styles.coverPlaceholderText}>Ajouter une image de couverture</Text></View>}
+            <View style={styles.coverCameraBadge}><Text style={styles.coverCameraText}>📷 Modifier la couverture</Text></View>
+          </Pressable>
+
           {form.socialLinks.map((link, index) => (
             <View key={`${index}-${link.platform}`} style={styles.socialEditor}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.platforms}>
@@ -483,7 +505,7 @@ const styles = StyleSheet.create({
     width: 112,
     height: 112,
     alignSelf: 'center',
-    borderRadius: 56,
+    borderRadius: 0,
     borderWidth: 2,
     borderColor: '#62E6B1',
     backgroundColor: '#174B3B',
@@ -492,7 +514,7 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 54,
+    borderRadius: 0,
   },
 
   avatarPlaceholder: {
@@ -510,7 +532,7 @@ const styles = StyleSheet.create({
     bottom: 2,
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#62E6B1',
@@ -541,7 +563,7 @@ const styles = StyleSheet.create({
 
   input: {
     minHeight: 56,
-    borderRadius: 16,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -555,7 +577,7 @@ const styles = StyleSheet.create({
     minHeight: 56,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -585,26 +607,34 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginTop: 5,
   },
+
+  coverButton: { height: 190, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', marginBottom: -48 },
+  coverImage: { width: '100%', height: '100%' },
+  coverPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  coverPlaceholderIcon: { color: '#62E6B1', fontSize: 34 },
+  coverPlaceholderText: { color: '#8FA69B', fontSize: 12, fontWeight: '800', marginTop: 6 },
+  coverCameraBadge: { position: 'absolute', right: 10, top: 10, borderRadius: 0, backgroundColor: 'rgba(7,19,16,0.88)', paddingHorizontal: 12, paddingVertical: 8 },
+  coverCameraText: { color: '#E4FFF4', fontSize: 10, fontWeight: '900' },
   socialHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
   socialHint: { color: '#63766D', fontSize: 11, marginTop: -4 },
-  addSocialButton: { borderRadius: 14, backgroundColor: '#173D31', paddingHorizontal: 13, paddingVertical: 10 },
+  addSocialButton: { borderRadius: 0, backgroundColor: '#173D31', paddingHorizontal: 13, paddingVertical: 10 },
   addSocialText: { color: '#62E6B1', fontSize: 12, fontWeight: '900' },
-  socialEditor: { borderRadius: 17, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', padding: 10, marginTop: 10 },
+  socialEditor: { borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', padding: 10, marginTop: 10 },
   platforms: { marginBottom: 9 },
   platformInput: { minHeight: 46, marginBottom: 8 },
-  platformChip: { borderRadius: 12, backgroundColor: '#10251E', paddingHorizontal: 11, paddingVertical: 8, marginRight: 7 },
+  platformChip: { borderRadius: 0, backgroundColor: '#10251E', paddingHorizontal: 11, paddingVertical: 8, marginRight: 7 },
   platformChipActive: { backgroundColor: '#28634F' },
   platformChipText: { color: '#DFFFF2', fontSize: 11, fontWeight: '800' },
   socialUrlRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   socialUrlInput: { flex: 1, minHeight: 48 },
-  removeSocialButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: '#351919' },
+  removeSocialButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#351919' },
   removeSocialText: { color: '#FFB8B8', fontSize: 24, fontWeight: '700' },
 
   saveButton: {
     minHeight: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
     marginTop: 30,
   },

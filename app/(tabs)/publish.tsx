@@ -1,7 +1,7 @@
 import { useAdventures } from '@/context/adventures-context';
 import { LocationPicker } from '@/components/location-picker';
 import { useAuth } from '@/context/auth-context';
-import type { RouteProfile } from '@/lib/routing';
+import { getRouteProfileForCategory, type RouteProfile } from '@/lib/routing';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -47,9 +47,16 @@ export default function PublishScreen() {
   const [destination, setDestination] = useState('');
   const [category, setCategory] = useState('Vélo');
   const [routingProfile, setRoutingProfile] = useState<RouteProfile>('cycling');
+  const [durationHours, setDurationHours] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [coordinate, setCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
   const [publishing, setPublishing] = useState(false);
+
+  function selectCategory(nextCategory: string) {
+    setCategory(nextCategory);
+    const suggestedProfile = getRouteProfileForCategory(nextCategory);
+    if (suggestedProfile) setRoutingProfile(suggestedProfile);
+  }
 
   async function pickImages() {
     if (publishing) {
@@ -185,6 +192,7 @@ export default function PublishScreen() {
         destination,
         category,
         routingProfile,
+        durationMinutes: durationHours.trim() ? Math.round(Number(durationHours.replace(',', '.')) * 60) : 0,
         images,
         publicationStatus,
         latitude: coordinate?.latitude,
@@ -207,6 +215,7 @@ export default function PublishScreen() {
       setDestination('');
       setCategory('Vélo');
       setRoutingProfile('cycling');
+      setDurationHours('');
       setImages([]);
       setCoordinate(null);
 
@@ -430,7 +439,7 @@ export default function PublishScreen() {
               return (
                 <Pressable
                   key={item}
-                  onPress={() => setCategory(item)}
+                  onPress={() => selectCategory(item)}
                   disabled={publishing}
                   style={[
                     styles.categoryButton,
@@ -453,6 +462,7 @@ export default function PublishScreen() {
           </ScrollView>
 
           <Text style={styles.label}>Mode du trajet</Text>
+          <Text style={styles.routeHint}>Choisi automatiquement selon la catégorie, mais reste modifiable.</Text>
           <View style={styles.routeProfiles}>
             {routeProfiles.map((item) => {
               const selected = routingProfile === item.value;
@@ -495,6 +505,9 @@ export default function PublishScreen() {
             maxLength={100}
             editable={!publishing}
           />
+
+          <Text style={styles.label}>Durée totale estimée</Text>
+          <View style={styles.durationInputRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} placeholder="Ex. 12" placeholderTextColor="#63766D" style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" maxLength={7} editable={!publishing} /><Text style={styles.durationUnit}>heures</Text></View>
 
           <Text style={styles.label}>Position sur la carte</Text>
           <LocationPicker coordinate={coordinate} onSelect={setCoordinate} />
@@ -614,7 +627,7 @@ const styles = StyleSheet.create({
     height: 190,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#386B59',
@@ -659,7 +672,7 @@ const styles = StyleSheet.create({
   imageCard: {
     width: 150,
     height: 180,
-    borderRadius: 4,
+    borderRadius: 0,
     overflow: 'hidden',
     backgroundColor: '#0C1C17',
   },
@@ -674,7 +687,7 @@ const styles = StyleSheet.create({
     left: 8,
     bottom: 8,
     backgroundColor: '#62E6B1',
-    borderRadius: 4,
+    borderRadius: 0,
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
@@ -691,7 +704,7 @@ const styles = StyleSheet.create({
     right: 8,
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.65)',
@@ -706,7 +719,7 @@ const styles = StyleSheet.create({
   addMoreButton: {
     width: 110,
     height: 180,
-    borderRadius: 5,
+    borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#386B59',
@@ -737,7 +750,7 @@ const styles = StyleSheet.create({
 
   input: {
     minHeight: 55,
-    borderRadius: 5,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -767,7 +780,7 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 4,
+    borderRadius: 0,
     backgroundColor: '#10251E',
     borderWidth: 1,
     borderColor: '#1D4538',
@@ -792,7 +805,7 @@ const styles = StyleSheet.create({
   visibilityCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     backgroundColor: '#0C1C17',
     borderWidth: 1,
     borderColor: '#19392E',
@@ -801,8 +814,10 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
 
+  routeHint: { color: '#81958C', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
+  durationInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#62E6B1', fontSize: 13, fontWeight: '900', paddingRight: 8 },
   routeProfiles: { gap: 8 },
-  routeProfileButton: { borderRadius: 6, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
+  routeProfileButton: { borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
   routeProfileButtonActive: { borderColor: '#62E6B1', backgroundColor: '#173D31' },
   routeProfileLabel: { color: '#DFFFF2', fontSize: 13, fontWeight: '900' },
   routeProfileLabelActive: { color: '#62E6B1' },
@@ -813,7 +828,7 @@ const styles = StyleSheet.create({
   visibilityIcon: {
     width: 46,
     height: 46,
-    borderRadius: 23,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#173D31',
@@ -845,7 +860,7 @@ const styles = StyleSheet.create({
     minHeight: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
   },
 

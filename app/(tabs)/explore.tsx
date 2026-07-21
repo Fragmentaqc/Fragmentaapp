@@ -7,10 +7,10 @@ import {
   Curiosity,
   useCuriosities,
 } from '@/context/curiosities-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as Location from 'expo-location';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -97,6 +97,8 @@ function getVerificationIcon(status: string) {
 }
 
 export default function ExploreScreen() {
+  const params = useLocalSearchParams<{ search?: string | string[] }>();
+  const initialSearch = Array.isArray(params.search) ? params.search[0] : params.search;
   const { user } = useAuth();
 
   const {
@@ -113,9 +115,13 @@ export default function ExploreScreen() {
   const [selectedCategory, setSelectedCategory] =
     useState<ExploreCategory>('Tout');
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch ?? '');
   const [userCoordinate, setUserCoordinate] = useState<Coordinate | null>(null);
   const [locating, setLocating] = useState(false);
+
+  useEffect(() => {
+    if (typeof initialSearch === 'string') setSearch(initialSearch);
+  }, [initialSearch]);
 
   async function toggleNearby() {
     if (userCoordinate) {
@@ -377,6 +383,12 @@ export default function ExploreScreen() {
             </Pressable>
           ) : null}
         </View>
+
+        <Pressable style={styles.memberSearchButton} onPress={() => router.push('/members' as never)}>
+          <Text style={styles.memberSearchIcon}>◎</Text>
+          <View style={styles.memberSearchContent}><Text style={styles.memberSearchTitle}>Rechercher parmi les membres</Text><Text style={styles.memberSearchText}>Filtre par pays ou type d’aventure et abonne-toi directement</Text></View>
+          <Text style={styles.memberSearchArrow}>›</Text>
+        </Pressable>
 
         <ScrollView
           horizontal
@@ -947,7 +959,7 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
   },
 
@@ -962,7 +974,7 @@ const styles = StyleSheet.create({
     minHeight: 126,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 7,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#2B6552',
     backgroundColor: '#10251E',
@@ -975,7 +987,7 @@ const styles = StyleSheet.create({
     height: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     backgroundColor: '#173D31',
   },
 
@@ -1014,7 +1026,7 @@ const styles = StyleSheet.create({
     height: 39,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
     marginLeft: 10,
   },
@@ -1029,12 +1041,15 @@ const styles = StyleSheet.create({
     minHeight: 58,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
     paddingHorizontal: 15,
   },
+
+  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', padding: 13, marginTop: 11 },
+  memberSearchIcon: { color: '#62E6B1', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F3FFF9', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#81958C', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#62E6B1', fontSize: 28 },
 
   searchIcon: {
     color: '#62E6B1',
@@ -1053,7 +1068,7 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
+    borderRadius: 0,
     backgroundColor: '#173D31',
   },
 
@@ -1072,7 +1087,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -1095,7 +1110,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 4, backgroundColor: '#173D31', paddingHorizontal: 12, paddingVertical: 8, marginTop: 4 },
+  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#173D31', paddingHorizontal: 12, paddingVertical: 8, marginTop: 4 },
   nearbyNoticeText: { color: '#62E6B1', fontSize: 10, fontWeight: '800' },
 
   loadingArea: {
@@ -1137,7 +1152,7 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#173D31',
   },
 
@@ -1155,14 +1170,14 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     textAlign: 'center',
     textAlignVertical: 'center',
-    borderRadius: 16,
+    borderRadius: 0,
     backgroundColor: '#173D31',
   },
 
   featuredCard: {
     minHeight: 430,
     overflow: 'hidden',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#285345',
     backgroundColor: '#10251E',
@@ -1209,7 +1224,7 @@ const styles = StyleSheet.create({
 
   featuredBadge: {
     maxWidth: '58%',
-    borderRadius: 4,
+    borderRadius: 0,
     backgroundColor: 'rgba(7, 19, 16, 0.92)',
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -1226,7 +1241,7 @@ const styles = StyleSheet.create({
   verificationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 4,
+    borderRadius: 0,
     backgroundColor: 'rgba(7, 19, 16, 0.92)',
     paddingHorizontal: 10,
     paddingVertical: 7,
@@ -1240,7 +1255,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '900',
     textAlign: 'center',
-    borderRadius: 9,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
     overflow: 'hidden',
     marginRight: 6,
@@ -1298,7 +1313,7 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#3D705D',
     backgroundColor: '#173D31',
@@ -1327,7 +1342,7 @@ const styles = StyleSheet.create({
     minHeight: 43,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
     paddingHorizontal: 14,
     marginLeft: 8,
@@ -1368,7 +1383,7 @@ const styles = StyleSheet.create({
     minHeight: 135,
     flexDirection: 'row',
     overflow: 'hidden',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1442,7 +1457,7 @@ const styles = StyleSheet.create({
     minHeight: 94,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#10251E',
@@ -1455,7 +1470,7 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 26,
+    borderRadius: 0,
     backgroundColor: '#173D31',
   },
 
@@ -1486,7 +1501,7 @@ const styles = StyleSheet.create({
     height: 42,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
     marginLeft: 10,
   },
@@ -1505,7 +1520,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     overflow: 'hidden',
     minHeight: 190,
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1586,7 +1601,7 @@ const styles = StyleSheet.create({
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15,
+    borderRadius: 0,
     backgroundColor: '#173D31',
   },
 
@@ -1618,7 +1633,7 @@ const styles = StyleSheet.create({
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
   },
 
@@ -1630,7 +1645,7 @@ const styles = StyleSheet.create({
 
   emptyCuriosities: {
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1642,7 +1657,7 @@ const styles = StyleSheet.create({
     height: 64,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     backgroundColor: '#173D31',
   },
 
@@ -1669,7 +1684,7 @@ const styles = StyleSheet.create({
     minHeight: 45,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: '#62E6B1',
     paddingHorizontal: 16,
     marginTop: 16,
@@ -1683,7 +1698,7 @@ const styles = StyleSheet.create({
 
   emptyCommunity: {
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1709,7 +1724,7 @@ const styles = StyleSheet.create({
   },
 
   bottomBanner: {
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#285345',
     backgroundColor: '#10251E',
