@@ -19,6 +19,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -189,6 +190,18 @@ export default function AdventureDetailsScreen() {
           </View>
         )) : <View style={styles.emptyFragments}><Text style={styles.emptyFragmentsText}>Aucun fragment pour le moment.</Text></View>}
 
+        <AdventureRouteMap
+          adventure={adventure}
+          fragmentCoordinates={fragments
+            .filter((fragment) => typeof fragment.latitude === 'number' && typeof fragment.longitude === 'number')
+            .map((fragment) => ({
+              id: fragment.id,
+              title: fragment.title,
+              latitude: fragment.latitude as number,
+              longitude: fragment.longitude as number,
+            }))}
+        />
+
         {typeof adventure.latitude === 'number' &&
         typeof adventure.longitude === 'number' ? (
           <View style={styles.coordinatesCard}>
@@ -293,6 +306,57 @@ function DetailPill({ label, value }: { label: string; value: string }) {
     <View style={styles.detailPill}>
       <Text style={styles.detailLabel}>{label}</Text>
       <Text style={styles.detailValue}>{value}</Text>
+    </View>
+  );
+}
+
+function AdventureRouteMap({
+  adventure,
+  fragmentCoordinates,
+}: {
+  adventure: Adventure;
+  fragmentCoordinates: { id: string; title: string; latitude: number; longitude: number }[];
+}) {
+  const adventureCoordinate = typeof adventure.latitude === 'number' && typeof adventure.longitude === 'number'
+    ? { latitude: adventure.latitude, longitude: adventure.longitude }
+    : null;
+  const coordinates = [
+    ...(adventureCoordinate ? [adventureCoordinate] : []),
+    ...fragmentCoordinates.map(({ latitude, longitude }) => ({ latitude, longitude })),
+  ];
+
+  if (!coordinates.length) return null;
+
+  const latitudes = coordinates.map((coordinate) => coordinate.latitude);
+  const longitudes = coordinates.map((coordinate) => coordinate.longitude);
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+  const initialRegion = {
+    latitude: (minLatitude + maxLatitude) / 2,
+    longitude: (minLongitude + maxLongitude) / 2,
+    latitudeDelta: Math.max((maxLatitude - minLatitude) * 1.5, 0.04),
+    longitudeDelta: Math.max((maxLongitude - minLongitude) * 1.5, 0.04),
+  };
+
+  return (
+    <View style={styles.routeMapCard}>
+      <View style={styles.routeMapHeading}>
+        <View>
+          <Text style={styles.sectionEyebrow}>PARCOURS</Text>
+          <Text style={styles.routeMapTitle}>Sur la carte</Text>
+        </View>
+        <Text style={styles.routeMapCount}>{coordinates.length} point{coordinates.length > 1 ? 's' : ''}</Text>
+      </View>
+      <MapView style={styles.routeMap} initialRegion={initialRegion} scrollEnabled zoomEnabled>
+        {coordinates.length > 1 ? <Polyline coordinates={coordinates} strokeColor="#62E6B1" strokeWidth={4} /> : null}
+        {adventureCoordinate ? <Marker coordinate={adventureCoordinate} title={adventure.title} description="Point de l’aventure" pinColor="#E9B949" /> : null}
+        {fragmentCoordinates.map((fragment, index) => (
+          <Marker key={fragment.id} coordinate={fragment} title={fragment.title} description={`Fragment ${index + 1}`} pinColor="#62E6B1" />
+        ))}
+      </MapView>
+      <Text style={styles.routeMapHelper}>La ligne relie les positions dans l’ordre chronologique.</Text>
     </View>
   );
 }
@@ -470,6 +534,12 @@ const styles = StyleSheet.create({
   fragmentImageCount: { color: '#82AA99', fontSize: 10, fontWeight: '800', marginTop: 8 },
   emptyFragments: { borderRadius: 18, borderWidth: 1, borderColor: '#19392E', padding: 18, marginHorizontal: 18, marginTop: 12 },
   emptyFragmentsText: { color: '#71877D', fontSize: 12, textAlign: 'center' },
+  routeMapCard: { overflow: 'hidden', borderRadius: 22, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', marginHorizontal: 18, marginTop: 16 },
+  routeMapHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
+  routeMapTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900', marginTop: 4 },
+  routeMapCount: { color: '#82AA99', fontSize: 10, fontWeight: '800' },
+  routeMap: { width: '100%', height: 260 },
+  routeMapHelper: { color: '#71877D', fontSize: 10, lineHeight: 15, paddingHorizontal: 16, paddingVertical: 12 },
   coordinatesCard: {
     flexDirection: 'row',
     alignItems: 'center',
