@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { passwordsMatch, validatePassword } from '@/lib/account-validation';
 import { useLinkingURL } from 'expo-linking';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -28,8 +29,9 @@ export default function ResetPasswordScreen() {
 
   async function savePassword() {
     if (!ready || saving) return;
-    if (password.length < 8) { Alert.alert('Mot de passe trop court', 'Utilise au moins 8 caractères.'); return; }
-    if (password !== confirmation) { Alert.alert('Vérification', 'Les deux mots de passe ne correspondent pas.'); return; }
+    const passwordError = validatePassword(password);
+    if (passwordError) { Alert.alert('Mot de passe trop court', passwordError); return; }
+    if (!passwordsMatch(password, confirmation)) { Alert.alert('Vérification', 'Les deux mots de passe ne correspondent pas.'); return; }
     setSaving(true);
     const { error } = await supabase.auth.updateUser({ password });
     setSaving(false);
