@@ -279,7 +279,11 @@ export default function AdventureDetailsScreen() {
               </Text>
             </Pressable>
           </View>
-        ) : null}
+        ) : (
+          <Pressable style={styles.reportButton} onPress={() => user ? router.push({ pathname: '/report', params: { type: 'adventure', id: adventure.id, label: adventure.title } }) : router.push('/auth')}>
+            <Text style={styles.reportButtonText}>⚑ Signaler cette aventure</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -692,4 +696,6 @@ const styles = StyleSheet.create({
   editButtonText: { color: '#071310', fontSize: 14, fontWeight: '900' },
   deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414' },
   deleteButtonText: { color: '#FFB8B8', fontSize: 14, fontWeight: '900' },
+  reportButton: { alignItems: 'center', justifyContent: 'center', minHeight: 48, marginHorizontal: 18, marginTop: 20 },
+  reportButtonText: { color: '#81958C', fontSize: 11, fontWeight: '800' },
 });
