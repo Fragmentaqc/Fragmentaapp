@@ -14,6 +14,7 @@ import { FragmentsProvider } from '@/context/fragments-context';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ConnectionSync } from '@/components/connection-sync';
 import { FavoritesProvider } from '@/context/favorites-context';
+import { CollectionsProvider } from '@/context/collections-context';
 import { BlocksProvider } from '@/context/blocks-context';
 import { FollowsProvider } from '@/context/follows-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -33,6 +34,7 @@ export default function RootLayout() {
         <CuriositiesProvider>
           <FragmentsProvider>
           <FavoritesProvider>
+          <CollectionsProvider>
           <ThemeProvider
             value={
               colorScheme === 'dark'
@@ -97,6 +99,7 @@ export default function RootLayout() {
             <OfflineBanner />
             <ConnectionSync />
           </ThemeProvider>
+          </CollectionsProvider>
           </FavoritesProvider>
           </FragmentsProvider>
         </CuriositiesProvider>

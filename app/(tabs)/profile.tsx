@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/auth-context';
 import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
-import { useFavorites } from '@/context/favorites-context';
+import { useCollections } from '@/context/collections-context';
 import { useFollows } from '@/context/follows-context';
 import { supabase } from '@/lib/supabase';
 import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
@@ -18,6 +18,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -37,7 +38,7 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { adventures } = useAdventures();
   const { curiosities } = useCuriosities();
-  const { adventureIds: favoriteAdventureIds, curiosityIds: favoriteCuriosityIds } = useFavorites();
+  const { collections, createCollection, deleteCollection } = useCollections();
   const { getCounts } = useFollows();
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -45,6 +46,8 @@ export default function ProfileScreen() {
   const [isModerator, setIsModerator] = useState(false);
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [creatingCollection, setCreatingCollection] = useState(false);
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -118,6 +121,24 @@ export default function ProfileScreen() {
     else Alert.alert('Courriel envoyé', 'Consulte ta boîte de réception pour confirmer ton adresse.');
   }
 
+  async function handleCreateCollection() {
+    if (!newCollectionName.trim() || creatingCollection) return;
+    setCreatingCollection(true);
+    const id = await createCollection(newCollectionName);
+    setCreatingCollection(false);
+    if (id) setNewCollectionName('');
+    else Alert.alert('Création impossible', 'Vérifie le nom de la collection et réessaie.');
+  }
+
+  function confirmDeleteCollection(collectionId: string, name: string) {
+    Alert.alert('Supprimer la collection', `Supprimer « ${name} »? Les aventures ne seront pas supprimées.`, [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: async () => {
+        if (!await deleteCollection(collectionId)) Alert.alert('Erreur', 'Impossible de supprimer cette collection.');
+      } },
+    ]);
+  }
+
   const displayName =
     profile?.display_name?.trim() ||
     user?.email?.split('@')[0] ||
@@ -134,8 +155,6 @@ export default function ProfileScreen() {
   const myCuriosities = user
     ? curiosities.filter((curiosity) => curiosity.ownerId === user.id)
     : [];
-  const favoriteAdventures = adventures.filter((adventure) => favoriteAdventureIds.includes(adventure.id));
-  const favoriteCuriosities = curiosities.filter((curiosity) => favoriteCuriosityIds.includes(curiosity.id));
   const coverImage = profile?.cover_url || myAdventures.find((adventure) => adventure.images[0])?.images[0];
   const totalDistanceKm = myAdventures.reduce((total, adventure) => total + Number(adventure.distanceKm ?? 0), 0);
   const totalDurationMinutes = myAdventures.reduce((total, adventure) => total + Number(adventure.durationMinutes ?? 0), 0);
@@ -203,8 +222,16 @@ export default function ProfileScreen() {
           <View style={styles.pageSectionHeader}><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View>
           <Pressable style={styles.mapSection} onPress={() => router.push('/map')}><View style={styles.sectionGlyph}><Text style={styles.sectionGlyphText}>⌖</Text></View><View style={styles.sectionCardContent}><Text style={styles.sectionCardEyebrow}>CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes lieux et aventures</Text><Text style={styles.sectionCardText}>Retrouve tous tes parcours et tes découvertes sur la carte.</Text></View><Text style={styles.sectionArrow}>›</Text></Pressable>
           <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View>
-          <View style={styles.sectionIntro}><View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes souvenirs sauvegardés</Text></View><Text style={styles.collectionCount}>{favoriteAdventures.length + favoriteCuriosities.length}</Text></View><Text style={styles.aboutText}>Aventures et curiosités que tu veux conserver ou retrouver plus tard.</Text></View>
-          <View style={styles.sectionItems}>{favoriteAdventures.map((adventure) => <ProfileContentCard key={`favorite-adventure-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}{favoriteCuriosities.map((curiosity) => <ProfileContentCard key={`favorite-curiosity-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}{favoriteAdventures.length + favoriteCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Aucun favori enregistré pour le moment.</Text> : null}</View>
+          <View style={styles.sectionIntro}>
+            <View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes listes d’aventures</Text></View><Text style={styles.collectionCount}>{collections.length}</Text></View>
+            <Text style={styles.aboutText}>Crée des listes et range les aventures que tu veux retrouver.</Text>
+            <View style={styles.collectionCreateRow}><TextInput value={newCollectionName} onChangeText={setNewCollectionName} placeholder="Nom de la collection" placeholderTextColor="#6F837B" style={styles.collectionInput} maxLength={80} /><Pressable style={styles.collectionCreateButton} onPress={() => void handleCreateCollection()} disabled={creatingCollection}><Text style={styles.collectionCreateText}>{creatingCollection ? '…' : 'Créer'}</Text></Pressable></View>
+          </View>
+          <View style={styles.sectionItems}>{collections.map((collection) => {
+            const collectionAdventures = adventures.filter((adventure) => collection.adventureIds.includes(adventure.id));
+            const collectionCuriosities = curiosities.filter((curiosity) => collection.curiosityIds.includes(curiosity.id));
+            return <View key={collection.id} style={styles.collectionCard}><View style={styles.collectionCardHeader}><View><Text style={styles.collectionCardTitle}>{collection.name}</Text><Text style={styles.collectionCardMeta}>{collection.adventureIds.length + collection.curiosityIds.length} élément(s)</Text></View><Pressable onPress={() => confirmDeleteCollection(collection.id, collection.name)}><Text style={styles.collectionDelete}>Supprimer</Text></Pressable></View>{collectionAdventures.map((adventure) => <ProfileContentCard key={`${collection.id}-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}{collectionCuriosities.map((curiosity) => <ProfileContentCard key={`${collection.id}-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}{collectionAdventures.length + collectionCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Ajoute une aventure ou une curiosité depuis sa fiche.</Text> : null}</View>;
+          })}{collections.length === 0 ? <Text style={styles.emptyLibraryText}>Crée ta première collection ci-dessus.</Text> : null}</View>
           <View style={styles.activityHeader}><Text style={styles.libraryEyebrow}>FIL D’ACTIVITÉ</Text><Text style={styles.aboutTitle}>Mes dernières publications</Text></View>
         </> : null}
 
@@ -470,6 +497,15 @@ const styles = StyleSheet.create({
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   collectionCount: { minWidth: 42, height: 42, color: '#071310', fontSize: 14, fontWeight: '900', lineHeight: 42, textAlign: 'center', borderRadius: 0, backgroundColor: '#62E6B1', overflow: 'hidden' },
   sectionItems: { width: '100%', marginTop: 10 },
+  collectionCreateRow: { flexDirection: 'row', gap: 8, marginTop: 16 },
+  collectionInput: { flex: 1, height: 46, color: '#F3FFF9', borderWidth: 1, borderColor: '#386B59', paddingHorizontal: 12 },
+  collectionCreateButton: { height: 46, justifyContent: 'center', backgroundColor: '#62E6B1', paddingHorizontal: 16 },
+  collectionCreateText: { color: '#071310', fontSize: 12, fontWeight: '900' },
+  collectionCard: { width: '100%', borderWidth: 1, borderColor: '#214337', backgroundColor: '#0C1C17', padding: 14, marginBottom: 10 },
+  collectionCardHeader: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  collectionCardTitle: { color: '#F3FFF9', fontSize: 17, fontWeight: '900' },
+  collectionCardMeta: { color: '#789086', fontSize: 10, marginTop: 4 },
+  collectionDelete: { color: '#E89891', fontSize: 10, fontWeight: '800' },
   bilanSection: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', padding: 18, marginTop: 18 },
   bilanYear: { color: '#62E6B1', fontSize: 13, fontWeight: '900', borderRadius: 0, backgroundColor: '#173D31', paddingHorizontal: 11, paddingVertical: 7 },
   bilanGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 17 },

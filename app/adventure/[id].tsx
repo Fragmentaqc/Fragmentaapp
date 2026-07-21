@@ -24,6 +24,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { supabase } from '@/lib/supabase';
+import { CollectionPicker } from '@/components/collection-picker';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -42,6 +43,7 @@ export default function AdventureDetailsScreen() {
   const [deleting, setDeleting] = useState(false);
   const [deletingFragmentId, setDeletingFragmentId] = useState<string | null>(null);
   const [savingFavorite, setSavingFavorite] = useState(false);
+  const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
   const adventureId = Array.isArray(params.id)
     ? params.id[0]
     : params.id;
@@ -180,7 +182,10 @@ export default function AdventureDetailsScreen() {
           <Pressable style={[styles.favoriteButton, favorite && styles.favoriteButtonActive]} onPress={() => void handleFavorite()} disabled={savingFavorite}>
             <Text style={[styles.favoriteButtonText, favorite && styles.favoriteButtonTextActive]}>{favorite ? '♥ Enregistrée' : '♡ Enregistrer'}</Text>
           </Pressable>
+          {user ? <Pressable style={styles.favoriteButton} onPress={() => setCollectionPickerVisible(true)}><Text style={styles.favoriteButtonText}>＋ Ajouter à une collection</Text></Pressable> : null}
         </View>
+
+        <CollectionPicker target={{ type: 'adventure', id: adventure.id }} visible={collectionPickerVisible} onClose={() => setCollectionPickerVisible(false)} />
 
         <Pressable
           style={styles.authorCard}

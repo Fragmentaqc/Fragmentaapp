@@ -1,6 +1,7 @@
 import { useCuriosities } from '@/context/curiosities-context';
 import { useAuth } from '@/context/auth-context';
 import { useFavorites } from '@/context/favorites-context';
+import { CollectionPicker } from '@/components/collection-picker';
 import { openDirections } from '@/lib/directions';
 import { supabase } from '@/lib/supabase';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -25,6 +26,7 @@ export default function CuriosityDetailsScreen() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [deleting, setDeleting] = useState(false);
   const [savingFavorite, setSavingFavorite] = useState(false);
+  const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
   const [requestingVerification, setRequestingVerification] = useState(false);
   const [verificationDecision, setVerificationDecision] = useState<{ status: string; decision_note: string; reviewed_at: string | null } | null>(null);
 
@@ -157,6 +159,8 @@ export default function CuriosityDetailsScreen() {
         <Pressable style={[styles.favoriteButton, favorite && styles.favoriteButtonActive]} onPress={() => void handleFavorite()} disabled={savingFavorite}>
           <Text style={[styles.favoriteButtonText, favorite && styles.favoriteButtonTextActive]}>{favorite ? '♥ Enregistrée' : '♡ Enregistrer'}</Text>
         </Pressable>
+        {user ? <Pressable style={styles.favoriteButton} onPress={() => setCollectionPickerVisible(true)}><Text style={styles.favoriteButtonText}>＋ Ajouter à une collection</Text></Pressable> : null}
+        <CollectionPicker target={{ type: 'curiosity', id: curiosity.id }} visible={collectionPickerVisible} onClose={() => setCollectionPickerVisible(false)} />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
