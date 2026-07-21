@@ -69,6 +69,7 @@ Projet de voyage ou défi appartenant à un utilisateur.
 | `destination` | texte | Destination facultative |
 | `status` | texte | État de progression |
 | `publication_status` | texte | État de publication (`draft` ou `published`) |
+| `routing_profile` | texte | Mode de calcul du trajet (`driving`, `cycling` ou `walking`) |
 | `visibility` | texte | Niveau de visibilité |
 | `day_label` | texte | Libellé chronologique actuel |
 | `distance_km` | nombre | Distance connue |

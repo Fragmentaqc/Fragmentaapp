@@ -3,6 +3,7 @@ import { useBlocks } from '@/context/blocks-context';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 import { readOfflineCache, writeOfflineCache } from '@/lib/offline-cache';
+import type { RouteProfile } from '@/lib/routing';
 import * as FileSystem from 'expo-file-system/legacy';
 import {
     createContext,
@@ -33,6 +34,7 @@ export type Adventure = {
   latitude: number | null;
   longitude: number | null;
   status: AdventureStatus;
+  routingProfile: RouteProfile;
   publicationStatus: 'draft' | 'published';
   createdAt: string | null;
 };
@@ -47,13 +49,14 @@ export type NewAdventure = {
   latitude?: number | null;
   longitude?: number | null;
   publicationStatus?: 'draft' | 'published';
+  routingProfile?: RouteProfile;
 };
 
 export type AdventureStatus = 'preparation' | 'active' | 'completed';
 
 export type AdventureUpdate = Pick<
   NewAdventure,
-  'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus'
+  'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus' | 'routingProfile'
 > & { status: AdventureStatus };
 
 type AdventuresContextValue = {
@@ -78,6 +81,7 @@ type AdventureRow = {
   category: string | null;
   status: string | null;
   publication_status: 'draft' | 'published' | null;
+  routing_profile: RouteProfile | null;
   created_at: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -271,6 +275,7 @@ export function AdventuresProvider({
           category,
           status,
           publication_status,
+          routing_profile,
           created_at,
           latitude,
           longitude
@@ -438,6 +443,10 @@ export function AdventuresProvider({
               adventure.publication_status === 'draft'
                 ? 'draft'
                 : 'published',
+            routingProfile:
+              adventure.routing_profile === 'cycling' || adventure.routing_profile === 'driving'
+                ? adventure.routing_profile
+                : 'walking',
             createdAt: adventure.created_at,
           };
         });
@@ -508,6 +517,7 @@ export function AdventuresProvider({
             status: 'active',
             publication_status:
               newAdventure.publicationStatus || 'published',
+            routing_profile: newAdventure.routingProfile || 'walking',
             latitude:
               typeof newAdventure.latitude ===
               'number'
@@ -646,6 +656,7 @@ export function AdventuresProvider({
         category: update.category.trim() || 'Autre',
         status: update.status,
         publication_status: update.publicationStatus || 'published',
+        routing_profile: update.routingProfile || 'walking',
         updated_at: new Date().toISOString(),
       })
       .eq('id', adventureId)

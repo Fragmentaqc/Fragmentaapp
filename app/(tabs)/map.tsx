@@ -6,6 +6,8 @@ import {
   Curiosity,
   useCuriosities,
 } from '@/context/curiosities-context';
+import { useFragments } from '@/context/fragments-context';
+import { useAdventureRoute } from '@/hooks/use-adventure-route';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
@@ -21,6 +23,7 @@ import {
 } from 'react-native';
 import MapView, {
   Marker,
+  Polyline,
   Region,
 } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -160,6 +163,7 @@ export default function MapScreen() {
     loading: curiositiesLoading,
     refreshCuriosities,
   } = useCuriosities();
+  const { fragmentsByAdventure, loadFragments } = useFragments();
 
   const [contentFilter, setContentFilter] =
     useState<ContentFilter>('Tout');
@@ -168,6 +172,23 @@ export default function MapScreen() {
     useState<SelectedMapItem>(null);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locating, setLocating] = useState(false);
+  const selectedAdventure = selectedItem?.type === 'adventure' ? selectedItem.data : null;
+  const selectedFragments = useMemo(
+    () => selectedAdventure ? fragmentsByAdventure[selectedAdventure.id] ?? [] : [],
+    [fragmentsByAdventure, selectedAdventure]
+  );
+  const selectedRoutePoints = useMemo(() => [
+    ...(selectedAdventure && hasAdventureCoordinates(selectedAdventure)
+      ? [getAdventureCoordinate(selectedAdventure)]
+      : []),
+    ...selectedFragments
+      .filter((fragment) => typeof fragment.latitude === 'number' && typeof fragment.longitude === 'number')
+      .map((fragment) => ({ latitude: fragment.latitude as number, longitude: fragment.longitude as number })),
+  ], [selectedAdventure, selectedFragments]);
+  const selectedRoute = useAdventureRoute(
+    selectedRoutePoints,
+    selectedAdventure?.routingProfile ?? 'walking'
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -349,6 +370,7 @@ export default function MapScreen() {
       type: 'adventure',
       data: adventure,
     });
+    void loadFragments(adventure.id);
 
     mapRef.current?.animateToRegion(
       {
@@ -436,6 +458,26 @@ export default function MapScreen() {
           toolbarEnabled={false}
           onPress={() => setSelectedItem(null)}
         >
+          {selectedRoute.route.coordinates.length > 1 ? (
+            <Polyline
+              coordinates={selectedRoute.route.coordinates}
+              strokeColor="#62E6B1"
+              strokeWidth={5}
+            />
+          ) : null}
+
+          {selectedFragments
+            .filter((fragment) => typeof fragment.latitude === 'number' && typeof fragment.longitude === 'number')
+            .map((fragment, index) => (
+              <Marker
+                key={`selected-fragment-${fragment.id}`}
+                coordinate={{ latitude: fragment.latitude as number, longitude: fragment.longitude as number }}
+                title={fragment.title}
+                description={`Fragment ${index + 1}`}
+                pinColor="#62E6B1"
+              />
+            ))}
+
           {visibleAdventures.map((adventure) => (
             <Marker
               key={`adventure-${adventure.id}`}
@@ -583,6 +625,8 @@ export default function MapScreen() {
         {selectedItem?.type === 'adventure' ? (
           <AdventureDetailCard
             adventure={selectedItem.data}
+            distanceKm={selectedRoute.route.distanceKm}
+            routeLoading={selectedRoute.loading}
             onOpen={openSelectedItem}
           />
         ) : null}
@@ -622,9 +666,13 @@ export default function MapScreen() {
 
 function AdventureDetailCard({
   adventure,
+  distanceKm,
+  routeLoading,
   onOpen,
 }: {
   adventure: Adventure;
+  distanceKm: number;
+  routeLoading: boolean;
   onOpen: () => void;
 }) {
   return (
@@ -663,6 +711,14 @@ function AdventureDetailCard({
 
       <Text style={styles.cardLocation}>
         ◉ {adventure.location}
+      </Text>
+
+      <Text style={styles.cardRoute}>
+        {routeLoading
+          ? 'Calcul du trajet…'
+          : distanceKm > 0
+            ? `${distanceKm >= 10 ? Math.round(distanceKm) : distanceKm.toFixed(1)} km · ${adventure.routingProfile === 'cycling' ? 'vélo' : adventure.routingProfile === 'driving' ? 'auto' : 'marche'}`
+            : 'Ajoute un deuxième point pour calculer le trajet'}
       </Text>
 
       <Text
@@ -1043,6 +1099,8 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginTop: 6,
   },
+
+  cardRoute: { color: '#F6C85F', fontSize: 11, fontWeight: '900', marginTop: 6 },
 
   cardDescription: {
     color: '#95AAA1',

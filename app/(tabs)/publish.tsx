@@ -1,6 +1,7 @@
 import { useAdventures } from '@/context/adventures-context';
 import { LocationPicker } from '@/components/location-picker';
 import { useAuth } from '@/context/auth-context';
+import type { RouteProfile } from '@/lib/routing';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -29,6 +30,12 @@ const categories = [
   'Autre',
 ];
 
+const routeProfiles: { value: RouteProfile; label: string; detail: string }[] = [
+  { value: 'cycling', label: 'Vélo', detail: 'Privilégie les pistes cyclables' },
+  { value: 'walking', label: 'Marche', detail: 'Suit les trottoirs et sentiers' },
+  { value: 'driving', label: 'Auto', detail: 'Suit le réseau routier' },
+];
+
 export default function PublishScreen() {
   const router = useRouter();
   const { user } = useAuth();
@@ -39,6 +46,7 @@ export default function PublishScreen() {
   const [startLocation, setStartLocation] = useState('');
   const [destination, setDestination] = useState('');
   const [category, setCategory] = useState('Vélo');
+  const [routingProfile, setRoutingProfile] = useState<RouteProfile>('cycling');
   const [images, setImages] = useState<string[]>([]);
   const [coordinate, setCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
   const [publishing, setPublishing] = useState(false);
@@ -176,6 +184,7 @@ export default function PublishScreen() {
         startLocation,
         destination,
         category,
+        routingProfile,
         images,
         publicationStatus,
         latitude: coordinate?.latitude,
@@ -197,6 +206,7 @@ export default function PublishScreen() {
       setStartLocation('');
       setDestination('');
       setCategory('Vélo');
+      setRoutingProfile('cycling');
       setImages([]);
       setCoordinate(null);
 
@@ -441,6 +451,24 @@ export default function PublishScreen() {
               );
             })}
           </ScrollView>
+
+          <Text style={styles.label}>Mode du trajet</Text>
+          <View style={styles.routeProfiles}>
+            {routeProfiles.map((item) => {
+              const selected = routingProfile === item.value;
+              return (
+                <Pressable
+                  key={item.value}
+                  onPress={() => setRoutingProfile(item.value)}
+                  disabled={publishing}
+                  style={[styles.routeProfileButton, selected && styles.routeProfileButtonActive]}
+                >
+                  <Text style={[styles.routeProfileLabel, selected && styles.routeProfileLabelActive]}>{item.label}</Text>
+                  <Text style={[styles.routeProfileDetail, selected && styles.routeProfileDetailActive]}>{item.detail}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
           <Text style={styles.label}>
             Point de départ
@@ -772,6 +800,14 @@ const styles = StyleSheet.create({
     marginTop: 22,
     marginBottom: 22,
   },
+
+  routeProfiles: { gap: 8 },
+  routeProfileButton: { borderRadius: 6, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
+  routeProfileButtonActive: { borderColor: '#62E6B1', backgroundColor: '#173D31' },
+  routeProfileLabel: { color: '#DFFFF2', fontSize: 13, fontWeight: '900' },
+  routeProfileLabelActive: { color: '#62E6B1' },
+  routeProfileDetail: { color: '#71877D', fontSize: 11, marginTop: 3 },
+  routeProfileDetailActive: { color: '#BFEEDB' },
   mapHelper: { color: '#63766D', fontSize: 11, marginTop: 8 },
 
   visibilityIcon: {
