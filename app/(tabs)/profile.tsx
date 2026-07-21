@@ -29,6 +29,7 @@ type Profile = {
   avatar_url: string | null;
   social_links: SocialLink[] | null;
   country: string | null;
+  cover_url: string | null;
 };
 
 export default function ProfileScreen() {
@@ -59,7 +60,7 @@ export default function ProfileScreen() {
     try {
       const profileResult = await supabase
         .from('profiles')
-        .select('username, display_name, bio, country, avatar_url, social_links')
+        .select('username, display_name, bio, country, avatar_url, cover_url, social_links')
         .eq('id', user.id)
         .maybeSingle();
       const moderatorResult = await supabase.rpc('is_moderator');
@@ -136,7 +137,7 @@ export default function ProfileScreen() {
     : [];
   const favoriteAdventures = adventures.filter((adventure) => favoriteAdventureIds.includes(adventure.id));
   const favoriteCuriosities = curiosities.filter((curiosity) => favoriteCuriosityIds.includes(curiosity.id));
-  const coverImage = myAdventures.find((adventure) => adventure.images[0])?.images[0];
+  const coverImage = profile?.cover_url || myAdventures.find((adventure) => adventure.images[0])?.images[0];
 
   if (loading) {
     return (

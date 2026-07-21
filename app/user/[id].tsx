@@ -16,6 +16,7 @@ type PublicProfile = {
   bio: string | null;
   country: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
   social_links: SocialLink[] | null;
 };
 
@@ -36,7 +37,7 @@ export default function PublicProfileScreen() {
       if (!userId) return;
       const { data } = await supabase
         .from('profiles')
-        .select('display_name, username, bio, country, avatar_url, social_links')
+        .select('display_name, username, bio, country, avatar_url, cover_url, social_links')
         .eq('id', userId)
         .maybeSingle();
       setProfile(data);
@@ -59,7 +60,7 @@ export default function PublicProfileScreen() {
   const isBlocked = Boolean(userId && blockedUserIds.includes(userId));
   const isHidden = Boolean(userId && hiddenUserIds.includes(userId));
   const isFollowing = followingIds.includes(userId);
-  const coverImage = userAdventures.find((item) => item.images[0])?.images[0];
+  const coverImage = profile?.cover_url || userAdventures.find((item) => item.images[0])?.images[0];
 
   function confirmBlock() {
     if (!user) { router.push('/auth'); return; }
