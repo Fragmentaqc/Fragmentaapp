@@ -7,10 +7,10 @@ import {
   Curiosity,
   useCuriosities,
 } from '@/context/curiosities-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as Location from 'expo-location';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -97,6 +97,8 @@ function getVerificationIcon(status: string) {
 }
 
 export default function ExploreScreen() {
+  const params = useLocalSearchParams<{ search?: string | string[] }>();
+  const initialSearch = Array.isArray(params.search) ? params.search[0] : params.search;
   const { user } = useAuth();
 
   const {
@@ -113,9 +115,13 @@ export default function ExploreScreen() {
   const [selectedCategory, setSelectedCategory] =
     useState<ExploreCategory>('Tout');
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch ?? '');
   const [userCoordinate, setUserCoordinate] = useState<Coordinate | null>(null);
   const [locating, setLocating] = useState(false);
+
+  useEffect(() => {
+    if (typeof initialSearch === 'string') setSearch(initialSearch);
+  }, [initialSearch]);
 
   async function toggleNearby() {
     if (userCoordinate) {
