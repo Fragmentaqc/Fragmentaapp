@@ -1,5 +1,6 @@
 import { type Adventure, useAdventures } from '@/context/adventures-context';
 import { type Curiosity, useCuriosities } from '@/context/curiosities-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
@@ -60,8 +61,13 @@ export default function HomeScreen() {
           <Image source={require('@/assets/images/D7K_3244.jpg')} style={styles.heroImage} contentFit="cover" contentPosition="center" />
           <View style={styles.heroShade} />
           <View style={styles.heroTop}>
-            <View style={styles.heroLogoLockup}><Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" /><Text style={styles.heroWordmark}>FRAGMENTA</Text></View>
-            <Pressable style={styles.profileButton} onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel="Ouvrir mon profil"><Text style={styles.profileButtonText}>◎</Text></Pressable>
+            <View style={styles.heroLogoLockup} pointerEvents="none">
+              <Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" />
+              <Text style={styles.heroWordmark}>FRAGMENTA</Text>
+            </View>
+            <Pressable style={styles.profileButton} onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel="Ouvrir mon profil">
+              <Ionicons name="person" size={24} color="#FFFFFF" />
+            </Pressable>
           </View>
           <View style={styles.heroContent}>
             <Text style={styles.heroEyebrow}>LE MONDE EST PLEIN DE FRAGMENTS</Text>
@@ -272,14 +278,13 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#071310' },
   container: { paddingBottom: 48 },
   profileButton: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: 'rgba(255,255,255,.55)', backgroundColor: 'rgba(7,19,16,.55)' },
-  profileButtonText: { color: '#FFFFFF', fontSize: 24, fontWeight: '900' },
   hero: { height: 540, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,10,8,.42)' },
-  heroTop: { position: 'absolute', top: 18, left: 18, right: 18, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
-  heroLogoLockup: { flexDirection: 'row', alignItems: 'center' },
-  heroLogo: { width: 76, height: 76 },
-  heroWordmark: { color: '#FFFFFF', fontSize: 20, fontWeight: '900', letterSpacing: 2.4, marginLeft: 8, textShadowColor: 'rgba(0,0,0,.6)', textShadowRadius: 8 },
+  heroTop: { position: 'absolute', top: 18, left: 18, right: 18, alignItems: 'flex-end' },
+  heroLogoLockup: { position: 'absolute', top: -140, left: -140, width: 500, height: 380, justifyContent: 'center' },
+  heroLogo: { width: 380, height: 380 },
+  heroWordmark: { position: 'absolute', left: 255, top: 154, color: '#FFFFFF', fontSize: 20, fontWeight: '900', letterSpacing: 2.4, textShadowColor: 'rgba(0,0,0,.6)', textShadowRadius: 8 },
   heroContent: { position: 'absolute', left: 18, right: 18, bottom: 22 },
   heroEyebrow: { color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.3 },
   heroTitle: { maxWidth: 410, color: '#FFFFFF', fontSize: 36, lineHeight: 40, fontWeight: '900', marginTop: 10, textShadowColor: 'rgba(0,0,0,.7)', textShadowRadius: 10 },
