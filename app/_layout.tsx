@@ -50,6 +50,10 @@ export default function RootLayout() {
 
               <Stack.Screen name="auth" />
 
+              <Stack.Screen name="forgot-password" />
+
+              <Stack.Screen name="reset-password" />
+
               <Stack.Screen name="edit-profile" />
 
               <Stack.Screen name="add-curiosity" />
