@@ -1,5 +1,6 @@
 import { LocationPicker } from '@/components/location-picker';
 import { useFragments } from '@/context/fragments-context';
+import { parseLocalDate } from '@/lib/date-validation';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -31,10 +32,15 @@ export default function EditFragmentScreen() {
       if (!title.trim() || !body.trim()) Alert.alert('Informations manquantes', 'Le titre et le récit sont obligatoires.');
       return;
     }
+    const parsedDate = parseLocalDate(date);
+    if (parsedDate === undefined) {
+      Alert.alert('Date invalide', 'Utilise une date réelle au format AAAA-MM-JJ.');
+      return;
+    }
     setSaving(true);
     const success = await updateFragment(fragment.id, fragment.adventureId, {
       title, body, status,
-      occurredAt: date.trim() ? new Date(`${date.trim()}T12:00:00`).toISOString() : null,
+      occurredAt: parsedDate,
       latitude: coordinate?.latitude,
       longitude: coordinate?.longitude,
     });

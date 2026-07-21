@@ -54,6 +54,7 @@ Fragmenta est une application Expo/React Native permettant de documenter des ave
 | `npm run web` | Ouvrir la version Web |
 | `npm run lint` | Vérifier les règles ESLint |
 | `npm run typecheck` | Vérifier les types TypeScript |
+| `npm test` | Exécuter les tests unitaires |
 
 ## Structure principale
 
@@ -78,9 +79,10 @@ GitHub Actions exécute automatiquement les commandes suivantes sur chaque pull 
 npm ci
 npm run lint
 npm run typecheck
+npm test
 ```
 
-Les trois contrôles doivent réussir avant la fusion d'une pull request.
+Les quatre contrôles doivent réussir avant la fusion d'une pull request.
 
 ## Documentation Expo
 

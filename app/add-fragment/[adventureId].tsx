@@ -1,6 +1,7 @@
 import { LocationPicker } from '@/components/location-picker';
 import { useAdventures } from '@/context/adventures-context';
 import { useFragments } from '@/context/fragments-context';
+import { parseLocalDate } from '@/lib/date-validation';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -36,7 +37,11 @@ export default function AddFragmentScreen() {
       Alert.alert('Informations manquantes', 'Ajoute un titre et raconte ce moment.');
       return;
     }
-    const parsedDate = date.trim() ? new Date(`${date.trim()}T12:00:00`).toISOString() : null;
+    const parsedDate = parseLocalDate(date);
+    if (parsedDate === undefined) {
+      Alert.alert('Date invalide', 'Utilise une date réelle au format AAAA-MM-JJ.');
+      return;
+    }
     setSaving(true);
     const success = await addFragment({ adventureId, title, body, occurredAt: parsedDate, latitude: coordinate?.latitude, longitude: coordinate?.longitude, status, images });
     setSaving(false);
