@@ -8,12 +8,12 @@ import {
   useCuriosities,
 } from '@/context/curiosities-context';
 import { router } from 'expo-router';
+import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -947,7 +947,7 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 17,
+    borderRadius: 5,
     backgroundColor: '#62E6B1',
   },
 
@@ -962,7 +962,7 @@ const styles = StyleSheet.create({
     minHeight: 126,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 24,
+    borderRadius: 7,
     borderWidth: 1,
     borderColor: '#2B6552',
     backgroundColor: '#10251E',
@@ -975,7 +975,7 @@ const styles = StyleSheet.create({
     height: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
+    borderRadius: 6,
     backgroundColor: '#173D31',
   },
 
@@ -1014,7 +1014,7 @@ const styles = StyleSheet.create({
     height: 39,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 14,
+    borderRadius: 5,
     backgroundColor: '#62E6B1',
     marginLeft: 10,
   },
@@ -1029,7 +1029,7 @@ const styles = StyleSheet.create({
     minHeight: 58,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 19,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -1072,7 +1072,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 999,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -1095,7 +1095,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 12, backgroundColor: '#173D31', paddingHorizontal: 12, paddingVertical: 8, marginTop: 4 },
+  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 4, backgroundColor: '#173D31', paddingHorizontal: 12, paddingVertical: 8, marginTop: 4 },
   nearbyNoticeText: { color: '#62E6B1', fontSize: 10, fontWeight: '800' },
 
   loadingArea: {
@@ -1137,7 +1137,7 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 13,
+    borderRadius: 5,
     backgroundColor: '#173D31',
   },
 
@@ -1162,7 +1162,7 @@ const styles = StyleSheet.create({
   featuredCard: {
     minHeight: 430,
     overflow: 'hidden',
-    borderRadius: 28,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#285345',
     backgroundColor: '#10251E',
@@ -1209,7 +1209,7 @@ const styles = StyleSheet.create({
 
   featuredBadge: {
     maxWidth: '58%',
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: 'rgba(7, 19, 16, 0.92)',
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -1226,7 +1226,7 @@ const styles = StyleSheet.create({
   verificationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: 'rgba(7, 19, 16, 0.92)',
     paddingHorizontal: 10,
     paddingVertical: 7,
@@ -1327,7 +1327,7 @@ const styles = StyleSheet.create({
     minHeight: 43,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 15,
+    borderRadius: 5,
     backgroundColor: '#62E6B1',
     paddingHorizontal: 14,
     marginLeft: 8,
@@ -1368,7 +1368,7 @@ const styles = StyleSheet.create({
     minHeight: 135,
     flexDirection: 'row',
     overflow: 'hidden',
-    borderRadius: 21,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1442,7 +1442,7 @@ const styles = StyleSheet.create({
     minHeight: 94,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 22,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#10251E',
@@ -1486,7 +1486,7 @@ const styles = StyleSheet.create({
     height: 42,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15,
+    borderRadius: 5,
     backgroundColor: '#62E6B1',
     marginLeft: 10,
   },
@@ -1505,7 +1505,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     overflow: 'hidden',
     minHeight: 190,
-    borderRadius: 23,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1630,7 +1630,7 @@ const styles = StyleSheet.create({
 
   emptyCuriosities: {
     alignItems: 'center',
-    borderRadius: 24,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1642,7 +1642,7 @@ const styles = StyleSheet.create({
     height: 64,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 22,
+    borderRadius: 6,
     backgroundColor: '#173D31',
   },
 
@@ -1669,7 +1669,7 @@ const styles = StyleSheet.create({
     minHeight: 45,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15,
+    borderRadius: 5,
     backgroundColor: '#62E6B1',
     paddingHorizontal: 16,
     marginTop: 16,
@@ -1683,7 +1683,7 @@ const styles = StyleSheet.create({
 
   emptyCommunity: {
     alignItems: 'center',
-    borderRadius: 22,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#19392E',
     backgroundColor: '#0C1C17',
@@ -1709,7 +1709,7 @@ const styles = StyleSheet.create({
   },
 
   bottomBanner: {
-    borderRadius: 26,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#285345',
     backgroundColor: '#10251E',

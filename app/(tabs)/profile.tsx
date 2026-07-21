@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
   settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 19, backgroundColor: '#173D31' },
   settingsIcon: { color: '#62E6B1', fontSize: 19 },
   socialLinks: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },
-  socialLink: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 },
+  socialLink: { flexDirection: 'row', alignItems: 'center', borderRadius: 5, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 },
   socialLinkText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' },
   socialLinkArrow: { color: '#62E6B1', fontSize: 13, marginLeft: 6 },
 
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#62E6B1',
     marginTop: 30,
   },
-  moderationButton: { width: '100%', minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 18, borderWidth: 1, borderColor: '#E9B949', backgroundColor: '#211D0E', marginTop: 30 },
+  moderationButton: { width: '100%', minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 5, borderWidth: 1, borderColor: '#E9B949', backgroundColor: '#211D0E', marginTop: 30 },
   moderationButtonText: { color: '#E9B949', fontSize: 14, fontWeight: '900' },
 
   editButtonText: {
@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   blockedUsersText: { color: '#8FA69B', fontSize: 12, fontWeight: '800' },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 22, marginTop: 12 },
   legalText: { color: '#62E6B1', fontSize: 11, fontWeight: '800', textDecorationLine: 'underline' },
-  emailStatus: { alignSelf: 'center', borderRadius: 999, backgroundColor: '#2A2412', paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
+  emailStatus: { alignSelf: 'center', borderRadius: 4, backgroundColor: '#2A2412', paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
   emailStatusConfirmed: { backgroundColor: '#173D31' },
   emailStatusText: { color: '#E9B949', fontSize: 9, fontWeight: '900' },
   emailStatusTextConfirmed: { color: '#62E6B1' },
