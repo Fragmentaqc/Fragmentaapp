@@ -384,6 +384,12 @@ export default function ExploreScreen() {
           ) : null}
         </View>
 
+        <Pressable style={styles.memberSearchButton} onPress={() => router.push('/members' as never)}>
+          <Text style={styles.memberSearchIcon}>◎</Text>
+          <View style={styles.memberSearchContent}><Text style={styles.memberSearchTitle}>Rechercher parmi les membres</Text><Text style={styles.memberSearchText}>Filtre par pays ou type d’aventure et abonne-toi directement</Text></View>
+          <Text style={styles.memberSearchArrow}>›</Text>
+        </Pressable>
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -1041,6 +1047,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#0C1C17',
     paddingHorizontal: 15,
   },
+
+  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 7, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', padding: 13, marginTop: 11 },
+  memberSearchIcon: { color: '#62E6B1', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F3FFF9', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#81958C', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#62E6B1', fontSize: 28 },
 
   searchIcon: {
     color: '#62E6B1',

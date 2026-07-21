@@ -2,6 +2,7 @@ import { useAuth } from '@/context/auth-context';
 import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
 import { useFavorites } from '@/context/favorites-context';
+import { useFollows } from '@/context/follows-context';
 import { supabase } from '@/lib/supabase';
 import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { useFocusEffect } from '@react-navigation/native';
@@ -27,6 +28,7 @@ type Profile = {
   bio: string | null;
   avatar_url: string | null;
   social_links: SocialLink[] | null;
+  country: string | null;
 };
 
 export default function ProfileScreen() {
@@ -35,11 +37,13 @@ export default function ProfileScreen() {
   const { adventures } = useAdventures();
   const { curiosities } = useCuriosities();
   const { adventureIds: favoriteAdventureIds, curiosityIds: favoriteCuriosityIds } = useFavorites();
+  const { getCounts } = useFollows();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
+  const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -54,11 +58,12 @@ export default function ProfileScreen() {
     try {
       const profileResult = await supabase
         .from('profiles')
-        .select('username, display_name, bio, avatar_url, social_links')
+        .select('username, display_name, bio, country, avatar_url, social_links')
         .eq('id', user.id)
         .maybeSingle();
       const moderatorResult = await supabase.rpc('is_moderator');
       setIsModerator(moderatorResult.data === true);
+      setFollowCounts(await getCounts(user.id));
 
       if (profileResult.error) {
         console.error(
@@ -74,7 +79,7 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [getCounts, user]);
 
   useFocusEffect(
     useCallback(() => {
@@ -218,10 +223,20 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}>{followCounts.followers}</Text>
             <Text style={styles.statLabel}>Abonnés</Text>
           </View>
         </View>
+
+        {user ? <>
+          <View style={styles.followingRow}>
+            <Pressable style={styles.followingCard} onPress={() => router.push({ pathname: '/members', params: { mode: 'followers', userId: user.id } } as never)}><Text style={styles.followingValue}>{followCounts.followers}</Text><Text style={styles.followingLabel}>Mes abonnés</Text></Pressable>
+            <Pressable style={styles.followingCard} onPress={() => router.push({ pathname: '/members', params: { mode: 'following', userId: user.id } } as never)}><Text style={styles.followingValue}>{followCounts.following}</Text><Text style={styles.followingLabel}>Mes abonnements</Text></Pressable>
+          </View>
+          <Pressable style={styles.findMembersButton} onPress={() => router.push('/members' as never)}><Text style={styles.findMembersIcon}>⌕</Text><View style={styles.findMembersContent}><Text style={styles.findMembersTitle}>Trouver des aventuriers</Text><Text style={styles.findMembersText}>Recherche par membre, pays et type d’aventure</Text></View><Text style={styles.findMembersArrow}>›</Text></Pressable>
+          <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}</View>
+          <View style={styles.activityHeader}><Text style={styles.libraryEyebrow}>FIL D’ACTIVITÉ</Text><Text style={styles.aboutTitle}>Mes dernières publications</Text></View>
+        </> : null}
 
         {user ? (
           <View style={styles.library}>
@@ -550,6 +565,14 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
   },
+
+  followingRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  followingCard: { flex: 1, alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#10251E', padding: 13 },
+  followingValue: { color: '#62E6B1', fontSize: 18, fontWeight: '900' },
+  followingLabel: { color: '#8FA69B', fontSize: 11, marginTop: 3 },
+  findMembersButton: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', padding: 15, marginTop: 12 },
+  findMembersIcon: { color: '#62E6B1', fontSize: 30 }, findMembersContent: { flex: 1, marginLeft: 12 }, findMembersTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '900' }, findMembersText: { color: '#81958C', fontSize: 11, marginTop: 4 }, findMembersArrow: { color: '#62E6B1', fontSize: 28 },
+  aboutSection: { borderRadius: 14, backgroundColor: '#0C1C17', padding: 18, marginTop: 22 }, aboutTitle: { color: '#F3FFF9', fontSize: 19, fontWeight: '900', marginTop: 6 }, aboutText: { color: '#B7C9C1', lineHeight: 20, marginTop: 9 }, aboutCountry: { color: '#62E6B1', fontSize: 12, fontWeight: '800', marginTop: 10 }, activityHeader: { marginTop: 26, marginBottom: -8 },
   settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 19, backgroundColor: '#173D31' },
   settingsIcon: { color: '#62E6B1', fontSize: 19 },
   socialLinks: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },

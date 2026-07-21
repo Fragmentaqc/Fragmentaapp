@@ -15,6 +15,7 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { ConnectionSync } from '@/components/connection-sync';
 import { FavoritesProvider } from '@/context/favorites-context';
 import { BlocksProvider } from '@/context/blocks-context';
+import { FollowsProvider } from '@/context/follows-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -27,6 +28,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <BlocksProvider>
+      <FollowsProvider>
       <AdventuresProvider>
         <CuriositiesProvider>
           <FragmentsProvider>
@@ -72,6 +74,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="user/[id]" />
 
+              <Stack.Screen name="members" />
+
               <Stack.Screen name="report" />
 
               <Stack.Screen name="moderation" />
@@ -97,6 +101,7 @@ export default function RootLayout() {
           </FragmentsProvider>
         </CuriositiesProvider>
       </AdventuresProvider>
+      </FollowsProvider>
       </BlocksProvider>
     </AuthProvider>
   );

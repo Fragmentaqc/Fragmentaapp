@@ -1,0 +1,102 @@
+import { useAdventures } from '@/context/adventures-context';
+import { useAuth } from '@/context/auth-context';
+import { useBlocks } from '@/context/blocks-context';
+import { useFollows } from '@/context/follows-context';
+import { supabase } from '@/lib/supabase';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const PAGE_SIZE = 20;
+type Member = { id: string; display_name: string | null; username: string | null; bio: string | null; country: string | null; avatar_url: string | null };
+
+export default function MembersScreen() {
+  const params = useLocalSearchParams<{ mode?: string; userId?: string }>();
+  const { user } = useAuth();
+  const { adventures } = useAdventures();
+  const { hiddenUserIds } = useBlocks();
+  const { followingIds, toggleFollow } = useFollows();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [search, setSearch] = useState('');
+  const [country, setCountry] = useState('');
+  const [adventureType, setAdventureType] = useState('Tous');
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const categories = useMemo(() => ['Tous', ...Array.from(new Set(adventures.map((item) => item.category).filter(Boolean))).sort()], [adventures]);
+  const permittedIds = useMemo(() => adventureType === 'Tous' ? null : Array.from(new Set(adventures.filter((item) => item.category === adventureType).map((item) => item.ownerId).filter(Boolean))) as string[], [adventureType, adventures]);
+
+  const load = useCallback(async (nextPage: number, replace: boolean) => {
+    if (nextPage > 0) setLoadingMore(true); else setLoading(true);
+    let relationshipIds: string[] | null = null;
+    const targetId = params.userId || user?.id;
+    if ((params.mode === 'followers' || params.mode === 'following') && targetId) {
+      const column = params.mode === 'followers' ? 'followed_id' : 'follower_id';
+      const selected = params.mode === 'followers' ? 'follower_id' : 'followed_id';
+      const { data } = await supabase.from('profile_follows').select(selected).eq(column, targetId);
+      relationshipIds = (data ?? []).map((row) => String(row[selected as keyof typeof row]));
+    }
+    const allowed = relationshipIds ?? permittedIds;
+    if (allowed && allowed.length === 0) {
+      setMembers([]); setHasMore(false); setLoading(false); setRefreshing(false); setLoadingMore(false); return;
+    }
+    let query = supabase.from('profiles').select('id, display_name, username, bio, country, avatar_url').order('display_name', { ascending: true }).range(nextPage * PAGE_SIZE, nextPage * PAGE_SIZE + PAGE_SIZE - 1);
+    const cleanSearch = search.trim().replace(/[,%()]/g, ' ');
+    if (cleanSearch) query = query.or(`display_name.ilike.%${cleanSearch}%,username.ilike.%${cleanSearch}%,bio.ilike.%${cleanSearch}%`);
+    if (country.trim()) query = query.ilike('country', `%${country.trim().replace(/[%]/g, '')}%`);
+    if (allowed) query = query.in('id', allowed);
+    const { data, error } = await query;
+    if (!error) {
+      const visible = (data ?? []).filter((item) => item.id !== user?.id && !hiddenUserIds.includes(item.id));
+      setMembers((current) => replace ? visible : [...current, ...visible.filter((item) => !current.some((old) => old.id === item.id))]);
+      setHasMore((data ?? []).length === PAGE_SIZE);
+      setPage(nextPage);
+    }
+    setLoading(false); setRefreshing(false); setLoadingMore(false);
+  }, [country, hiddenUserIds, params.mode, params.userId, permittedIds, search, user?.id]);
+
+  useEffect(() => { const timer = setTimeout(() => void load(0, true), 250); return () => clearTimeout(timer); }, [adventureType, country, search, params.mode, load]);
+  const title = params.mode === 'followers' ? 'Abonnés' : params.mode === 'following' ? 'Abonnements' : 'Trouver des membres';
+
+  return <SafeAreaView style={styles.safeArea}>
+    <FlatList
+      data={members}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} tintColor="#62E6B1" onRefresh={() => { setRefreshing(true); void load(0, true); }} />}
+      onEndReached={() => { if (hasMore && !loadingMore && !loading) void load(page + 1, false); }}
+      onEndReachedThreshold={0.35}
+      ListHeaderComponent={<>
+        <View style={styles.header}><Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Retour</Text></Pressable><Text style={styles.eyebrow}>COMMUNAUTÉ</Text><Text style={styles.title}>{title}</Text><Text style={styles.subtitle}>Découvre des aventuriers, consulte leur profil et abonne-toi sans quitter la recherche.</Text></View>
+        <View style={styles.searchBox}><Text style={styles.searchIcon}>⌕</Text><TextInput style={styles.input} value={search} onChangeText={setSearch} placeholder="Nom, pseudo ou mot-clé" placeholderTextColor="#6E857B" /></View>
+        <TextInput style={styles.countryInput} value={country} onChangeText={setCountry} placeholder="Filtrer par pays" placeholderTextColor="#6E857B" />
+        <FlatList horizontal data={categories} keyExtractor={(item) => item} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} renderItem={({ item }) => <Pressable style={[styles.chip, item === adventureType && styles.chipActive]} onPress={() => setAdventureType(item)}><Text style={[styles.chipText, item === adventureType && styles.chipTextActive]}>{item}</Text></Pressable>} />
+        <Text style={styles.resultLabel}>{members.length} membre{members.length === 1 ? '' : 's'}</Text>
+      </>}
+      renderItem={({ item }) => {
+        const name = item.display_name || item.username || 'Aventurier';
+        const isFollowing = followingIds.includes(item.id);
+        return <Pressable style={styles.card} onPress={() => router.push({ pathname: '/user/[id]', params: { id: item.id } })}>
+          <View style={styles.avatar}>{item.avatar_url ? <Image source={{ uri: item.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>}</View>
+          <View style={styles.memberInfo}><Text style={styles.name}>{name}</Text><Text style={styles.handle}>{item.username ? `@${item.username}` : 'Profil Fragmenta'}{item.country ? ` · ${item.country}` : ''}</Text>{item.bio ? <Text style={styles.bio} numberOfLines={2}>{item.bio}</Text> : null}</View>
+          <Pressable style={[styles.followButton, isFollowing && styles.followingButton]} onPress={(event) => { event.stopPropagation(); if (!user) router.push('/auth'); else void toggleFollow(item.id); }}><Text style={[styles.followText, isFollowing && styles.followingText]}>{isFollowing ? 'Suivi' : 'Suivre'}</Text></Pressable>
+        </Pressable>;
+      }}
+      ListEmptyComponent={loading ? <ActivityIndicator style={styles.loader} color="#62E6B1" /> : <View style={styles.empty}><Text style={styles.emptyTitle}>Aucun membre trouvé</Text><Text style={styles.emptyText}>Essaie un autre nom, pays ou type d’aventure.</Text></View>}
+      ListFooterComponent={loadingMore ? <ActivityIndicator style={styles.footerLoader} color="#62E6B1" /> : <View style={styles.footerSpace} />}
+    />
+  </SafeAreaView>;
+}
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#071310' }, container: { padding: 18, paddingBottom: 70 },
+  header: { marginBottom: 18 }, back: { color: '#62E6B1', fontWeight: '800', paddingVertical: 8 }, eyebrow: { color: '#62E6B1', fontSize: 10, fontWeight: '900', letterSpacing: 1.6, marginTop: 12 }, title: { color: '#F3FFF9', fontSize: 30, fontWeight: '900', marginTop: 7 }, subtitle: { color: '#8FA69B', lineHeight: 20, marginTop: 8 },
+  searchBox: { height: 56, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#28634F', borderRadius: 8, backgroundColor: '#0C1C17', paddingHorizontal: 14 }, searchIcon: { color: '#62E6B1', fontSize: 26, marginRight: 9 }, input: { flex: 1, color: '#F3FFF9', fontSize: 15 }, countryInput: { height: 48, color: '#F3FFF9', borderWidth: 1, borderColor: '#19392E', borderRadius: 8, backgroundColor: '#0C1C17', paddingHorizontal: 15, marginTop: 10 },
+  chips: { gap: 8, paddingVertical: 14 }, chip: { borderWidth: 1, borderColor: '#1D4538', borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9 }, chipActive: { backgroundColor: '#62E6B1', borderColor: '#62E6B1' }, chipText: { color: '#9EB0A8', fontSize: 12, fontWeight: '800' }, chipTextActive: { color: '#071310' }, resultLabel: { color: '#81958C', fontSize: 12, fontWeight: '800', marginBottom: 10 },
+  card: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#19392E', borderRadius: 12, backgroundColor: '#0C1C17', padding: 12, marginBottom: 10 }, avatar: { width: 54, height: 54, alignItems: 'center', justifyContent: 'center', borderRadius: 27, overflow: 'hidden', backgroundColor: '#174B3B' }, avatarImage: { width: '100%', height: '100%' }, avatarText: { color: '#62E6B1', fontSize: 21, fontWeight: '900' }, memberInfo: { flex: 1, marginHorizontal: 11 }, name: { color: '#F3FFF9', fontSize: 15, fontWeight: '900' }, handle: { color: '#62E6B1', fontSize: 10, marginTop: 3 }, bio: { color: '#8FA69B', fontSize: 11, lineHeight: 15, marginTop: 5 }, followButton: { backgroundColor: '#62E6B1', borderRadius: 8, paddingHorizontal: 13, paddingVertical: 10 }, followingButton: { backgroundColor: '#173D31' }, followText: { color: '#071310', fontSize: 11, fontWeight: '900' }, followingText: { color: '#62E6B1' },
+  loader: { marginTop: 45 }, empty: { alignItems: 'center', padding: 35 }, emptyTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900' }, emptyText: { color: '#81958C', textAlign: 'center', marginTop: 8 }, footerLoader: { margin: 20 }, footerSpace: { height: 25 },
+});
