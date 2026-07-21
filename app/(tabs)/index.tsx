@@ -56,35 +56,26 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.brand}>FRAGMENTA</Text>
-            <Text style={styles.headerTagline}>Explore. Raconte. Laisse une trace.</Text>
-          </View>
-          <Pressable
-            style={styles.profileButton}
-            onPress={() => router.push('/profile')}
-            accessibilityRole="button"
-            accessibilityLabel="Ouvrir mon profil"
-          >
-            <Text style={styles.profileButtonText}>◎</Text>
-          </Pressable>
-        </View>
-
         <View style={styles.hero}>
-          <Text style={styles.heroEyebrow}>LE MONDE EST PLEIN DE FRAGMENTS</Text>
-          <Text style={styles.heroTitle}>Trouve ta prochaine histoire dehors.</Text>
-          <Text style={styles.heroText}>
-            Découvre des parcours vécus, suis leurs étapes et repère les curiosités cachées par la communauté.
-          </Text>
-          <View style={styles.heroActions}>
-            <Pressable style={styles.primaryAction} onPress={() => router.push('/map')}>
-              <Text style={styles.primaryActionText}>Explorer la carte</Text>
-              <Text style={styles.primaryActionArrow}>↗</Text>
-            </Pressable>
-            <Pressable style={styles.secondaryAction} onPress={() => router.push('/publish')}>
-              <Text style={styles.secondaryActionText}>＋ Publier</Text>
-            </Pressable>
+          <Image source={require('@/assets/images/D7K_3244.jpg')} style={styles.heroImage} contentFit="cover" contentPosition="center" />
+          <View style={styles.heroShade} />
+          <View style={styles.heroTop}>
+            <View style={styles.heroLogoLockup}><Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" /><Text style={styles.heroWordmark}>FRAGMENTA</Text></View>
+            <Pressable style={styles.profileButton} onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel="Ouvrir mon profil"><Text style={styles.profileButtonText}>◎</Text></Pressable>
+          </View>
+          <View style={styles.heroContent}>
+            <Text style={styles.heroEyebrow}>LE MONDE EST PLEIN DE FRAGMENTS</Text>
+            <Text style={styles.heroTitle}>Trouve ta prochaine histoire dehors.</Text>
+            <Text style={styles.heroText}>Découvre des parcours vécus, suis leurs étapes et repère les curiosités cachées par la communauté.</Text>
+            <View style={styles.heroActions}>
+              <Pressable style={styles.primaryAction} onPress={() => router.push('/map')}>
+                <Text style={styles.primaryActionText}>Explorer la carte</Text>
+                <Text style={styles.primaryActionArrow}>↗</Text>
+              </Pressable>
+              <Pressable style={styles.secondaryAction} onPress={() => router.push('/publish')}>
+                <Text style={styles.secondaryActionText}>＋ Publier</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
 
@@ -279,22 +270,26 @@ function RecentAdventure({ adventure, index }: { adventure: Adventure; index: nu
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#071310' },
-  container: { paddingTop: 10, paddingBottom: 48 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingBottom: 18 },
-  brand: { color: '#F3FFF9', fontSize: 25, fontWeight: '900', letterSpacing: 2.2 },
-  headerTagline: { color: '#789086', fontSize: 11, marginTop: 3 },
-  profileButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E' },
-  profileButtonText: { color: '#62E6B1', fontSize: 24, fontWeight: '900' },
-  hero: { marginHorizontal: 18, borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', padding: 22 },
-  heroEyebrow: { color: '#62E6B1', fontSize: 9, fontWeight: '900', letterSpacing: 1.3 },
-  heroTitle: { color: '#F3FFF9', fontSize: 31, lineHeight: 36, fontWeight: '900', marginTop: 10 },
-  heroText: { color: '#9CB0A7', fontSize: 13, lineHeight: 20, marginTop: 11 },
+  container: { paddingBottom: 48 },
+  profileButton: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: 'rgba(255,255,255,.55)', backgroundColor: 'rgba(7,19,16,.55)' },
+  profileButtonText: { color: '#FFFFFF', fontSize: 24, fontWeight: '900' },
+  hero: { height: 540, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
+  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,10,8,.42)' },
+  heroTop: { position: 'absolute', top: 18, left: 18, right: 18, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  heroLogoLockup: { flexDirection: 'row', alignItems: 'center' },
+  heroLogo: { width: 76, height: 76 },
+  heroWordmark: { color: '#FFFFFF', fontSize: 20, fontWeight: '900', letterSpacing: 2.4, marginLeft: 8, textShadowColor: 'rgba(0,0,0,.6)', textShadowRadius: 8 },
+  heroContent: { position: 'absolute', left: 18, right: 18, bottom: 22 },
+  heroEyebrow: { color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.3 },
+  heroTitle: { maxWidth: 410, color: '#FFFFFF', fontSize: 36, lineHeight: 40, fontWeight: '900', marginTop: 10, textShadowColor: 'rgba(0,0,0,.7)', textShadowRadius: 10 },
+  heroText: { maxWidth: 430, color: '#E2ECE8', fontSize: 13, lineHeight: 20, marginTop: 11, textShadowColor: 'rgba(0,0,0,.65)', textShadowRadius: 7 },
   heroActions: { flexDirection: 'row', gap: 9, marginTop: 20 },
   primaryAction: { minHeight: 48, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#62E6B1', paddingHorizontal: 14 },
   primaryActionText: { color: '#071310', fontSize: 12, fontWeight: '900' },
   primaryActionArrow: { color: '#071310', fontSize: 17, fontWeight: '900', marginLeft: 7 },
-  secondaryAction: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#386B59', paddingHorizontal: 15 },
-  secondaryActionText: { color: '#DFFFF2', fontSize: 12, fontWeight: '900' },
+  secondaryAction: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: 'rgba(255,255,255,.65)', backgroundColor: 'rgba(7,19,16,.5)', paddingHorizontal: 15 },
+  secondaryActionText: { color: '#FFFFFF', fontSize: 12, fontWeight: '900' },
   metrics: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 18, marginTop: 12, borderRadius: 0, backgroundColor: '#0C1C17', paddingVertical: 14 },
   metric: { flex: 1, alignItems: 'center' },
   metricValue: { color: '#F3FFF9', fontSize: 20, fontWeight: '900' },
