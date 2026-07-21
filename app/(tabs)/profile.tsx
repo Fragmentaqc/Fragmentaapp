@@ -37,10 +37,12 @@ export default function ProfileScreen() {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
 
   const loadProfile = useCallback(async () => {
     if (!user) {
       setProfile(null);
+      setIsModerator(false);
       setLoading(false);
       return;
     }
@@ -53,6 +55,8 @@ export default function ProfileScreen() {
         .select('username, display_name, bio, avatar_url, social_links')
         .eq('id', user.id)
         .maybeSingle();
+      const moderatorResult = await supabase.rpc('is_moderator');
+      setIsModerator(moderatorResult.data === true);
 
       if (profileResult.error) {
         console.error(
@@ -301,6 +305,7 @@ export default function ProfileScreen() {
 
         {user ? (
           <>
+            {isModerator ? <Pressable style={styles.moderationButton} onPress={() => router.push('/moderation')}><Text style={styles.moderationButtonText}>⚑ Ouvrir la modération</Text></Pressable> : null}
             <Pressable
               style={styles.editButton}
               onPress={() => router.push('/edit-profile')}
@@ -689,6 +694,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#62E6B1',
     marginTop: 30,
   },
+  moderationButton: { width: '100%', minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 18, borderWidth: 1, borderColor: '#E9B949', backgroundColor: '#211D0E', marginTop: 30 },
+  moderationButtonText: { color: '#E9B949', fontSize: 14, fontWeight: '900' },
 
   editButtonText: {
     color: '#071310',
