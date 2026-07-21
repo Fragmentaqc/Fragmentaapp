@@ -2,8 +2,9 @@ import { useCuriosities } from '@/context/curiosities-context';
 import { useAuth } from '@/context/auth-context';
 import { useFavorites } from '@/context/favorites-context';
 import { openDirections } from '@/lib/directions';
+import { supabase } from '@/lib/supabase';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Alert,
     Pressable,
@@ -19,16 +20,27 @@ export default function CuriosityDetailsScreen() {
     id: string;
   }>();
 
-  const { curiosities, deleteCuriosity } = useCuriosities();
+  const { curiosities, deleteCuriosity, refreshCuriosities } = useCuriosities();
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [deleting, setDeleting] = useState(false);
   const [savingFavorite, setSavingFavorite] = useState(false);
+  const [requestingVerification, setRequestingVerification] = useState(false);
+  const [verificationDecision, setVerificationDecision] = useState<{ status: string; decision_note: string; reviewed_at: string | null } | null>(null);
 
   const curiosity = curiosities.find(
     (item) => item.id === id
   );
   const favorite = curiosity ? isFavorite({ type: 'curiosity', id: curiosity.id }) : false;
+
+  useEffect(() => {
+    async function loadDecision() {
+      if (!curiosity || user?.id !== curiosity.ownerId) { setVerificationDecision(null); return; }
+      const { data } = await supabase.from('curiosity_verification_requests').select('status, decision_note, reviewed_at').eq('curiosity_id', curiosity.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      setVerificationDecision(data);
+    }
+    void loadDecision();
+  }, [curiosity, user]);
 
   async function handleFavorite() {
     if (!curiosity || savingFavorite) return;
@@ -62,6 +74,15 @@ export default function CuriosityDetailsScreen() {
         },
       ]
     );
+  }
+
+  async function requestVerification() {
+    if (!curiosity || requestingVerification) return;
+    setRequestingVerification(true);
+    const { error } = await supabase.rpc('request_curiosity_verification', { target_curiosity_id: curiosity.id });
+    setRequestingVerification(false);
+    if (error) Alert.alert('Demande impossible', 'Vérifie que la curiosité est publiée et qu’aucune demande n’est déjà en attente.');
+    else { await refreshCuriosities(); Alert.alert('Demande envoyée', 'La curiosité sera examinée par un modérateur.'); }
   }
 
   if (!curiosity) {
@@ -128,7 +149,9 @@ export default function CuriosityDetailsScreen() {
               : curiosity.verificationStatus ===
                   'community_confirmed'
                 ? '● Confirmé par la communauté'
-                : '? À vérifier'}
+                : curiosity.verificationStatus === 'pending'
+                  ? '⏳ Vérification en attente'
+                  : '? À vérifier'}
           </Text>
         </View>
         <Pressable style={[styles.favoriteButton, favorite && styles.favoriteButtonActive]} onPress={() => void handleFavorite()} disabled={savingFavorite}>
@@ -197,6 +220,10 @@ export default function CuriosityDetailsScreen() {
         </Pressable>
         {user?.id === curiosity.ownerId ? (
           <View style={styles.ownerActions}>
+            {curiosity.verificationStatus === 'unverified' && curiosity.status === 'published' && verificationDecision?.status !== 'pending' ? <Pressable style={styles.verifyButton} onPress={() => void requestVerification()} disabled={requestingVerification}><Text style={styles.verifyButtonText}>{requestingVerification ? 'Envoi…' : 'Demander la vérification'}</Text></Pressable> : null}
+            {verificationDecision?.status === 'pending' ? <Text style={styles.pendingText}>Ta demande de vérification est en cours d’examen.</Text> : null}
+            {verificationDecision?.status === 'rejected' ? <View style={styles.decisionCard}><Text style={styles.decisionTitle}>Vérification refusée</Text><Text style={styles.decisionText}>{verificationDecision.decision_note}</Text></View> : null}
+            {verificationDecision?.status === 'approved' ? <View style={styles.approvedCard}><Text style={styles.approvedText}>✓ Vérification approuvée</Text></View> : null}
             <Pressable style={styles.editButton} onPress={() => router.push({ pathname: '/edit-curiosity/[id]', params: { id: curiosity.id } })}>
               <Text style={styles.editButtonText}>Modifier la curiosité</Text>
             </Pressable>
@@ -485,6 +512,14 @@ const styles = StyleSheet.create({
   directionsTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '900', marginTop: 5 },
   directionsArrow: { color: '#62E6B1', fontSize: 25 },
   ownerActions: { marginTop: 22, gap: 10 },
+  verifyButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: '#E9B949', backgroundColor: '#2A2412' },
+  verifyButtonText: { color: '#F6C85F', fontSize: 13, fontWeight: '900' },
+  pendingText: { color: '#E9B949', fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  decisionCard: { borderRadius: 15, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414', padding: 13 },
+  decisionTitle: { color: '#FFB8B8', fontSize: 12, fontWeight: '900' },
+  decisionText: { color: '#D29A9A', fontSize: 11, lineHeight: 17, marginTop: 5 },
+  approvedCard: { borderRadius: 15, backgroundColor: '#173D31', padding: 13 },
+  approvedText: { color: '#62E6B1', fontSize: 12, fontWeight: '900', textAlign: 'center' },
   editButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, backgroundColor: '#62E6B1' },
   editButtonText: { color: '#071310', fontSize: 14, fontWeight: '900' },
   deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414' },

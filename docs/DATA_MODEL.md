@@ -194,6 +194,8 @@ Valeurs permises pour `verification_status` :
 - `community_confirmed`
 - `verified`
 
+Les demandes et décisions sont conservées dans `curiosity_verification_requests`. Un créateur peut demander l’examen d’une curiosité publiée; seuls les modérateurs peuvent l’approuver ou la refuser, avec un motif obligatoire en cas de refus.
+
 Le propriétaire contrôle le contenu et le statut de publication, mais pas le statut de vérification. Une curiosité peut être indépendante ou rattachée uniquement à une aventure du même propriétaire.
 
 ## `curiosity_images`
