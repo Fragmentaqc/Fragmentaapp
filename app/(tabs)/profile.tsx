@@ -324,6 +324,7 @@ export default function ProfileScreen() {
               </Text>
             </Pressable>
             <Pressable style={styles.blockedUsersButton} onPress={() => router.push('/blocked-users')}><Text style={styles.blockedUsersText}>Gérer les comptes bloqués</Text></Pressable>
+            <Pressable style={styles.blockedUsersButton} onPress={() => router.push('/export-data')}><Text style={styles.blockedUsersText}>Exporter mes données</Text></Pressable>
             <Pressable style={styles.deleteAccountButton} onPress={() => router.push('/delete-account')}><Text style={styles.deleteAccountText}>Supprimer mon compte</Text></Pressable>
           </>
         ) : (

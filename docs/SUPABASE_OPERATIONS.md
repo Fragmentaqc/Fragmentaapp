@@ -2,6 +2,8 @@
 
 La suppression de compte utilise la fonction protégée `delete_own_account('SUPPRIMER')`. Le client retire d'abord les fichiers Storage appartenant au compte, puis la suppression de `auth.users` déclenche les cascades relationnelles. Cette opération est définitive.
 
+L’export personnel utilise la fonction protégée `export_my_data()`. Elle retourne uniquement les données appartenant à l’utilisateur authentifié et exclut les mots de passe, jetons et champs administratifs.
+
 Ce guide définit la procédure minimale pour modifier, sauvegarder et restaurer la base de données Fragmenta sans mettre les données de production en danger.
 
 ## Environnements

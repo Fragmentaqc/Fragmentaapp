@@ -76,6 +76,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="blocked-users" />
 
+              <Stack.Screen name="export-data" />
+
               <Stack.Screen
                 name="modal"
                 options={{
