@@ -45,7 +45,6 @@ export default function ProfileScreen() {
   const [isModerator, setIsModerator] = useState(false);
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
-  const [profileSection, setProfileSection] = useState<'activity' | 'collections' | 'about'>('activity');
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -182,20 +181,16 @@ export default function ProfileScreen() {
         </View>
 
         {user ? <>
-          <View style={styles.profileNav}>
-            <Pressable style={[styles.navItem, profileSection === 'activity' && styles.navItemActive]} onPress={() => setProfileSection('activity')}><Text style={styles.navIcon}>◷</Text><Text style={[styles.navLabel, profileSection === 'activity' && styles.navLabelActive]}>Activité</Text></Pressable>
-            <Pressable style={styles.navItem} onPress={() => router.push('/map')}><Text style={styles.navIcon}>⌖</Text><Text style={styles.navLabel}>Carte</Text></Pressable>
-            <Pressable style={[styles.navItem, profileSection === 'collections' && styles.navItemActive]} onPress={() => setProfileSection('collections')}><Text style={styles.navIcon}>◇</Text><Text style={[styles.navLabel, profileSection === 'collections' && styles.navLabelActive]}>Collections</Text></Pressable>
-            <Pressable style={[styles.navItem, profileSection === 'about' && styles.navItemActive]} onPress={() => setProfileSection('about')}><Text style={styles.navIcon}>○</Text><Text style={[styles.navLabel, profileSection === 'about' && styles.navLabelActive]}>À propos</Text></Pressable>
-          </View>
-          {profileSection === 'about' ? <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View> : null}
-          {profileSection === 'collections' ? <View style={styles.sectionIntro}><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes souvenirs sauvegardés</Text><Text style={styles.aboutText}>{favoriteAdventures.length + favoriteCuriosities.length} élément{favoriteAdventures.length + favoriteCuriosities.length === 1 ? '' : 's'} dans tes favoris.</Text></View> : null}
-          {profileSection === 'activity' ? <View style={styles.activityHeader}><Text style={styles.libraryEyebrow}>FIL D’ACTIVITÉ</Text><Text style={styles.aboutTitle}>Mes dernières publications</Text></View> : null}
+          <View style={styles.pageSectionHeader}><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View>
+          <Pressable style={styles.mapSection} onPress={() => router.push('/map')}><View style={styles.sectionGlyph}><Text style={styles.sectionGlyphText}>⌖</Text></View><View style={styles.sectionCardContent}><Text style={styles.sectionCardEyebrow}>CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes lieux et aventures</Text><Text style={styles.sectionCardText}>Retrouve tous tes parcours et tes découvertes sur la carte.</Text></View><Text style={styles.sectionArrow}>›</Text></Pressable>
+          <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View>
+          <View style={styles.sectionIntro}><View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes souvenirs sauvegardés</Text></View><Text style={styles.collectionCount}>{favoriteAdventures.length + favoriteCuriosities.length}</Text></View><Text style={styles.aboutText}>Aventures et curiosités que tu veux conserver ou retrouver plus tard.</Text></View>
+          <View style={styles.sectionItems}>{favoriteAdventures.map((adventure) => <ProfileContentCard key={`favorite-adventure-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}{favoriteCuriosities.map((curiosity) => <ProfileContentCard key={`favorite-curiosity-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}{favoriteAdventures.length + favoriteCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Aucun favori enregistré pour le moment.</Text> : null}</View>
+          <View style={styles.activityHeader}><Text style={styles.libraryEyebrow}>FIL D’ACTIVITÉ</Text><Text style={styles.aboutTitle}>Mes dernières publications</Text></View>
         </> : null}
 
         {user ? (
           <View style={styles.library}>
-            {profileSection === 'activity' ? <>
             <View style={styles.libraryHeader}>
               <View>
                 <Text style={styles.libraryEyebrow}>MA COLLECTION</Text>
@@ -260,16 +255,6 @@ export default function ProfileScreen() {
               </Text>
             )}
 
-            </> : null}
-            {profileSection === 'collections' ? <>
-            <View style={styles.libraryHeader}>
-              <View><Text style={styles.libraryEyebrow}>ENREGISTRÉS</Text><Text style={styles.libraryTitle}>Mes favoris</Text></View>
-              <Text style={styles.libraryCount}>{favoriteAdventures.length + favoriteCuriosities.length}</Text>
-            </View>
-            {favoriteAdventures.map((adventure) => <ProfileContentCard key={`favorite-adventure-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}
-            {favoriteCuriosities.map((curiosity) => <ProfileContentCard key={`favorite-curiosity-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}
-            {favoriteAdventures.length + favoriteCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Aucun favori enregistré pour le moment.</Text> : null}
-            </> : null}
           </View>
         ) : null}
 
@@ -433,6 +418,18 @@ const styles = StyleSheet.create({
   discoverButton: { alignSelf: 'flex-start', borderRadius: 18, backgroundColor: '#173D31', paddingHorizontal: 15, paddingVertical: 10, marginTop: 15 },
   discoverButtonText: { color: '#62E6B1', fontSize: 11, fontWeight: '900' },
   sectionIntro: { width: '100%', borderRadius: 18, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 18, marginTop: 22 },
+  pageSectionHeader: { width: '100%', marginTop: 27, marginBottom: 12 },
+  mapSection: { width: '100%', minHeight: 138, flexDirection: 'row', alignItems: 'center', borderRadius: 20, borderWidth: 1, borderColor: '#2B6552', backgroundColor: '#10251E', padding: 17 },
+  sectionGlyph: { width: 58, height: 78, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: '#173D31' },
+  sectionGlyphText: { color: '#62E6B1', fontSize: 31, fontWeight: '900' },
+  sectionCardContent: { flex: 1, marginLeft: 14 },
+  sectionCardEyebrow: { color: '#62E6B1', fontSize: 8, fontWeight: '900', letterSpacing: 1.2 },
+  sectionCardTitle: { color: '#F3FFF9', fontSize: 17, fontWeight: '900', marginTop: 5 },
+  sectionCardText: { color: '#8FA69B', fontSize: 11, lineHeight: 16, marginTop: 5 },
+  sectionArrow: { color: '#62E6B1', fontSize: 30, marginLeft: 8 },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  collectionCount: { minWidth: 42, height: 42, color: '#071310', fontSize: 14, fontWeight: '900', lineHeight: 42, textAlign: 'center', borderRadius: 21, backgroundColor: '#62E6B1', overflow: 'hidden' },
+  sectionItems: { width: '100%', marginTop: 10 },
 
   topLabel: {
     width: '100%',
