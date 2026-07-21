@@ -1,5 +1,6 @@
 import { useCuriosities } from '@/context/curiosities-context';
 import { useAuth } from '@/context/auth-context';
+import { useFavorites } from '@/context/favorites-context';
 import { openDirections } from '@/lib/directions';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -20,11 +21,26 @@ export default function CuriosityDetailsScreen() {
 
   const { curiosities, deleteCuriosity } = useCuriosities();
   const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [deleting, setDeleting] = useState(false);
+  const [savingFavorite, setSavingFavorite] = useState(false);
 
   const curiosity = curiosities.find(
     (item) => item.id === id
   );
+  const favorite = curiosity ? isFavorite({ type: 'curiosity', id: curiosity.id }) : false;
+
+  async function handleFavorite() {
+    if (!curiosity || savingFavorite) return;
+    if (!user) {
+      Alert.alert('Connexion requise', 'Connecte-toi pour enregistrer cette curiosité.', [{ text: 'Annuler', style: 'cancel' }, { text: 'Connexion', onPress: () => router.push('/auth') }]);
+      return;
+    }
+    setSavingFavorite(true);
+    const success = await toggleFavorite({ type: 'curiosity', id: curiosity.id });
+    setSavingFavorite(false);
+    if (!success) Alert.alert('Erreur', 'Impossible de modifier ce favori.');
+  }
 
   function confirmDelete() {
     if (!curiosity || deleting) return;
@@ -115,6 +131,9 @@ export default function CuriosityDetailsScreen() {
                 : '? À vérifier'}
           </Text>
         </View>
+        <Pressable style={[styles.favoriteButton, favorite && styles.favoriteButtonActive]} onPress={() => void handleFavorite()} disabled={savingFavorite}>
+          <Text style={[styles.favoriteButtonText, favorite && styles.favoriteButtonTextActive]}>{favorite ? '♥ Enregistrée' : '♡ Enregistrer'}</Text>
+        </Pressable>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
@@ -453,6 +472,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
   },
+  favoriteButton: { alignSelf: 'flex-start', borderRadius: 14, borderWidth: 1, borderColor: '#386B59', paddingHorizontal: 14, paddingVertical: 10, marginTop: 12 },
+  favoriteButtonActive: { backgroundColor: '#62E6B1', borderColor: '#62E6B1' },
+  favoriteButtonText: { color: '#DFFFF2', fontSize: 12, fontWeight: '900' },
+  favoriteButtonTextActive: { color: '#071310' },
   directionsCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 20, backgroundColor: '#173D31', padding: 17, marginTop: 14 },
   directionsEyebrow: { color: '#82AA99', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   directionsTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '900', marginTop: 5 },

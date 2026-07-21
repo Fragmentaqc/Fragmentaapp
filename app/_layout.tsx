@@ -13,6 +13,7 @@ import { CuriositiesProvider } from '@/context/curiosities-context';
 import { FragmentsProvider } from '@/context/fragments-context';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ConnectionSync } from '@/components/connection-sync';
+import { FavoritesProvider } from '@/context/favorites-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -27,6 +28,7 @@ export default function RootLayout() {
       <AdventuresProvider>
         <CuriositiesProvider>
           <FragmentsProvider>
+          <FavoritesProvider>
           <ThemeProvider
             value={
               colorScheme === 'dark'
@@ -81,6 +83,7 @@ export default function RootLayout() {
             <OfflineBanner />
             <ConnectionSync />
           </ThemeProvider>
+          </FavoritesProvider>
           </FragmentsProvider>
         </CuriositiesProvider>
       </AdventuresProvider>
