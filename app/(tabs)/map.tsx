@@ -559,47 +559,15 @@ export default function MapScreen() {
             })}
           </ScrollView>
 
-          <View style={styles.legend}>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendDot,
-                  {
-                    backgroundColor: '#4DA3FF',
-                  },
-                ]}
-              />
-
-              <Text style={styles.legendText}>
-                Aventure
-              </Text>
-            </View>
-
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendDiamond,
-                  {
-                    backgroundColor: '#F6C85F',
-                  },
-                ]}
-              />
-
-              <Text style={styles.legendText}>
-                Curiosité
-              </Text>
-            </View>
-          </View>
         </View>
 
         <View style={styles.mapButtons}>
           <Pressable
-            style={styles.mapButton}
+            style={[styles.mapButton, styles.showAllButton]}
             onPress={showAllPoints}
+            accessibilityLabel="Afficher tous les points"
           >
-            <Text style={styles.mapButtonIcon}>
-              ⌗
-            </Text>
+            <Text style={styles.showAllButtonText}>Tout voir</Text>
           </Pressable>
 
           <Pressable
@@ -966,44 +934,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  legend: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    borderRadius: 999,
-    backgroundColor: 'rgba(7, 19, 16, 0.92)',
-    paddingHorizontal: 13,
-    paddingVertical: 8,
-    marginLeft: 16,
-    marginTop: 8,
-  },
-
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  legendDot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    marginRight: 6,
-  },
-
-  legendDiamond: {
-    width: 9,
-    height: 9,
-    marginRight: 7,
-    transform: [{ rotate: '45deg' }],
-  },
-
-  legendText: {
-    color: '#B6C8C0',
-    fontSize: 10,
-    fontWeight: '800',
-  },
-
   mapButtons: {
     position: 'absolute',
     right: 16,
@@ -1026,6 +956,16 @@ const styles = StyleSheet.create({
   mapButtonIcon: {
     color: '#62E6B1',
     fontSize: 23,
+    fontWeight: '900',
+  },
+
+  showAllButton: {
+    width: 78,
+  },
+
+  showAllButtonText: {
+    color: '#62E6B1',
+    fontSize: 11,
     fontWeight: '900',
   },
 
