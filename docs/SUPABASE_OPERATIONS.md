@@ -1,5 +1,7 @@
 # Exploitation Supabase de Fragmenta
 
+La suppression de compte utilise la fonction protégée `delete_own_account('SUPPRIMER')`. Le client retire d'abord les fichiers Storage appartenant au compte, puis la suppression de `auth.users` déclenche les cascades relationnelles. Cette opération est définitive.
+
 Ce guide définit la procédure minimale pour modifier, sauvegarder et restaurer la base de données Fragmenta sans mettre les données de production en danger.
 
 ## Environnements
