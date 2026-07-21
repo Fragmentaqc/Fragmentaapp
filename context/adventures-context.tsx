@@ -35,6 +35,8 @@ export type Adventure = {
   longitude: number | null;
   status: AdventureStatus;
   routingProfile: RouteProfile;
+  distanceKm: number;
+  durationMinutes: number;
   publicationStatus: 'draft' | 'published';
   createdAt: string | null;
 };
@@ -50,13 +52,14 @@ export type NewAdventure = {
   longitude?: number | null;
   publicationStatus?: 'draft' | 'published';
   routingProfile?: RouteProfile;
+  durationMinutes?: number;
 };
 
 export type AdventureStatus = 'preparation' | 'active' | 'completed';
 
 export type AdventureUpdate = Pick<
   NewAdventure,
-  'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus' | 'routingProfile'
+  'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus' | 'routingProfile' | 'durationMinutes'
 > & { status: AdventureStatus };
 
 type AdventuresContextValue = {
@@ -82,6 +85,8 @@ type AdventureRow = {
   status: string | null;
   publication_status: 'draft' | 'published' | null;
   routing_profile: RouteProfile | null;
+  distance_km: number | null;
+  duration_minutes: number | null;
   created_at: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -276,6 +281,8 @@ export function AdventuresProvider({
           status,
           publication_status,
           routing_profile,
+          distance_km,
+          duration_minutes,
           created_at,
           latitude,
           longitude
@@ -419,7 +426,9 @@ export function AdventuresProvider({
             day: formatAdventureDate(
               adventure.created_at
             ),
-            distance: '0 km',
+            distance: `${Number(adventure.distance_km ?? 0).toFixed(1)} km`,
+            distanceKm: Number(adventure.distance_km ?? 0),
+            durationMinutes: Number(adventure.duration_minutes ?? 0),
             detail: category,
             description:
               adventure.description?.trim() ||
@@ -518,6 +527,7 @@ export function AdventuresProvider({
             publication_status:
               newAdventure.publicationStatus || 'published',
             routing_profile: newAdventure.routingProfile || 'walking',
+            duration_minutes: Number.isFinite(Number(newAdventure.durationMinutes)) ? Math.max(0, Math.round(Number(newAdventure.durationMinutes))) : 0,
             latitude:
               typeof newAdventure.latitude ===
               'number'
@@ -657,6 +667,7 @@ export function AdventuresProvider({
         status: update.status,
         publication_status: update.publicationStatus || 'published',
         routing_profile: update.routingProfile || 'walking',
+        duration_minutes: Number.isFinite(Number(update.durationMinutes)) ? Math.max(0, Math.round(Number(update.durationMinutes))) : 0,
         updated_at: new Date().toISOString(),
       })
       .eq('id', adventureId)

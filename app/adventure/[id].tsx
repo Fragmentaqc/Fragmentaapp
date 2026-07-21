@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, Polyline } from 'react-native-maps';
+import { supabase } from '@/lib/supabase';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -34,7 +35,7 @@ function getStatusLabel(status: string) {
 
 export default function AdventureDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
-  const { adventures, loading, deleteAdventure } = useAdventures();
+  const { adventures, loading, deleteAdventure, refreshAdventures } = useAdventures();
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { fragmentsByAdventure, loadingAdventureId, loadFragments, deleteFragment } = useFragments();
@@ -62,6 +63,14 @@ export default function AdventureDetailsScreen() {
     routePoints,
     adventure?.routingProfile ?? 'walking'
   );
+
+  useEffect(() => {
+    if (!adventure || routeLoading || route.distanceKm <= 0 || user?.id !== adventure.ownerId || Math.abs(adventure.distanceKm - route.distanceKm) < 0.01) return;
+    void supabase.from('adventures').update({ distance_km: Number(route.distanceKm.toFixed(2)) }).eq('id', adventure.id).eq('owner_id', user.id).then(({ error }) => {
+      if (!error) void refreshAdventures();
+      else console.error('Erreur de synchronisation de la distance :', error.message);
+    });
+  }, [adventure, refreshAdventures, route.distanceKm, routeLoading, user?.id]);
 
   async function handleFavorite() {
     if (!adventure || savingFavorite) return;
@@ -387,6 +396,9 @@ function AdventureStats({ adventure, fragments, distanceKm }: {
   const durationDays = dates.length
     ? Math.max(1, Math.floor((Math.max(...dates) - Math.min(...dates)) / 86400000) + 1)
     : 0;
+  const recordedDuration = adventure.durationMinutes >= 60
+    ? `${Math.floor(adventure.durationMinutes / 60)} h${adventure.durationMinutes % 60 ? ` ${adventure.durationMinutes % 60}` : ''}`
+    : adventure.durationMinutes > 0 ? `${adventure.durationMinutes} min` : null;
 
   return (
     <View style={styles.statsSection}>
@@ -396,7 +408,7 @@ function AdventureStats({ adventure, fragments, distanceKm }: {
         <StatCard value={`${fragments.length}`} label="Fragments" />
         <StatCard value={`${photoCount}`} label="Photos" />
         <StatCard value={distanceKm >= 10 ? `${Math.round(distanceKm)} km` : `${distanceKm.toFixed(1)} km`} label="Distance parcourue" />
-        <StatCard value={durationDays ? `${durationDays} j` : '—'} label="Durée racontée" />
+        <StatCard value={recordedDuration || (durationDays ? `${durationDays} j` : '—')} label={recordedDuration ? "Temps d’activité" : "Durée racontée"} />
       </View>
       {distanceKm === 0 ? <Text style={styles.statsHelper}>Ajoute au moins deux positions GPS pour calculer la distance.</Text> : null}
     </View>

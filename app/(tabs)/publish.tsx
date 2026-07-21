@@ -47,6 +47,7 @@ export default function PublishScreen() {
   const [destination, setDestination] = useState('');
   const [category, setCategory] = useState('Vélo');
   const [routingProfile, setRoutingProfile] = useState<RouteProfile>('cycling');
+  const [durationHours, setDurationHours] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [coordinate, setCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
   const [publishing, setPublishing] = useState(false);
@@ -191,6 +192,7 @@ export default function PublishScreen() {
         destination,
         category,
         routingProfile,
+        durationMinutes: durationHours.trim() ? Math.round(Number(durationHours.replace(',', '.')) * 60) : 0,
         images,
         publicationStatus,
         latitude: coordinate?.latitude,
@@ -213,6 +215,7 @@ export default function PublishScreen() {
       setDestination('');
       setCategory('Vélo');
       setRoutingProfile('cycling');
+      setDurationHours('');
       setImages([]);
       setCoordinate(null);
 
@@ -502,6 +505,9 @@ export default function PublishScreen() {
             maxLength={100}
             editable={!publishing}
           />
+
+          <Text style={styles.label}>Durée totale estimée</Text>
+          <View style={styles.durationInputRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} placeholder="Ex. 12" placeholderTextColor="#63766D" style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" maxLength={7} editable={!publishing} /><Text style={styles.durationUnit}>heures</Text></View>
 
           <Text style={styles.label}>Position sur la carte</Text>
           <LocationPicker coordinate={coordinate} onSelect={setCoordinate} />
@@ -809,6 +815,7 @@ const styles = StyleSheet.create({
   },
 
   routeHint: { color: '#81958C', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
+  durationInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#62E6B1', fontSize: 13, fontWeight: '900', paddingRight: 8 },
   routeProfiles: { gap: 8 },
   routeProfileButton: { borderRadius: 6, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
   routeProfileButtonActive: { borderColor: '#62E6B1', backgroundColor: '#173D31' },

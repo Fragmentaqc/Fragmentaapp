@@ -137,6 +137,15 @@ export default function ProfileScreen() {
   const favoriteAdventures = adventures.filter((adventure) => favoriteAdventureIds.includes(adventure.id));
   const favoriteCuriosities = curiosities.filter((curiosity) => favoriteCuriosityIds.includes(curiosity.id));
   const coverImage = profile?.cover_url || myAdventures.find((adventure) => adventure.images[0])?.images[0];
+  const totalDistanceKm = myAdventures.reduce((total, adventure) => total + Number(adventure.distanceKm ?? 0), 0);
+  const totalDurationMinutes = myAdventures.reduce((total, adventure) => total + Number(adventure.durationMinutes ?? 0), 0);
+  const completedAdventures = myAdventures.filter((adventure) => adventure.status === 'completed').length;
+  const longestAdventure = myAdventures.reduce((longest, adventure) => Number(adventure.distanceKm ?? 0) > Number(longest?.distanceKm ?? -1) ? adventure : longest, null as (typeof myAdventures)[number] | null);
+  const distanceByProfile = {
+    cycling: myAdventures.filter((item) => item.routingProfile === 'cycling').reduce((total, item) => total + Number(item.distanceKm ?? 0), 0),
+    walking: myAdventures.filter((item) => item.routingProfile === 'walking').reduce((total, item) => total + Number(item.distanceKm ?? 0), 0),
+    driving: myAdventures.filter((item) => item.routingProfile === 'driving').reduce((total, item) => total + Number(item.distanceKm ?? 0), 0),
+  };
 
   if (loading) {
     return (
@@ -179,6 +188,16 @@ export default function ProfileScreen() {
           <View style={styles.statDivider} />
           <Pressable style={styles.statCard} onPress={() => user && router.push({ pathname: '/members', params: { mode: 'following', userId: user.id } } as never)}><Text style={styles.statValue}>{followCounts.following}</Text><Text style={styles.statLabel}>Suivis</Text></Pressable>
         </View>
+
+        {user ? <View style={styles.bilanSection}>
+          <View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>MON BILAN</Text><Text style={styles.aboutTitle}>Vue d’ensemble</Text></View><Text style={styles.bilanYear}>{new Date().getFullYear()}</Text></View>
+          <View style={styles.bilanGrid}><BilanMetric value={formatDistance(totalDistanceKm)} label="Distance totale" icon="↝" /><BilanMetric value={formatDuration(totalDurationMinutes)} label="Temps d’activité" icon="◷" /><BilanMetric value={String(completedAdventures)} label="Terminées" icon="✓" /><BilanMetric value={String(myAdventures.length + myCuriosities.length)} label="Activités réalisées" icon="◇" /></View>
+          <Text style={styles.breakdownTitle}>Répartition de la distance</Text>
+          <DistanceBar label="Vélo" value={distanceByProfile.cycling} total={totalDistanceKm} color="#4DA3FF" />
+          <DistanceBar label="Marche" value={distanceByProfile.walking} total={totalDistanceKm} color="#62E6B1" />
+          <DistanceBar label="Auto" value={distanceByProfile.driving} total={totalDistanceKm} color="#E9B949" />
+          {longestAdventure && longestAdventure.distanceKm > 0 ? <Pressable style={styles.recordCard} onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: longestAdventure.id } })}><View><Text style={styles.recordEyebrow}>RECORD PERSONNEL</Text><Text style={styles.recordTitle} numberOfLines={1}>{longestAdventure.title}</Text></View><Text style={styles.recordDistance}>{formatDistance(longestAdventure.distanceKm)}</Text></Pressable> : <Text style={styles.bilanHelper}>Les distances apparaîtront après le calcul des parcours de tes aventures.</Text>}
+        </View> : null}
 
         {user ? <>
           <View style={styles.pageSectionHeader}><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View>
@@ -335,6 +354,27 @@ export default function ProfileScreen() {
   );
 }
 
+function formatDistance(value: number) {
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}k km`;
+  return `${value >= 10 ? Math.round(value) : value.toFixed(1)} km`;
+}
+
+function formatDuration(minutes: number) {
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  return remainder ? `${hours} h ${remainder}` : `${hours} h`;
+}
+
+function BilanMetric({ value, label, icon }: { value: string; label: string; icon: string }) {
+  return <View style={styles.bilanMetric}><Text style={styles.bilanMetricIcon}>{icon}</Text><Text style={styles.bilanMetricValue}>{value}</Text><Text style={styles.bilanMetricLabel}>{label}</Text></View>;
+}
+
+function DistanceBar({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
+  const percentage = total > 0 ? Math.min(100, value / total * 100) : 0;
+  return <View style={styles.distanceRow}><View style={styles.distanceLabels}><Text style={styles.distanceLabel}>{label}</Text><Text style={styles.distanceValue}>{formatDistance(value)}</Text></View><View style={styles.distanceTrack}><View style={[styles.distanceFill, { width: `${percentage}%`, backgroundColor: color }]} /></View></View>;
+}
+
 function ProfileContentCard({
   title,
   subtitle,
@@ -430,6 +470,14 @@ const styles = StyleSheet.create({
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   collectionCount: { minWidth: 42, height: 42, color: '#071310', fontSize: 14, fontWeight: '900', lineHeight: 42, textAlign: 'center', borderRadius: 21, backgroundColor: '#62E6B1', overflow: 'hidden' },
   sectionItems: { width: '100%', marginTop: 10 },
+  bilanSection: { width: '100%', borderRadius: 22, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', padding: 18, marginTop: 18 },
+  bilanYear: { color: '#62E6B1', fontSize: 13, fontWeight: '900', borderRadius: 14, backgroundColor: '#173D31', paddingHorizontal: 11, paddingVertical: 7 },
+  bilanGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 17 },
+  bilanMetric: { width: '48%', minHeight: 112, borderRadius: 16, borderWidth: 1, borderColor: '#21483B', backgroundColor: '#0C1C17', padding: 14 },
+  bilanMetricIcon: { color: '#62E6B1', fontSize: 18, fontWeight: '900' }, bilanMetricValue: { color: '#F3FFF9', fontSize: 22, fontWeight: '900', marginTop: 9 }, bilanMetricLabel: { color: '#81958C', fontSize: 10, marginTop: 4 },
+  breakdownTitle: { color: '#DFFFF2', fontSize: 13, fontWeight: '900', marginTop: 22, marginBottom: 3 },
+  distanceRow: { marginTop: 12 }, distanceLabels: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }, distanceLabel: { color: '#B7C9C1', fontSize: 11, fontWeight: '800' }, distanceValue: { color: '#81958C', fontSize: 10, fontWeight: '700' }, distanceTrack: { height: 7, overflow: 'hidden', borderRadius: 4, backgroundColor: '#071310' }, distanceFill: { height: '100%', borderRadius: 4 },
+  recordCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 15, backgroundColor: '#173D31', padding: 14, marginTop: 19 }, recordEyebrow: { color: '#62E6B1', fontSize: 8, fontWeight: '900', letterSpacing: 1 }, recordTitle: { maxWidth: 190, color: '#F3FFF9', fontSize: 13, fontWeight: '900', marginTop: 4 }, recordDistance: { color: '#62E6B1', fontSize: 16, fontWeight: '900' }, bilanHelper: { color: '#71877D', fontSize: 10, lineHeight: 15, marginTop: 17 },
 
   topLabel: {
     width: '100%',
