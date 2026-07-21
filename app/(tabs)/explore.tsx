@@ -8,6 +8,7 @@ import {
   useCuriosities,
 } from '@/context/curiosities-context';
 import { router } from 'expo-router';
+import * as Location from 'expo-location';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -48,6 +49,20 @@ const categories: ExploreCategory[] = [
   'Commerce unique',
   'Mystère local',
 ];
+
+type Coordinate = { latitude: number; longitude: number };
+
+function distanceInKm(from: Coordinate, latitude: number | null, longitude: number | null) {
+  if (latitude === null || longitude === null) return Number.POSITIVE_INFINITY;
+  const toRadians = (value: number) => value * Math.PI / 180;
+  const earthRadiusKm = 6371;
+  const latitudeDelta = toRadians(latitude - from.latitude);
+  const longitudeDelta = toRadians(longitude - from.longitude);
+  const a = Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(toRadians(from.latitude)) * Math.cos(toRadians(latitude)) *
+    Math.sin(longitudeDelta / 2) ** 2;
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 function formatLocation(curiosity: Curiosity) {
   return (
@@ -99,6 +114,29 @@ export default function ExploreScreen() {
     useState<ExploreCategory>('Tout');
 
   const [search, setSearch] = useState('');
+  const [userCoordinate, setUserCoordinate] = useState<Coordinate | null>(null);
+  const [locating, setLocating] = useState(false);
+
+  async function toggleNearby() {
+    if (userCoordinate) {
+      setUserCoordinate(null);
+      return;
+    }
+    setLocating(true);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Localisation désactivée', 'Autorise la localisation pour trier les découvertes près de toi.');
+        return;
+      }
+      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      setUserCoordinate({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+    } catch {
+      Alert.alert('GPS indisponible', 'Impossible de récupérer ta position pour le moment.');
+    } finally {
+      setLocating(false);
+    }
+  }
 
   const publishedCuriosities = useMemo(() => {
     return curiosities.filter(
@@ -109,7 +147,7 @@ export default function ExploreScreen() {
   const filteredCuriosities = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return publishedCuriosities.filter((curiosity) => {
+    const results = publishedCuriosities.filter((curiosity) => {
       const matchesCategory =
         selectedCategory === 'Tout' ||
         curiosity.category === selectedCategory;
@@ -132,16 +170,23 @@ export default function ExploreScreen() {
 
       return matchesCategory && matchesSearch;
     });
+    return userCoordinate
+      ? [...results].sort((first, second) =>
+          distanceInKm(userCoordinate, first.latitude, first.longitude) -
+          distanceInKm(userCoordinate, second.latitude, second.longitude)
+        )
+      : results;
   }, [
     publishedCuriosities,
     search,
     selectedCategory,
+    userCoordinate,
   ]);
 
   const filteredAdventures = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return adventures.filter((adventure) => {
+    const results = adventures.filter((adventure) => {
       if (adventure.publicationStatus !== 'published') {
         return false;
       }
@@ -162,7 +207,13 @@ export default function ExploreScreen() {
         searchableContent.includes(normalizedSearch)
       );
     });
-  }, [adventures, search]);
+    return userCoordinate
+      ? [...results].sort((first, second) =>
+          distanceInKm(userCoordinate, first.latitude, first.longitude) -
+          distanceInKm(userCoordinate, second.latitude, second.longitude)
+        )
+      : results;
+  }, [adventures, search, userCoordinate]);
 
   const featuredCuriosity =
     filteredCuriosities.length > 0
@@ -332,6 +383,21 @@ export default function ExploreScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categories}
         >
+          <Pressable
+            onPress={() => void toggleNearby()}
+            disabled={locating}
+            style={[
+              styles.categoryButton,
+              userCoordinate && styles.categoryButtonSelected,
+            ]}
+          >
+            <Text style={[
+              styles.categoryText,
+              userCoordinate && styles.categoryTextSelected,
+            ]}>
+              {locating ? 'Localisation…' : '◎ Près de moi'}
+            </Text>
+          </Pressable>
           {categories.map((category) => {
             const isSelected =
               category === selectedCategory;
@@ -361,6 +427,14 @@ export default function ExploreScreen() {
             );
           })}
         </ScrollView>
+
+        {userCoordinate ? (
+          <View style={styles.nearbyNotice}>
+            <Text style={styles.nearbyNoticeText}>
+              Triés du plus proche au plus loin
+            </Text>
+          </View>
+        ) : null}
 
         {loading ? (
           <View style={styles.loadingArea}>
@@ -1020,6 +1094,9 @@ const styles = StyleSheet.create({
     color: '#071310',
     fontWeight: '900',
   },
+
+  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 12, backgroundColor: '#173D31', paddingHorizontal: 12, paddingVertical: 8, marginTop: 4 },
+  nearbyNoticeText: { color: '#62E6B1', fontSize: 10, fontWeight: '800' },
 
   loadingArea: {
     minHeight: 320,
