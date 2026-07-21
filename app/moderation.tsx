@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type ReportStatus = 'pending' | 'reviewing' | 'resolved' | 'dismissed';
 type Report = { id: string; reporter_id: string; adventure_id: string | null; curiosity_id: string | null; reported_user_id: string | null; reason: string; details: string; status: ReportStatus; moderation_note: string; created_at: string };
 type ModerationLog = { id: string; report_id: string | null; old_status: ReportStatus; new_status: ReportStatus; note: string; created_at: string };
+type VerificationRequest = { id: string; curiosity_id: string; requester_id: string; status: 'pending' | 'approved' | 'rejected'; decision_note: string; created_at: string; curiosities: { title: string; location_name: string | null } | null };
 const reasonLabels: Record<string, string> = { spam: 'Contenu indésirable', harassment: 'Harcèlement', dangerous: 'Contenu dangereux', false_information: 'Information fausse', inappropriate: 'Contenu inapproprié', other: 'Autre raison' };
 
 export default function ModerationScreen() {
@@ -16,6 +17,8 @@ export default function ModerationScreen() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [logs, setLogs] = useState<ModerationLog[]>([]);
+  const [verificationRequests, setVerificationRequests] = useState<VerificationRequest[]>([]);
+  const [verificationNotes, setVerificationNotes] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -29,6 +32,8 @@ export default function ModerationScreen() {
     else setReports((data ?? []) as Report[]);
     const logResult = await supabase.from('moderation_logs').select('id, report_id, old_status, new_status, note, created_at').order('created_at', { ascending: false }).limit(25);
     if (!logResult.error) setLogs((logResult.data ?? []) as ModerationLog[]);
+    const verificationResult = await supabase.from('curiosity_verification_requests').select('id, curiosity_id, requester_id, status, decision_note, created_at, curiosities(title, location_name)').eq('status', 'pending').order('created_at', { ascending: true });
+    if (!verificationResult.error) setVerificationRequests((verificationResult.data ?? []) as unknown as VerificationRequest[]);
     setLoading(false);
   }, []);
 
@@ -46,6 +51,17 @@ export default function ModerationScreen() {
       setNotes((current) => ({ ...current, [id]: '' }));
       await load();
     }
+  }
+
+  async function reviewVerification(request: VerificationRequest, decision: 'approved' | 'rejected') {
+    if (updatingId) return;
+    const note = (verificationNotes[request.id] ?? '').trim();
+    if (decision === 'rejected' && !note) { Alert.alert('Motif requis', 'Ajoute un motif avant de refuser la vérification.'); return; }
+    setUpdatingId(request.id);
+    const { error } = await supabase.rpc('review_curiosity_verification', { request_id: request.id, decision, note });
+    setUpdatingId(null);
+    if (error) Alert.alert('Erreur', 'Impossible d’enregistrer cette décision.');
+    else await load();
   }
 
   function openTarget(report: Report) {
@@ -73,6 +89,15 @@ export default function ModerationScreen() {
         <Pressable style={styles.dismiss} onPress={() => void updateStatus(report.id, 'dismissed')}><Text style={styles.dismissText}>Rejeter</Text></Pressable>
       </View>
     </View>) : <Text style={styles.empty}>Aucun signalement à traiter.</Text>}
+    <Text style={styles.historyTitle}>Curiosités à vérifier</Text>
+    {verificationRequests.length ? verificationRequests.map((request) => <View key={request.id} style={styles.card}>
+      <View style={styles.cardTop}><Text style={styles.reason}>{request.curiosities?.title ?? 'Curiosité'}</Text><Text style={styles.status}>À VÉRIFIER</Text></View>
+      {request.curiosities?.location_name ? <Text style={styles.details}>{request.curiosities.location_name}</Text> : null}
+      <Text style={styles.date}>Demandée le {new Date(request.created_at).toLocaleString('fr-CA')}</Text>
+      <Pressable style={styles.target} onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: request.curiosity_id } })}><Text style={styles.targetText}>Examiner la curiosité →</Text></Pressable>
+      <TextInput value={verificationNotes[request.id] ?? ''} onChangeText={(value) => setVerificationNotes((current) => ({ ...current, [request.id]: value }))} style={styles.noteInput} maxLength={1000} placeholder="Note de décision (obligatoire pour refuser)" placeholderTextColor="#63766D" />
+      <View style={styles.actions}><Pressable style={styles.resolve} onPress={() => void reviewVerification(request, 'approved')}><Text style={styles.resolveText}>Vérifier</Text></Pressable><Pressable style={styles.dismiss} onPress={() => void reviewVerification(request, 'rejected')}><Text style={styles.dismissText}>Refuser</Text></Pressable></View>
+    </View>) : <Text style={styles.empty}>Aucune demande de vérification.</Text>}
     <Text style={styles.historyTitle}>Historique récent</Text>
     {logs.length ? logs.map((log) => <View key={log.id} style={styles.logCard}><Text style={styles.logChange}>{log.old_status} → {log.new_status}</Text><Text style={styles.date}>{new Date(log.created_at).toLocaleString('fr-CA')}</Text>{log.note ? <Text style={styles.logNote}>{log.note}</Text> : null}</View>) : <Text style={styles.empty}>Aucune action enregistrée.</Text>}
   </ScrollView></SafeAreaView>;
