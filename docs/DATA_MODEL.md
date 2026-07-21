@@ -228,6 +228,8 @@ Un favori référence exactement une aventure ou une curiosité. Les doublons so
 
 La table `reports` reçoit les signalements d'aventures, de curiosités ou de profils. Chaque ligne possède exactement une cible, un motif, des détails facultatifs et un état de traitement. Un utilisateur peut consulter ses propres signalements, mais ne peut ni les modifier ni accéder à ceux des autres. Les modérateurs et administrateurs peuvent consulter la file et modifier uniquement l'état de traitement et sa date.
 
+La table `moderation_logs` conserve automatiquement chaque changement d'état avec le modérateur, l'ancien état, le nouvel état, la note interne et la date. Elle est en lecture seule depuis l'application.
+
 ## Buckets Storage
 
 | Bucket | Public | Limite | Types autorisés |
