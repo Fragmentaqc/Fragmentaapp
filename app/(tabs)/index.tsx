@@ -272,7 +272,7 @@ function RecentAdventure({ adventure, index }: { adventure: Adventure; index: nu
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#071310' },
   container: { paddingBottom: 48 },
-  hero: { height: 540, marginHorizontal: 18, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
+  hero: { height: 540, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,10,8,.42)' },
   heroTop: { position: 'absolute', top: 18, left: 18, right: 18, alignItems: 'flex-end' },
