@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/auth-context';
 import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
+import { useFavorites } from '@/context/favorites-context';
 import { supabase } from '@/lib/supabase';
 import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { useFocusEffect } from '@react-navigation/native';
@@ -32,6 +33,7 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { adventures } = useAdventures();
   const { curiosities } = useCuriosities();
+  const { adventureIds: favoriteAdventureIds, curiosityIds: favoriteCuriosityIds } = useFavorites();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -111,6 +113,8 @@ export default function ProfileScreen() {
   const myCuriosities = user
     ? curiosities.filter((curiosity) => curiosity.ownerId === user.id)
     : [];
+  const favoriteAdventures = adventures.filter((adventure) => favoriteAdventureIds.includes(adventure.id));
+  const favoriteCuriosities = curiosities.filter((curiosity) => favoriteCuriosityIds.includes(curiosity.id));
 
   if (loading) {
     return (
@@ -269,6 +273,14 @@ export default function ProfileScreen() {
                 {"Aucune curiosité publiée pour le moment."}
               </Text>
             )}
+
+            <View style={[styles.libraryHeader, styles.curiosityHeader]}>
+              <View><Text style={styles.libraryEyebrow}>ENREGISTRÉS</Text><Text style={styles.libraryTitle}>Mes favoris</Text></View>
+              <Text style={styles.libraryCount}>{favoriteAdventures.length + favoriteCuriosities.length}</Text>
+            </View>
+            {favoriteAdventures.map((adventure) => <ProfileContentCard key={`favorite-adventure-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}
+            {favoriteCuriosities.map((curiosity) => <ProfileContentCard key={`favorite-curiosity-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}
+            {favoriteAdventures.length + favoriteCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Aucun favori enregistré pour le moment.</Text> : null}
           </View>
         ) : null}
 

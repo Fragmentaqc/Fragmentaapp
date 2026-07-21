@@ -5,6 +5,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
 import { useFragments } from '@/context/fragments-context';
+import { useFavorites } from '@/context/favorites-context';
 import { openDirections } from '@/lib/directions';
 import { useEffect, useState } from 'react';
 import {
@@ -33,14 +34,29 @@ export default function AdventureDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const { adventures, loading, deleteAdventure } = useAdventures();
   const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const { fragmentsByAdventure, loadingAdventureId, loadFragments, deleteFragment } = useFragments();
   const [deleting, setDeleting] = useState(false);
   const [deletingFragmentId, setDeletingFragmentId] = useState<string | null>(null);
+  const [savingFavorite, setSavingFavorite] = useState(false);
   const adventureId = Array.isArray(params.id)
     ? params.id[0]
     : params.id;
   const adventure = adventures.find((item) => item.id === adventureId);
   const fragments = adventureId ? fragmentsByAdventure[adventureId] ?? [] : [];
+  const favorite = adventureId ? isFavorite({ type: 'adventure', id: adventureId }) : false;
+
+  async function handleFavorite() {
+    if (!adventure || savingFavorite) return;
+    if (!user) {
+      Alert.alert('Connexion requise', 'Connecte-toi pour enregistrer cette aventure.', [{ text: 'Annuler', style: 'cancel' }, { text: 'Connexion', onPress: () => router.push('/auth') }]);
+      return;
+    }
+    setSavingFavorite(true);
+    const success = await toggleFavorite({ type: 'adventure', id: adventure.id });
+    setSavingFavorite(false);
+    if (!success) Alert.alert('Erreur', 'Impossible de modifier ce favori.');
+  }
 
   useEffect(() => {
     if (adventureId) void loadFragments(adventureId);
@@ -135,6 +151,9 @@ export default function AdventureDetailsScreen() {
           </Text>
           <Text style={styles.title}>{adventure.title}</Text>
           <Text style={styles.location}>⌖ {adventure.location}</Text>
+          <Pressable style={[styles.favoriteButton, favorite && styles.favoriteButtonActive]} onPress={() => void handleFavorite()} disabled={savingFavorite}>
+            <Text style={[styles.favoriteButtonText, favorite && styles.favoriteButtonTextActive]}>{favorite ? '♥ Enregistrée' : '♡ Enregistrer'}</Text>
+          </Pressable>
         </View>
 
         <Pressable
@@ -518,6 +537,10 @@ const styles = StyleSheet.create({
     marginTop: 7,
   },
   location: { color: '#79DDB5', fontSize: 13, fontWeight: '800', marginTop: 11 },
+  favoriteButton: { alignSelf: 'flex-start', borderRadius: 14, borderWidth: 1, borderColor: '#386B59', paddingHorizontal: 14, paddingVertical: 10, marginTop: 14 },
+  favoriteButtonActive: { backgroundColor: '#62E6B1', borderColor: '#62E6B1' },
+  favoriteButtonText: { color: '#DFFFF2', fontSize: 12, fontWeight: '900' },
+  favoriteButtonTextActive: { color: '#071310' },
   authorCard: {
     flexDirection: 'row',
     alignItems: 'center',
