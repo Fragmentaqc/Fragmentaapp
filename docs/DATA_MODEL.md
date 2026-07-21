@@ -209,6 +209,20 @@ Images ordonnées d'une curiosité.
 
 La propriété est déterminée par la curiosité parente. Les images sont lisibles lorsque la curiosité est publiée ou appartient à l'utilisateur connecté.
 
+## Favoris
+
+La table `favorites` conserve la collection privée d'un utilisateur.
+
+| Colonne | Type | Utilisation |
+|---|---|---|
+| `id` | UUID | Clé primaire |
+| `owner_id` | UUID | Propriétaire du favori |
+| `adventure_id` | UUID | Aventure enregistrée, facultative |
+| `curiosity_id` | UUID | Curiosité enregistrée, facultative |
+| `created_at` | horodatage | Date d'ajout |
+
+Un favori référence exactement une aventure ou une curiosité. Les doublons sont interdits et les politiques RLS permettent uniquement au propriétaire de lire, créer ou retirer ses favoris.
+
 ## Buckets Storage
 
 | Bucket | Public | Limite | Types autorisés |
