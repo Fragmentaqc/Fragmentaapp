@@ -36,6 +36,7 @@ type FragmentsContextValue = {
   loadingAdventureId: string | null;
   isOffline: boolean;
   loadFragments: (adventureId: string) => Promise<void>;
+  refreshLoadedFragments: () => Promise<void>;
   addFragment: (fragment: NewFragment) => Promise<boolean>;
   updateFragment: (fragmentId: string, adventureId: string, update: FragmentUpdate) => Promise<boolean>;
   deleteFragment: (fragmentId: string, adventureId: string) => Promise<boolean>;
@@ -187,7 +188,13 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
     return true;
   }, [loadFragments, user]);
 
-  const value = useMemo(() => ({ fragmentsByAdventure, loadingAdventureId, isOffline, loadFragments, addFragment, updateFragment, deleteFragment }), [fragmentsByAdventure, loadingAdventureId, isOffline, loadFragments, addFragment, updateFragment, deleteFragment]);
+  const refreshLoadedFragments = useCallback(async () => {
+    const adventureIds = Object.keys(fragmentsByAdventure);
+    await Promise.all(adventureIds.map((adventureId) => loadFragments(adventureId)));
+    if (adventureIds.length === 0) setIsOffline(false);
+  }, [fragmentsByAdventure, loadFragments]);
+
+  const value = useMemo(() => ({ fragmentsByAdventure, loadingAdventureId, isOffline, loadFragments, refreshLoadedFragments, addFragment, updateFragment, deleteFragment }), [fragmentsByAdventure, loadingAdventureId, isOffline, loadFragments, refreshLoadedFragments, addFragment, updateFragment, deleteFragment]);
   return <FragmentsContext.Provider value={value}>{children}</FragmentsContext.Provider>;
 }
 
