@@ -3,8 +3,11 @@ import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -16,13 +19,13 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#071310',
           borderTopColor: '#19392E',
-          height: 115,
-          paddingTop: 10,
-          paddingBottom: 32,
+          height: 64 + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: Math.max(insets.bottom, 8),
         },
 
         tabBarItemStyle: {
-          paddingBottom: 5,
+          paddingBottom: 0,
         },
 
         tabBarLabelStyle: {
