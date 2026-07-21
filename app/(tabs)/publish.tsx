@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
     height: 190,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 22,
+    borderRadius: 6,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#386B59',
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
   imageCard: {
     width: 150,
     height: 180,
-    borderRadius: 18,
+    borderRadius: 4,
     overflow: 'hidden',
     backgroundColor: '#0C1C17',
   },
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
     left: 8,
     bottom: 8,
     backgroundColor: '#62E6B1',
-    borderRadius: 999,
+    borderRadius: 4,
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
   addMoreButton: {
     width: 110,
     height: 180,
-    borderRadius: 18,
+    borderRadius: 5,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#386B59',
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
 
   input: {
     minHeight: 55,
-    borderRadius: 16,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: '#1D4538',
     backgroundColor: '#0C1C17',
@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: '#10251E',
     borderWidth: 1,
     borderColor: '#1D4538',
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
   visibilityCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 18,
+    borderRadius: 6,
     backgroundColor: '#0C1C17',
     borderWidth: 1,
     borderColor: '#19392E',
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
     minHeight: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
+    borderRadius: 5,
     backgroundColor: '#62E6B1',
   },
 
