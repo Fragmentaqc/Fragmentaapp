@@ -1,5 +1,13 @@
 export type RouteProfile = 'driving' | 'cycling' | 'walking';
 
+export function getRouteProfileForCategory(category: string): RouteProfile | null {
+  const normalized = category.trim().toLocaleLowerCase('fr-CA');
+  if (normalized === 'vélo' || normalized === 'velo') return 'cycling';
+  if (normalized === 'road trip' || normalized === 'roadtrip' || normalized === 'auto') return 'driving';
+  if (normalized === 'à pied' || normalized === 'a pied' || normalized === 'marche') return 'walking';
+  return null;
+}
+
 export type RouteCoordinate = {
   latitude: number;
   longitude: number;

@@ -1,6 +1,6 @@
 import { type AdventureStatus, useAdventures } from '@/context/adventures-context';
 import { useAuth } from '@/context/auth-context';
-import type { RouteProfile } from '@/lib/routing';
+import { getRouteProfileForCategory, type RouteProfile } from '@/lib/routing';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -62,6 +62,12 @@ export default function EditAdventureScreen() {
     }
   }
 
+  function selectCategory(nextCategory: string) {
+    setCategory(nextCategory);
+    const suggestedProfile = getRouteProfileForCategory(nextCategory);
+    if (suggestedProfile) setRoutingProfile(suggestedProfile);
+  }
+
   if (loading) return <SafeAreaView style={styles.safeArea}><View style={styles.center}><ActivityIndicator color="#62E6B1" size="large" /></View></SafeAreaView>;
   if (!adventure || adventure.ownerId !== user?.id) return <SafeAreaView style={styles.safeArea}><View style={styles.center}><Text style={styles.errorTitle}>Modification non autorisée</Text><Pressable style={styles.primaryButton} onPress={() => router.back()}><Text style={styles.primaryText}>Revenir</Text></Pressable></View></SafeAreaView>;
 
@@ -74,8 +80,9 @@ export default function EditAdventureScreen() {
           <Text style={styles.label}>Description</Text><TextInput value={description} onChangeText={setDescription} style={[styles.input, styles.textarea]} multiline textAlignVertical="top" maxLength={2000} />
           <Text style={styles.label}>Départ</Text><TextInput value={startLocation} onChangeText={setStartLocation} style={styles.input} />
           <Text style={styles.label}>Destination</Text><TextInput value={destination} onChangeText={setDestination} style={styles.input} />
-          <Text style={styles.label}>Catégorie</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>{categories.map((item) => <Pressable key={item} style={[styles.chip, category === item && styles.chipActive]} onPress={() => setCategory(item)}><Text style={styles.chipText}>{item}</Text></Pressable>)}</ScrollView>
+          <Text style={styles.label}>Catégorie</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>{categories.map((item) => <Pressable key={item} style={[styles.chip, category === item && styles.chipActive]} onPress={() => selectCategory(item)}><Text style={styles.chipText}>{item}</Text></Pressable>)}</ScrollView>
           <Text style={styles.label}>Mode du trajet</Text>
+          <Text style={styles.routeHint}>Choisi automatiquement selon la catégorie, mais reste modifiable.</Text>
           <View style={styles.progressColumn}>{routeProfiles.map((item) => <Pressable key={item.value} style={[styles.progressButton, routingProfile === item.value && styles.statusActive]} onPress={() => setRoutingProfile(item.value)}><View style={[styles.progressDot, routingProfile === item.value && styles.progressDotActive]} /><Text style={styles.statusText}>{item.label}</Text></Pressable>)}</View>
           <Text style={styles.label}>Progression de l’aventure</Text>
           <View style={styles.progressColumn}>{progressStatuses.map((item) => <Pressable key={item.value} style={[styles.progressButton, status === item.value && styles.statusActive]} onPress={() => setStatus(item.value)}><View style={[styles.progressDot, status === item.value && styles.progressDotActive]} /><Text style={styles.statusText}>{item.label}</Text></Pressable>)}</View>
@@ -94,6 +101,7 @@ const styles = StyleSheet.create({
   label: { color: '#DFFFF2', fontSize: 13, fontWeight: '800', marginTop: 16, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 16, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', color: '#F3FFF9', paddingHorizontal: 15, paddingVertical: 13 }, textarea: { minHeight: 145 },
   chip: { borderRadius: 14, backgroundColor: '#10251E', paddingHorizontal: 14, paddingVertical: 10, marginRight: 8 }, chipActive: { backgroundColor: '#28634F' }, chipText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' },
   statusRow: { flexDirection: 'row', gap: 9 }, statusButton: { flex: 1, alignItems: 'center', borderRadius: 15, borderWidth: 1, borderColor: '#285345', padding: 14 }, statusActive: { backgroundColor: '#28634F' }, statusText: { color: '#F3FFF9', fontWeight: '800' }, photoNote: { color: '#81958C', fontSize: 12, marginTop: 20 },
+  routeHint: { color: '#81958C', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
   progressColumn: { gap: 8 }, progressButton: { minHeight: 50, flexDirection: 'row', alignItems: 'center', borderRadius: 15, borderWidth: 1, borderColor: '#285345', paddingHorizontal: 14 }, progressDot: { width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: '#71877D', marginRight: 11 }, progressDotActive: { borderColor: '#62E6B1', backgroundColor: '#62E6B1' },
   primaryButton: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 18, backgroundColor: '#62E6B1', paddingHorizontal: 20, marginTop: 24 }, primaryText: { color: '#071310', fontSize: 14, fontWeight: '900' }, errorTitle: { color: '#F3FFF9', fontSize: 20, fontWeight: '900' },
 });

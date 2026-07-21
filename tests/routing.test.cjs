@@ -4,6 +4,7 @@ const {
   createDirectRoute,
   distanceBetween,
   splitRouteCoordinates,
+  getRouteProfileForCategory,
 } = require('../node_modules/.cache/fragmenta-tests/routing.js');
 
 test('calcule une distance directe réaliste', () => {
@@ -12,6 +13,13 @@ test('calcule une distance directe réaliste', () => {
     { latitude: 46.8139, longitude: -71.2080 }
   );
   assert.ok(distance > 230 && distance < 260);
+});
+
+test('associe les catégories au bon mode de trajet', () => {
+  assert.equal(getRouteProfileForCategory('Vélo'), 'cycling');
+  assert.equal(getRouteProfileForCategory('Road trip'), 'driving');
+  assert.equal(getRouteProfileForCategory('À pied'), 'walking');
+  assert.equal(getRouteProfileForCategory('Camping'), null);
 });
 
 test('additionne les segments du trajet de secours', () => {

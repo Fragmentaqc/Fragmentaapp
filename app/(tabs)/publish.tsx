@@ -1,7 +1,7 @@
 import { useAdventures } from '@/context/adventures-context';
 import { LocationPicker } from '@/components/location-picker';
 import { useAuth } from '@/context/auth-context';
-import type { RouteProfile } from '@/lib/routing';
+import { getRouteProfileForCategory, type RouteProfile } from '@/lib/routing';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -50,6 +50,12 @@ export default function PublishScreen() {
   const [images, setImages] = useState<string[]>([]);
   const [coordinate, setCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
   const [publishing, setPublishing] = useState(false);
+
+  function selectCategory(nextCategory: string) {
+    setCategory(nextCategory);
+    const suggestedProfile = getRouteProfileForCategory(nextCategory);
+    if (suggestedProfile) setRoutingProfile(suggestedProfile);
+  }
 
   async function pickImages() {
     if (publishing) {
@@ -430,7 +436,7 @@ export default function PublishScreen() {
               return (
                 <Pressable
                   key={item}
-                  onPress={() => setCategory(item)}
+                  onPress={() => selectCategory(item)}
                   disabled={publishing}
                   style={[
                     styles.categoryButton,
@@ -453,6 +459,7 @@ export default function PublishScreen() {
           </ScrollView>
 
           <Text style={styles.label}>Mode du trajet</Text>
+          <Text style={styles.routeHint}>Choisi automatiquement selon la catégorie, mais reste modifiable.</Text>
           <View style={styles.routeProfiles}>
             {routeProfiles.map((item) => {
               const selected = routingProfile === item.value;
@@ -801,6 +808,7 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
 
+  routeHint: { color: '#81958C', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
   routeProfiles: { gap: 8 },
   routeProfileButton: { borderRadius: 6, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
   routeProfileButtonActive: { borderColor: '#62E6B1', backgroundColor: '#173D31' },
