@@ -30,7 +30,7 @@ export function LaunchIntro({ onFinish }: { onFinish: () => void }) {
 
   return (
     <Animated.View style={[styles.overlay, { opacity: screenOpacity }]}>
-      <ImageBackground source={require('@/assets/images/D7K_3244.jpg')} resizeMode="cover" style={styles.background}>
+      <ImageBackground source={require('@/assets/images/D7K_3256.jpg')} resizeMode="cover" style={styles.background}>
         <View style={styles.shade} />
         <View style={styles.content}>
           <Animated.View style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}>
