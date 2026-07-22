@@ -17,7 +17,9 @@ import { FavoritesProvider } from '@/context/favorites-context';
 import { CollectionsProvider } from '@/context/collections-context';
 import { BlocksProvider } from '@/context/blocks-context';
 import { FollowsProvider } from '@/context/follows-context';
+import { LaunchIntro } from '@/components/launch-intro';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useCallback, useState } from 'react';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -25,6 +27,8 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [showLaunchIntro, setShowLaunchIntro] = useState(true);
+  const finishLaunchIntro = useCallback(() => setShowLaunchIntro(false), []);
 
   return (
     <AuthProvider>
@@ -95,9 +99,11 @@ export default function RootLayout() {
             <StatusBar
               style="light"
               backgroundColor="#0B1710"
+              hidden={showLaunchIntro}
             />
             <OfflineBanner />
             <ConnectionSync />
+            {showLaunchIntro ? <LaunchIntro onFinish={finishLaunchIntro} /> : null}
           </ThemeProvider>
           </CollectionsProvider>
           </FavoritesProvider>
