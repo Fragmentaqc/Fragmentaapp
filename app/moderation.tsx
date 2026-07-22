@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, Text
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ReportStatus = 'pending' | 'reviewing' | 'resolved' | 'dismissed';
-type Report = { id: string; reporter_id: string; adventure_id: string | null; curiosity_id: string | null; reported_user_id: string | null; reason: string; details: string; status: ReportStatus; moderation_note: string; created_at: string };
+type Report = { id: string; reporter_id: string; adventure_id: string | null; curiosity_id: string | null; reported_user_id: string | null; message_id: string | null; reason: string; details: string; status: ReportStatus; moderation_note: string; created_at: string };
 type ModerationLog = { id: string; report_id: string | null; old_status: ReportStatus; new_status: ReportStatus; note: string; created_at: string };
 type VerificationRequest = { id: string; curiosity_id: string; requester_id: string; status: 'pending' | 'approved' | 'rejected'; decision_note: string; created_at: string; curiosities: { title: string; location_name: string | null } | null };
 const reasonLabels: Record<string, string> = { spam: 'Contenu indésirable', harassment: 'Harcèlement', dangerous: 'Contenu dangereux', false_information: 'Information fausse', inappropriate: 'Contenu inapproprié', other: 'Autre raison' };
@@ -27,7 +27,7 @@ export default function ModerationScreen() {
       setAuthorized(false); setLoading(false); return;
     }
     setAuthorized(true);
-    const { data, error } = await supabase.from('reports').select('id, reporter_id, adventure_id, curiosity_id, reported_user_id, reason, details, status, moderation_note, created_at').order('created_at', { ascending: true });
+    const { data, error } = await supabase.from('reports').select('id, reporter_id, adventure_id, curiosity_id, reported_user_id, message_id, reason, details, status, moderation_note, created_at').order('created_at', { ascending: true });
     if (error) Alert.alert('Erreur', 'Impossible de charger les signalements.');
     else setReports((data ?? []) as Report[]);
     const logResult = await supabase.from('moderation_logs').select('id, report_id, old_status, new_status, note, created_at').order('created_at', { ascending: false }).limit(25);
@@ -81,7 +81,7 @@ export default function ModerationScreen() {
       <View style={styles.cardTop}><Text style={styles.reason}>{reasonLabels[report.reason] ?? report.reason}</Text><Text style={styles.status}>{report.status === 'pending' ? 'NOUVEAU' : 'EN EXAMEN'}</Text></View>
       <Text style={styles.date}>{new Date(report.created_at).toLocaleString('fr-CA')}</Text>
       {report.details ? <Text style={styles.details}>{report.details}</Text> : <Text style={styles.noDetails}>Aucune précision fournie.</Text>}
-      <Pressable style={styles.target} onPress={() => openTarget(report)}><Text style={styles.targetText}>Voir le contenu signalé →</Text></Pressable>
+      {report.message_id ? <View style={styles.target}><Text style={styles.targetText}>Message privé signalé</Text></View> : <Pressable style={styles.target} onPress={() => openTarget(report)}><Text style={styles.targetText}>Voir le contenu signalé →</Text></Pressable>}
       <TextInput value={notes[report.id] ?? ''} onChangeText={(value) => setNotes((current) => ({ ...current, [report.id]: value }))} style={styles.noteInput} maxLength={1000} placeholder="Note interne facultative" placeholderTextColor="#A8B3A4" />
       <View style={styles.actions}>
         {report.status === 'pending' ? <Pressable style={styles.review} onPress={() => void updateStatus(report.id, 'reviewing')}><Text style={styles.reviewText}>Examiner</Text></Pressable> : null}

@@ -2,7 +2,7 @@ import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ConversationRow = {
@@ -12,7 +12,7 @@ type ConversationRow = {
   last_message_at: string;
 };
 type ProfileRow = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
-type MessageRow = { conversation_id: string; body: string; created_at: string; sender_id: string; read_at: string | null };
+type MessageRow = { conversation_id: string; body: string; created_at: string; sender_id: string; read_at: string | null; deleted_at: string | null };
 type InboxItem = { id: string; other: ProfileRow; preview: string; createdAt: string; unread: number };
 
 export default function MessagesScreen() {
@@ -23,14 +23,18 @@ export default function MessagesScreen() {
 
   const loadInbox = useCallback(async () => {
     if (!user) { setItems([]); setLoading(false); setRefreshing(false); return; }
-    const { data: conversations, error } = await supabase.from('conversations').select('id, participant_one, participant_two, last_message_at').order('last_message_at', { ascending: false });
+    const [{ data: conversations, error }, hiddenResult] = await Promise.all([
+      supabase.from('conversations').select('id, participant_one, participant_two, last_message_at').order('last_message_at', { ascending: false }),
+      supabase.from('hidden_conversations').select('conversation_id').eq('user_id', user.id),
+    ]);
     if (error) { console.error('Erreur de chargement des conversations :', error.message); setLoading(false); setRefreshing(false); return; }
-    const rows = (conversations ?? []) as ConversationRow[];
+    const hiddenIds = new Set((hiddenResult.data ?? []).map((row) => row.conversation_id as string));
+    const rows = ((conversations ?? []) as ConversationRow[]).filter((row) => !hiddenIds.has(row.id));
     const otherIds = [...new Set(rows.map((row) => row.participant_one === user.id ? row.participant_two : row.participant_one))];
     const conversationIds = rows.map((row) => row.id);
     const [profilesResult, messagesResult] = await Promise.all([
       otherIds.length ? supabase.from('profiles').select('id, display_name, username, avatar_url').in('id', otherIds) : Promise.resolve({ data: [], error: null }),
-      conversationIds.length ? supabase.from('messages').select('conversation_id, body, created_at, sender_id, read_at').in('conversation_id', conversationIds).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
+      conversationIds.length ? supabase.from('messages').select('conversation_id, body, created_at, sender_id, read_at, deleted_at').in('conversation_id', conversationIds).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
     ]);
     const profiles = (profilesResult.data ?? []) as ProfileRow[];
     const messages = (messagesResult.data ?? []) as MessageRow[];
@@ -41,13 +45,27 @@ export default function MessagesScreen() {
       return {
         id: row.id,
         other: profiles.find((profile) => profile.id === otherId) ?? { id: otherId, display_name: 'Aventurier', username: null, avatar_url: null },
-        preview: last?.body ?? 'Nouvelle conversation',
+        preview: last?.deleted_at ? 'Message supprimé' : last?.body ?? 'Nouvelle conversation',
         createdAt: last?.created_at ?? row.last_message_at,
         unread: conversationMessages.filter((message) => message.sender_id !== user.id && !message.read_at).length,
       };
     }));
     setLoading(false); setRefreshing(false);
   }, [user]);
+
+  async function hideConversation(item: InboxItem) {
+    if (!user) return;
+    const { error } = await supabase.from('hidden_conversations').upsert({ user_id: user.id, conversation_id: item.id });
+    if (error) Alert.alert('Impossible de masquer', error.message);
+    else setItems((current) => current.filter((conversation) => conversation.id !== item.id));
+  }
+
+  function showConversationActions(item: InboxItem) {
+    Alert.alert(item.other.display_name || item.other.username || 'Conversation', 'Que veux-tu faire?', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Masquer la conversation', style: 'destructive', onPress: () => void hideConversation(item) },
+    ]);
+  }
 
   useEffect(() => { void loadInbox(); }, [loadInbox]);
   useEffect(() => {
@@ -68,7 +86,7 @@ export default function MessagesScreen() {
       ListEmptyComponent={<View style={styles.empty}><Text style={styles.emptyMark}>✦</Text><Text style={styles.emptyTitle}>Aucune conversation</Text><Text style={styles.emptyText}>Trouve un membre dans Explorer et touche « Écrire » sur son profil.</Text><Pressable style={styles.secondary} onPress={() => router.push('/members' as never)}><Text style={styles.secondaryText}>Découvrir des membres</Text></Pressable></View>}
       renderItem={({ item }) => {
         const name = item.other.display_name || item.other.username || 'Aventurier';
-        return <Pressable style={styles.row} onPress={() => router.push({ pathname: '/chat/[id]', params: { id: item.id, otherId: item.other.id, name, avatar: item.other.avatar_url || '' } })}>
+        return <Pressable style={styles.row} onLongPress={() => showConversationActions(item)} onPress={() => router.push({ pathname: '/chat/[id]', params: { id: item.id, otherId: item.other.id, name, avatar: item.other.avatar_url || '' } })}>
           <View style={styles.avatar}>{item.other.avatar_url ? <Image source={{ uri: item.other.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>}</View>
           <View style={styles.body}><View style={styles.nameRow}><Text style={styles.name} numberOfLines={1}>{name}</Text><Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' })}</Text></View><Text style={[styles.preview, item.unread > 0 && styles.previewUnread]} numberOfLines={1}>{item.preview}</Text></View>
           {item.unread > 0 ? <Text style={styles.badge}>{item.unread > 99 ? '99+' : item.unread}</Text> : <Text style={styles.arrow}>›</Text>}
