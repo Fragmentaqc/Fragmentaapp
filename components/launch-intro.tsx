@@ -35,6 +35,7 @@ export function LaunchIntro({ onFinish }: { onFinish: () => void }) {
         <View style={styles.content}>
           <Animated.View style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}>
             <Image source={require('@/assets/images/android-icon-foreground.png')} resizeMode="contain" style={styles.logo} />
+            <Text style={styles.brand}>FRAGMENTA</Text>
           </Animated.View>
           <Animated.View style={[styles.words, { opacity: wordsOpacity, transform: [{ translateY: wordsTranslate }] }]}>
             {pillars.map((pillar, index) => (
@@ -57,7 +58,8 @@ const styles = StyleSheet.create({
   shade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(6, 17, 10, 0.58)' },
   content: { width: '100%', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, marginTop: -18 },
   logo: { width: 310, height: 310 },
-  words: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', marginTop: -42, paddingHorizontal: 14 },
+  brand: { color: '#FFFFFF', fontSize: 20, lineHeight: 24, fontWeight: '900', letterSpacing: 5.5, textAlign: 'center', marginTop: -82, textShadowColor: 'rgba(0,0,0,.85)', textShadowRadius: 9 },
+  words: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', marginTop: 25, paddingHorizontal: 14 },
   pillarRow: { flexDirection: 'row', alignItems: 'center' },
   dot: { width: 4, height: 4, backgroundColor: '#B86F4B', marginHorizontal: 9 },
   pillar: { color: '#F4E9D6', fontSize: 10, lineHeight: 22, fontWeight: '900', letterSpacing: 1.15, textShadowColor: 'rgba(0,0,0,.7)', textShadowRadius: 6 },
