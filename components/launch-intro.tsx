@@ -21,7 +21,7 @@ export function LaunchIntro({ onFinish }: { onFinish: () => void }) {
         Animated.timing(wordsOpacity, { toValue: 1, duration: 650, useNativeDriver: true }),
         Animated.timing(wordsTranslate, { toValue: 0, duration: 650, useNativeDriver: true }),
       ]),
-      Animated.delay(850),
+      Animated.delay(2850),
       Animated.timing(screenOpacity, { toValue: 0, duration: 500, useNativeDriver: true }),
     ]).start(({ finished }) => {
       if (finished) onFinish();
