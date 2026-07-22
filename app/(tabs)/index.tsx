@@ -62,6 +62,7 @@ export default function HomeScreen() {
           <View style={styles.heroTop}>
             <View style={styles.heroLogoLockup} pointerEvents="none">
               <Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" />
+              <Text style={styles.heroBrand}>FRAGMENTA</Text>
             </View>
           </View>
           <View style={styles.heroContent}>
@@ -278,8 +279,9 @@ const styles = StyleSheet.create({
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,14,16,.48)' },
   heroTop: { position: 'absolute', top: 18, left: 18, right: 18, alignItems: 'flex-end' },
-  heroLogoLockup: { position: 'absolute', top: -55, left: '50%', width: 190, height: 190, marginLeft: -95 },
+  heroLogoLockup: { position: 'absolute', top: -55, left: '50%', width: 190, alignItems: 'center', marginLeft: -95 },
   heroLogo: { width: 190, height: 190 },
+  heroBrand: { color: '#FFFFFF', fontSize: 15, lineHeight: 18, fontWeight: '900', letterSpacing: 4.2, marginTop: -52, textShadowColor: 'rgba(0,0,0,.8)', textShadowRadius: 8 },
   heroContent: { position: 'absolute', left: 22, right: 22, bottom: 30 },
   heroEyebrow: { color: '#E4C778', fontSize: 9, fontWeight: '900', letterSpacing: 2.1 },
   heroTitle: { maxWidth: 390, color: '#FFFFFF', fontSize: 43, lineHeight: 46, fontWeight: '900', marginTop: 13, textShadowColor: 'rgba(0,0,0,.72)', textShadowRadius: 12 },
