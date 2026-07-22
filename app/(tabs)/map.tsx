@@ -57,7 +57,7 @@ const initialRegion: Region = {
 };
 
 const adventureCategoryColors: Record<string, string> = {
-  Vélo: '#5E7FB8',
+  Vélo: '#5B879D',
   'Road trip': '#FF9F43',
   'À pied': '#B784F7',
   Camping: '#56D98C',
@@ -67,7 +67,7 @@ const adventureCategoryColors: Record<string, string> = {
 };
 
 const curiosityCategoryColors: Record<string, string> = {
-  'Lieu insolite': '#F0A36B',
+  'Lieu insolite': '#D8B65A',
   'Histoire locale': '#D98E73',
   'Architecture étrange': '#E18FFF',
   'Nature remarquable': '#61D394',
@@ -90,7 +90,7 @@ function getAdventureColor(category: string) {
 }
 
 function getCuriosityColor(category: string) {
-  return curiosityCategoryColors[category] ?? '#F0A36B';
+  return curiosityCategoryColors[category] ?? '#D8B65A';
 }
 
 function hasAdventureCoordinates(adventure: Adventure) {
@@ -428,7 +428,7 @@ export default function MapScreen() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator
             size="large"
-            color="#E9576F"
+            color="#C99A2E"
           />
 
           <Text style={styles.loadingText}>
@@ -461,7 +461,7 @@ export default function MapScreen() {
           {selectedRoute.route.coordinates.length > 1 ? (
             <Polyline
               coordinates={selectedRoute.route.coordinates}
-              strokeColor="#E9576F"
+              strokeColor="#C99A2E"
               strokeWidth={5}
             />
           ) : null}
@@ -474,7 +474,7 @@ export default function MapScreen() {
                 coordinate={{ latitude: fragment.latitude as number, longitude: fragment.longitude as number }}
                 title={fragment.title}
                 description={`Fragment ${index + 1}`}
-                pinColor="#E9576F"
+                pinColor="#C99A2E"
               />
             ))}
 
@@ -546,10 +546,10 @@ export default function MapScreen() {
 
               const color =
                 filter === 'Aventures'
-                  ? '#5E7FB8'
+                  ? '#5B879D'
                   : filter === 'Curiosités'
-                    ? '#F0A36B'
-                    : '#E9576F';
+                    ? '#D8B65A'
+                    : '#C99A2E';
 
               const icon =
                 filter === 'Aventures'
@@ -568,7 +568,7 @@ export default function MapScreen() {
                     styles.filterButton,
                     selected && {
                       borderColor: color,
-                      backgroundColor: '#2F6F3E',
+                      backgroundColor: '#16484C',
                     },
                   ]}
                 >
@@ -867,12 +867,12 @@ function CuriosityDetailCard({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#173E28',
+    backgroundColor: '#071A1C',
   },
 
   container: {
     flex: 1,
-    backgroundColor: '#173E28',
+    backgroundColor: '#071A1C',
   },
 
   loadingContainer: {
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
-    color: '#D8CFBA',
+    color: '#C9D6D1',
     fontSize: 14,
     marginTop: 14,
   },
@@ -917,21 +917,21 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.6,
   },
 
   title: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 23,
     fontWeight: '900',
     marginTop: 4,
   },
 
   subtitle: {
-    color: '#D8CFBA',
+    color: '#C9D6D1',
     fontSize: 12,
     marginTop: 5,
   },
@@ -966,7 +966,7 @@ const styles = StyleSheet.create({
   },
 
   filterTextSelected: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontWeight: '900',
   },
 
@@ -990,7 +990,7 @@ const styles = StyleSheet.create({
   },
 
   mapButtonIcon: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 23,
     fontWeight: '900',
   },
@@ -1000,7 +1000,7 @@ const styles = StyleSheet.create({
   },
 
   showAllButtonText: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 11,
     fontWeight: '900',
   },
@@ -1074,33 +1074,33 @@ const styles = StyleSheet.create({
 
   verificationBadge: {
     borderRadius: 0,
-    backgroundColor: '#3B7C49',
+    backgroundColor: '#1D5A5E',
     paddingHorizontal: 9,
     paddingVertical: 6,
   },
 
   verificationText: {
-    color: '#F0A36B',
+    color: '#D8B65A',
     fontSize: 8,
     fontWeight: '900',
     textTransform: 'uppercase',
   },
 
   cardTitle: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 21,
     fontWeight: '900',
     marginTop: 10,
   },
 
   cardLocation: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 12,
     fontWeight: '800',
     marginTop: 6,
   },
 
-  cardRoute: { color: '#F0A36B', fontSize: 11, fontWeight: '900', marginTop: 6 },
+  cardRoute: { color: '#D8B65A', fontSize: 11, fontWeight: '900', marginTop: 6 },
 
   cardDescription: {
     color: '#95AAA1',
@@ -1128,14 +1128,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#3B7C49',
+    backgroundColor: '#1D5A5E',
     borderWidth: 1,
     borderColor: '#2A5B49',
     marginRight: 9,
   },
 
   authorInitial: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 15,
     fontWeight: '900',
   },
@@ -1148,7 +1148,7 @@ const styles = StyleSheet.create({
   },
 
   authorName: {
-    color: '#FFF1D6',
+    color: '#FFF6E5',
     fontSize: 12,
     fontWeight: '800',
     marginTop: 2,
@@ -1160,19 +1160,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#E9576F',
+    backgroundColor: '#C99A2E',
     paddingHorizontal: 14,
     marginLeft: 8,
   },
 
   openButtonText: {
-    color: '#173E28',
+    color: '#071A1C',
     fontSize: 11,
     fontWeight: '900',
   },
 
   openButtonArrow: {
-    color: '#173E28',
+    color: '#071A1C',
     fontSize: 23,
     fontWeight: '700',
     marginLeft: 5,
@@ -1184,7 +1184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#F0A36B',
+    backgroundColor: '#D8B65A',
     paddingHorizontal: 15,
     marginLeft: 8,
   },
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#315F3C',
+    borderColor: '#275456',
     backgroundColor: 'rgba(7, 19, 16, 0.97)',
     padding: 20,
   },
@@ -1220,14 +1220,14 @@ const styles = StyleSheet.create({
   },
 
   emptyTitle: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 16,
     fontWeight: '900',
     marginTop: 6,
   },
 
   emptyText: {
-    color: '#D0C4A9',
+    color: '#B8C8C2',
     fontSize: 12,
     lineHeight: 18,
     marginTop: 5,

@@ -290,7 +290,7 @@ function InfoCard({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#173E28',
+    backgroundColor: '#071A1C',
   },
 
   container: {
@@ -305,27 +305,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#356F43',
-    backgroundColor: '#245A35',
+    borderColor: '#265F63',
+    backgroundColor: '#10363A',
     marginBottom: 24,
   },
 
   backIcon: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 34,
     lineHeight: 36,
     marginTop: -3,
   },
 
   eyebrow: {
-    color: '#F0A36B',
+    color: '#D8B65A',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.4,
   },
 
   title: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 32,
     lineHeight: 38,
     fontWeight: '900',
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
 
   location: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 13,
     fontWeight: '800',
     marginTop: 12,
@@ -342,14 +342,14 @@ const styles = StyleSheet.create({
   statusBadge: {
     alignSelf: 'flex-start',
     borderRadius: 0,
-    backgroundColor: '#3B7C49',
+    backgroundColor: '#1D5A5E',
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginTop: 14,
   },
 
   statusText: {
-    color: '#F0A36B',
+    color: '#D8B65A',
     fontSize: 10,
     fontWeight: '900',
   },
@@ -357,14 +357,14 @@ const styles = StyleSheet.create({
   section: {
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#315F3C',
-    backgroundColor: '#245A35',
+    borderColor: '#275456',
+    backgroundColor: '#10363A',
     padding: 18,
     marginTop: 25,
   },
 
   sectionTitle: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 18,
     fontWeight: '900',
   },
@@ -382,8 +382,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#315F3C',
-    backgroundColor: '#245A35',
+    borderColor: '#275456',
+    backgroundColor: '#10363A',
     padding: 14,
     marginTop: 12,
   },
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#3B7C49',
+    backgroundColor: '#1D5A5E',
   },
 
   infoEmoji: {
@@ -407,13 +407,13 @@ const styles = StyleSheet.create({
   },
 
   infoTitle: {
-    color: '#FFF1D6',
+    color: '#FFF6E5',
     fontSize: 13,
     fontWeight: '900',
   },
 
   infoText: {
-    color: '#D0C4A9',
+    color: '#B8C8C2',
     fontSize: 12,
     lineHeight: 18,
     marginTop: 5,
@@ -424,8 +424,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#5B8F5D',
-    backgroundColor: '#2F6F3E',
+    borderColor: '#3C7475',
+    backgroundColor: '#16484C',
     padding: 16,
     marginTop: 24,
   },
@@ -436,12 +436,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#3B7C49',
+    backgroundColor: '#1D5A5E',
     marginRight: 13,
   },
 
   avatarText: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 19,
     fontWeight: '900',
   },
@@ -454,14 +454,14 @@ const styles = StyleSheet.create({
   },
 
   authorName: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 14,
     fontWeight: '900',
     marginTop: 3,
   },
 
   authorHandle: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 11,
     marginTop: 3,
   },
@@ -478,14 +478,14 @@ const styles = StyleSheet.create({
   },
 
   notFoundTitle: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 20,
     fontWeight: '900',
     marginTop: 12,
   },
 
   notFoundText: {
-    color: '#D0C4A9',
+    color: '#B8C8C2',
     fontSize: 13,
     lineHeight: 20,
     textAlign: 'center',
@@ -497,37 +497,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#E9576F',
+    backgroundColor: '#C99A2E',
     paddingHorizontal: 22,
     marginTop: 20,
   },
 
   backButtonLargeText: {
-    color: '#173E28',
+    color: '#071A1C',
     fontSize: 13,
     fontWeight: '900',
   },
-  favoriteButton: { alignSelf: 'flex-start', borderRadius: 0, borderWidth: 1, borderColor: '#7BA578', paddingHorizontal: 14, paddingVertical: 10, marginTop: 12 },
-  favoriteButtonActive: { backgroundColor: '#E9576F', borderColor: '#E9576F' },
-  favoriteButtonText: { color: '#FFF1D6', fontSize: 12, fontWeight: '900' },
-  favoriteButtonTextActive: { color: '#173E28' },
-  directionsCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 0, backgroundColor: '#3B7C49', padding: 17, marginTop: 14 },
+  favoriteButton: { alignSelf: 'flex-start', borderRadius: 0, borderWidth: 1, borderColor: '#6A9692', paddingHorizontal: 14, paddingVertical: 10, marginTop: 12 },
+  favoriteButtonActive: { backgroundColor: '#C99A2E', borderColor: '#C99A2E' },
+  favoriteButtonText: { color: '#FFF6E5', fontSize: 12, fontWeight: '900' },
+  favoriteButtonTextActive: { color: '#071A1C' },
+  directionsCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 0, backgroundColor: '#1D5A5E', padding: 17, marginTop: 14 },
   directionsEyebrow: { color: '#82AA99', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
-  directionsTitle: { color: '#F5E6C8', fontSize: 15, fontWeight: '900', marginTop: 5 },
-  directionsArrow: { color: '#E9576F', fontSize: 25 },
+  directionsTitle: { color: '#F4EBD8', fontSize: 15, fontWeight: '900', marginTop: 5 },
+  directionsArrow: { color: '#C99A2E', fontSize: 25 },
   ownerActions: { marginTop: 22, gap: 10 },
-  verifyButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#F0A36B', backgroundColor: '#2A2412' },
-  verifyButtonText: { color: '#F0A36B', fontSize: 13, fontWeight: '900' },
-  pendingText: { color: '#F0A36B', fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  verifyButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#D8B65A', backgroundColor: '#2A2412' },
+  verifyButtonText: { color: '#D8B65A', fontSize: 13, fontWeight: '900' },
+  pendingText: { color: '#D8B65A', fontSize: 12, lineHeight: 18, textAlign: 'center' },
   decisionCard: { borderRadius: 0, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414', padding: 13 },
   decisionTitle: { color: '#FFB8B8', fontSize: 12, fontWeight: '900' },
   decisionText: { color: '#D29A9A', fontSize: 11, lineHeight: 17, marginTop: 5 },
-  approvedCard: { borderRadius: 0, backgroundColor: '#3B7C49', padding: 13 },
-  approvedText: { color: '#E9576F', fontSize: 12, fontWeight: '900', textAlign: 'center' },
-  editButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#E9576F' },
-  editButtonText: { color: '#173E28', fontSize: 14, fontWeight: '900' },
+  approvedCard: { borderRadius: 0, backgroundColor: '#1D5A5E', padding: 13 },
+  approvedText: { color: '#C99A2E', fontSize: 12, fontWeight: '900', textAlign: 'center' },
+  editButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#C99A2E' },
+  editButtonText: { color: '#071A1C', fontSize: 14, fontWeight: '900' },
   deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414' },
   deleteButtonText: { color: '#FFB8B8', fontSize: 14, fontWeight: '900' },
   reportButton: { alignItems: 'center', justifyContent: 'center', minHeight: 48, marginTop: 18 },
-  reportButtonText: { color: '#D0C4A9', fontSize: 11, fontWeight: '800' },
+  reportButtonText: { color: '#B8C8C2', fontSize: 11, fontWeight: '800' },
 });

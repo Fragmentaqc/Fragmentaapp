@@ -194,7 +194,7 @@ export default function ProfileScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#E9576F" />
+          <ActivityIndicator size="large" color="#C99A2E" />
 
           <Text style={styles.loadingText}>
             Chargement du profil…
@@ -237,9 +237,9 @@ export default function ProfileScreen() {
           <View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>MON BILAN</Text><Text style={styles.aboutTitle}>Vue d’ensemble</Text></View><Text style={styles.bilanYear}>{new Date().getFullYear()}</Text></View>
           <View style={styles.bilanGrid}><BilanMetric value={formatDistance(totalDistanceKm)} label="Distance totale" icon="↝" /><BilanMetric value={formatDuration(totalDurationMinutes)} label="Temps d’activité" icon="◷" /><BilanMetric value={String(completedAdventures)} label="Terminées" icon="✓" /><BilanMetric value={String(myAdventures.length + myCuriosities.length)} label="Activités réalisées" icon="◇" /></View>
           <Text style={styles.breakdownTitle}>Répartition de la distance</Text>
-          <DistanceBar label="Vélo" value={distanceByProfile.cycling} total={totalDistanceKm} color="#5E7FB8" />
-          <DistanceBar label="Marche" value={distanceByProfile.walking} total={totalDistanceKm} color="#E9576F" />
-          <DistanceBar label="Auto" value={distanceByProfile.driving} total={totalDistanceKm} color="#F0A36B" />
+          <DistanceBar label="Vélo" value={distanceByProfile.cycling} total={totalDistanceKm} color="#5B879D" />
+          <DistanceBar label="Marche" value={distanceByProfile.walking} total={totalDistanceKm} color="#C99A2E" />
+          <DistanceBar label="Auto" value={distanceByProfile.driving} total={totalDistanceKm} color="#D8B65A" />
           {longestAdventure && longestAdventure.distanceKm > 0 ? <Pressable style={styles.recordCard} onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: longestAdventure.id } })}><View><Text style={styles.recordEyebrow}>RECORD PERSONNEL</Text><Text style={styles.recordTitle} numberOfLines={1}>{longestAdventure.title}</Text></View><Text style={styles.recordDistance}>{formatDistance(longestAdventure.distanceKm)}</Text></Pressable> : <Text style={styles.bilanHelper}>Les distances apparaîtront après le calcul des parcours de tes aventures.</Text>}
         </View> : null}
 
@@ -248,7 +248,7 @@ export default function ProfileScreen() {
           <View style={styles.profileMapSection}>
             <View style={styles.profileMapHeader}><View><Text style={styles.sectionCardEyebrow}>MA CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes activités autour du monde</Text></View><Text style={styles.profileMapCount}>{visibleProfileMapItems.length}</Text></View>
             <MapView key={`profile-map-${profileMapFilter}-${visibleProfileMapItems.length}`} style={styles.profileMap} initialRegion={profileMapRegion} scrollEnabled zoomEnabled zoomControlEnabled rotateEnabled={false} pitchEnabled={false} toolbarEnabled={false}>
-              {visibleProfileMapItems.map((item) => <Marker key={`${item.type}-${item.id}`} coordinate={{ latitude: item.latitude, longitude: item.longitude }} title={item.title} pinColor={item.type === 'adventure' ? '#5E7FB8' : '#E9576F'} onPress={() => router.push(item.type === 'adventure' ? { pathname: '/adventure/[id]', params: { id: item.id } } : { pathname: '/curiosity/[id]', params: { id: item.id } })} />)}
+              {visibleProfileMapItems.map((item) => <Marker key={`${item.type}-${item.id}`} coordinate={{ latitude: item.latitude, longitude: item.longitude }} title={item.title} pinColor={item.type === 'adventure' ? '#5B879D' : '#C99A2E'} onPress={() => router.push(item.type === 'adventure' ? { pathname: '/adventure/[id]', params: { id: item.id } } : { pathname: '/curiosity/[id]', params: { id: item.id } })} />)}
             </MapView>
             <View style={styles.profileMapFilters}>
               <Pressable style={[styles.profileMapFilter, profileMapFilter === 'all' && styles.profileMapFilterActive]} onPress={() => setProfileMapFilter('all')}><Text style={[styles.profileMapFilterText, profileMapFilter === 'all' && styles.profileMapFilterTextActive]}>Tout</Text></Pressable>
@@ -473,7 +473,7 @@ function ProfileContentCard({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#173E28',
+    backgroundColor: '#071A1C',
   },
 
   loadingContainer: {
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
-    color: '#D8CFBA',
+    color: '#C9D6D1',
     fontSize: 14,
     marginTop: 14,
   },
@@ -496,73 +496,73 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
 
-  passportHero: { width: '100%', height: 350, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#5B8F5D', backgroundColor: '#2F6F3E' },
+  passportHero: { width: '100%', height: 350, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#3C7475', backgroundColor: '#16484C' },
   coverImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   coverFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', justifyContent: 'center', backgroundColor: '#12382D' },
   coverMark: { color: 'rgba(98,230,177,0.08)', fontSize: 260, fontWeight: '900', marginRight: -20 },
   coverShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,12,9,0.52)' },
   heroTop: { position: 'absolute', top: 20, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  heroEyebrow: { color: '#F3D7AF', fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
+  heroEyebrow: { color: '#E4C778', fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
   heroBrand: { color: '#FFFFFF', fontSize: 18, fontWeight: '900', letterSpacing: 2.5, marginTop: 5 },
   heroIdentity: { position: 'absolute', left: 20, right: 20, bottom: 20, alignItems: 'flex-start' },
   identityText: { width: '100%', marginTop: 13 },
   heroCountry: { color: '#C4D9D0', fontSize: 11, fontWeight: '700', marginTop: 7 },
   profileIntro: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, marginTop: 16 },
-  editProfilePill: { borderRadius: 0, borderWidth: 1, borderColor: '#6D9F6B', paddingHorizontal: 13, paddingVertical: 9 },
-  editProfilePillText: { color: '#E9576F', fontSize: 10, fontWeight: '900' },
+  editProfilePill: { borderRadius: 0, borderWidth: 1, borderColor: '#4B8180', paddingHorizontal: 13, paddingVertical: 9 },
+  editProfilePillText: { color: '#C99A2E', fontSize: 10, fontWeight: '900' },
   statDivider: { width: 1, height: 30, backgroundColor: '#24483B', alignSelf: 'center' },
-  profileNav: { width: '100%', flexDirection: 'row', borderRadius: 0, borderWidth: 1, borderColor: '#315F3C', backgroundColor: '#245A35', padding: 6, marginTop: 18 },
+  profileNav: { width: '100%', flexDirection: 'row', borderRadius: 0, borderWidth: 1, borderColor: '#275456', backgroundColor: '#10363A', padding: 6, marginTop: 18 },
   navItem: { flex: 1, minHeight: 58, alignItems: 'center', justifyContent: 'center', borderRadius: 0},
-  navItemActive: { backgroundColor: '#3B7C49' },
-  navIcon: { color: '#E9576F', fontSize: 18 },
-  navLabel: { color: '#BDB7A3', fontSize: 9, fontWeight: '800', marginTop: 5 },
+  navItemActive: { backgroundColor: '#1D5A5E' },
+  navIcon: { color: '#C99A2E', fontSize: 18 },
+  navLabel: { color: '#A9BBB5', fontSize: 9, fontWeight: '800', marginTop: 5 },
   navLabelActive: { color: '#E4FFF4' },
-  aboutMeta: { color: '#D0C4A9', fontSize: 11, marginTop: 10 },
-  discoverButton: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#3B7C49', paddingHorizontal: 15, paddingVertical: 10, marginTop: 15 },
-  discoverButtonText: { color: '#E9576F', fontSize: 11, fontWeight: '900' },
-  sectionIntro: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#315F3C', backgroundColor: '#245A35', padding: 18, marginTop: 22 },
+  aboutMeta: { color: '#B8C8C2', fontSize: 11, marginTop: 10 },
+  discoverButton: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#1D5A5E', paddingHorizontal: 15, paddingVertical: 10, marginTop: 15 },
+  discoverButtonText: { color: '#C99A2E', fontSize: 11, fontWeight: '900' },
+  sectionIntro: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#275456', backgroundColor: '#10363A', padding: 18, marginTop: 22 },
   pageSectionHeader: { width: '100%', marginTop: 27, marginBottom: 12 },
-  profileMapSection: { width: '100%', borderWidth: 1, borderColor: '#2B6552', backgroundColor: '#2F6F3E', overflow: 'hidden' },
+  profileMapSection: { width: '100%', borderWidth: 1, borderColor: '#2B6552', backgroundColor: '#16484C', overflow: 'hidden' },
   profileMapHeader: { minHeight: 82, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 17 },
-  profileMapCount: { minWidth: 38, height: 38, color: '#173E28', fontSize: 13, fontWeight: '900', lineHeight: 38, textAlign: 'center', backgroundColor: '#E9576F', overflow: 'hidden' },
+  profileMapCount: { minWidth: 38, height: 38, color: '#071A1C', fontSize: 13, fontWeight: '900', lineHeight: 38, textAlign: 'center', backgroundColor: '#C99A2E', overflow: 'hidden' },
   profileMap: { width: '100%', height: 280 },
   profileMapFilters: { flexDirection: 'row', gap: 7, padding: 10 },
-  profileMapFilter: { flex: 1, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#5B8F5D', backgroundColor: '#245A35', paddingHorizontal: 6 },
-  profileMapFilterActive: { backgroundColor: '#F5E6C8', borderColor: '#F5E6C8' },
-  profileMapFilterAdventure: { backgroundColor: '#5E7FB8', borderColor: '#5E7FB8' },
-  profileMapFilterCuriosity: { backgroundColor: '#E9576F', borderColor: '#E9576F' },
-  profileMapFilterText: { color: '#EFE0C4', fontSize: 9, fontWeight: '900' },
-  profileMapFilterTextActive: { color: '#173E28' },
+  profileMapFilter: { flex: 1, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#3C7475', backgroundColor: '#10363A', paddingHorizontal: 6 },
+  profileMapFilterActive: { backgroundColor: '#F4EBD8', borderColor: '#F4EBD8' },
+  profileMapFilterAdventure: { backgroundColor: '#5B879D', borderColor: '#5B879D' },
+  profileMapFilterCuriosity: { backgroundColor: '#C99A2E', borderColor: '#C99A2E' },
+  profileMapFilterText: { color: '#E6E2D5', fontSize: 9, fontWeight: '900' },
+  profileMapFilterTextActive: { color: '#071A1C' },
   profileMapEmpty: { position: 'absolute', left: 18, right: 18, top: 155, backgroundColor: 'rgba(7,19,16,.88)', padding: 16 },
-  profileMapEmptyTitle: { color: '#F5E6C8', fontSize: 15, fontWeight: '900' },
+  profileMapEmptyTitle: { color: '#F4EBD8', fontSize: 15, fontWeight: '900' },
   profileMapEmptyText: { color: '#9CB0A7', fontSize: 11, lineHeight: 16, marginTop: 5 },
-  sectionGlyph: { width: 58, height: 78, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#3B7C49' },
-  sectionGlyphText: { color: '#E9576F', fontSize: 31, fontWeight: '900' },
+  sectionGlyph: { width: 58, height: 78, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#1D5A5E' },
+  sectionGlyphText: { color: '#C99A2E', fontSize: 31, fontWeight: '900' },
   sectionCardContent: { flex: 1, marginLeft: 14 },
-  sectionCardEyebrow: { color: '#E9576F', fontSize: 8, fontWeight: '900', letterSpacing: 1.2 },
-  sectionCardTitle: { color: '#F5E6C8', fontSize: 17, fontWeight: '900', marginTop: 5 },
-  sectionCardText: { color: '#D8CFBA', fontSize: 11, lineHeight: 16, marginTop: 5 },
-  sectionArrow: { color: '#E9576F', fontSize: 30, marginLeft: 8 },
+  sectionCardEyebrow: { color: '#C99A2E', fontSize: 8, fontWeight: '900', letterSpacing: 1.2 },
+  sectionCardTitle: { color: '#F4EBD8', fontSize: 17, fontWeight: '900', marginTop: 5 },
+  sectionCardText: { color: '#C9D6D1', fontSize: 11, lineHeight: 16, marginTop: 5 },
+  sectionArrow: { color: '#C99A2E', fontSize: 30, marginLeft: 8 },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  collectionCount: { minWidth: 42, height: 42, color: '#173E28', fontSize: 14, fontWeight: '900', lineHeight: 42, textAlign: 'center', borderRadius: 0, backgroundColor: '#E9576F', overflow: 'hidden' },
+  collectionCount: { minWidth: 42, height: 42, color: '#071A1C', fontSize: 14, fontWeight: '900', lineHeight: 42, textAlign: 'center', borderRadius: 0, backgroundColor: '#C99A2E', overflow: 'hidden' },
   sectionItems: { width: '100%', marginTop: 10 },
   collectionCreateRow: { flexDirection: 'row', gap: 8, marginTop: 16 },
-  collectionInput: { flex: 1, height: 46, color: '#F5E6C8', borderWidth: 1, borderColor: '#7BA578', paddingHorizontal: 12 },
-  collectionCreateButton: { height: 46, justifyContent: 'center', backgroundColor: '#E9576F', paddingHorizontal: 16 },
-  collectionCreateText: { color: '#173E28', fontSize: 12, fontWeight: '900' },
-  collectionCard: { width: '100%', borderWidth: 1, borderColor: '#214337', backgroundColor: '#245A35', padding: 14, marginBottom: 10 },
+  collectionInput: { flex: 1, height: 46, color: '#F4EBD8', borderWidth: 1, borderColor: '#6A9692', paddingHorizontal: 12 },
+  collectionCreateButton: { height: 46, justifyContent: 'center', backgroundColor: '#C99A2E', paddingHorizontal: 16 },
+  collectionCreateText: { color: '#071A1C', fontSize: 12, fontWeight: '900' },
+  collectionCard: { width: '100%', borderWidth: 1, borderColor: '#214337', backgroundColor: '#10363A', padding: 14, marginBottom: 10 },
   collectionCardHeader: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  collectionCardTitle: { color: '#F5E6C8', fontSize: 17, fontWeight: '900' },
+  collectionCardTitle: { color: '#F4EBD8', fontSize: 17, fontWeight: '900' },
   collectionCardMeta: { color: '#789086', fontSize: 10, marginTop: 4 },
   collectionDelete: { color: '#E89891', fontSize: 10, fontWeight: '800' },
-  bilanSection: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#5B8F5D', backgroundColor: '#2F6F3E', padding: 18, marginTop: 18 },
-  bilanYear: { color: '#E9576F', fontSize: 13, fontWeight: '900', borderRadius: 0, backgroundColor: '#3B7C49', paddingHorizontal: 11, paddingVertical: 7 },
+  bilanSection: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#3C7475', backgroundColor: '#16484C', padding: 18, marginTop: 18 },
+  bilanYear: { color: '#C99A2E', fontSize: 13, fontWeight: '900', borderRadius: 0, backgroundColor: '#1D5A5E', paddingHorizontal: 11, paddingVertical: 7 },
   bilanGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 17 },
-  bilanMetric: { width: '48%', minHeight: 112, borderRadius: 0, borderWidth: 1, borderColor: '#21483B', backgroundColor: '#245A35', padding: 14 },
-  bilanMetricIcon: { color: '#E9576F', fontSize: 18, fontWeight: '900' }, bilanMetricValue: { color: '#F5E6C8', fontSize: 22, fontWeight: '900', marginTop: 9 }, bilanMetricLabel: { color: '#D0C4A9', fontSize: 10, marginTop: 4 },
-  breakdownTitle: { color: '#FFF1D6', fontSize: 13, fontWeight: '900', marginTop: 22, marginBottom: 3 },
-  distanceRow: { marginTop: 12 }, distanceLabels: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }, distanceLabel: { color: '#EFE0C4', fontSize: 11, fontWeight: '800' }, distanceValue: { color: '#D0C4A9', fontSize: 10, fontWeight: '700' }, distanceTrack: { height: 7, overflow: 'hidden', borderRadius: 0, backgroundColor: '#173E28' }, distanceFill: { height: '100%', borderRadius: 0},
-  recordCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 0, backgroundColor: '#3B7C49', padding: 14, marginTop: 19 }, recordEyebrow: { color: '#E9576F', fontSize: 8, fontWeight: '900', letterSpacing: 1 }, recordTitle: { maxWidth: 190, color: '#F5E6C8', fontSize: 13, fontWeight: '900', marginTop: 4 }, recordDistance: { color: '#E9576F', fontSize: 16, fontWeight: '900' }, bilanHelper: { color: '#BDB7A3', fontSize: 10, lineHeight: 15, marginTop: 17 },
+  bilanMetric: { width: '48%', minHeight: 112, borderRadius: 0, borderWidth: 1, borderColor: '#21483B', backgroundColor: '#10363A', padding: 14 },
+  bilanMetricIcon: { color: '#C99A2E', fontSize: 18, fontWeight: '900' }, bilanMetricValue: { color: '#F4EBD8', fontSize: 22, fontWeight: '900', marginTop: 9 }, bilanMetricLabel: { color: '#B8C8C2', fontSize: 10, marginTop: 4 },
+  breakdownTitle: { color: '#FFF6E5', fontSize: 13, fontWeight: '900', marginTop: 22, marginBottom: 3 },
+  distanceRow: { marginTop: 12 }, distanceLabels: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }, distanceLabel: { color: '#E6E2D5', fontSize: 11, fontWeight: '800' }, distanceValue: { color: '#B8C8C2', fontSize: 10, fontWeight: '700' }, distanceTrack: { height: 7, overflow: 'hidden', borderRadius: 0, backgroundColor: '#071A1C' }, distanceFill: { height: '100%', borderRadius: 0},
+  recordCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 0, backgroundColor: '#1D5A5E', padding: 14, marginTop: 19 }, recordEyebrow: { color: '#C99A2E', fontSize: 8, fontWeight: '900', letterSpacing: 1 }, recordTitle: { maxWidth: 190, color: '#F4EBD8', fontSize: 13, fontWeight: '900', marginTop: 4 }, recordDistance: { color: '#C99A2E', fontSize: 16, fontWeight: '900' }, bilanHelper: { color: '#A9BBB5', fontSize: 10, lineHeight: 15, marginTop: 17 },
 
   topLabel: {
     width: '100%',
@@ -573,14 +573,14 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 20,
     fontWeight: '900',
     letterSpacing: 2,
   },
 
   sectionLabel: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1.5,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#174B3B',
     borderWidth: 3,
-    borderColor: '#E9576F',
+    borderColor: '#C99A2E',
   },
 
   avatarImage: {
@@ -604,13 +604,13 @@ const styles = StyleSheet.create({
   },
 
   avatarText: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 32,
     fontWeight: '900',
   },
 
   title: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 25,
     fontWeight: '900',
     textShadowColor: 'rgba(0,0,0,0.55)',
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
   },
 
   username: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 14,
     fontWeight: '800',
     marginTop: 5,
@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
   },
 
   bio: {
-    color: '#EFE0C4',
+    color: '#E6E2D5',
     fontSize: 14,
     lineHeight: 21,
     flex: 1,
@@ -651,8 +651,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#315F3C',
-    backgroundColor: '#245A35',
+    borderColor: '#275456',
+    backgroundColor: '#10363A',
     paddingVertical: 15,
     marginTop: 16,
   },
@@ -665,31 +665,31 @@ const styles = StyleSheet.create({
   },
 
   statValue: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 20,
     fontWeight: '900',
   },
 
   statLabel: {
-    color: '#D8CFBA',
+    color: '#C9D6D1',
     fontSize: 11,
     marginTop: 6,
     textAlign: 'center',
   },
 
   followingRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
-  followingCard: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#315F3C', backgroundColor: '#2F6F3E', padding: 13 },
-  followingValue: { color: '#E9576F', fontSize: 18, fontWeight: '900' },
-  followingLabel: { color: '#D8CFBA', fontSize: 11, marginTop: 3 },
-  findMembersButton: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#6D9F6B', backgroundColor: '#2F6F3E', padding: 15, marginTop: 12 },
-  findMembersIcon: { color: '#E9576F', fontSize: 30 }, findMembersContent: { flex: 1, marginLeft: 12 }, findMembersTitle: { color: '#F5E6C8', fontSize: 15, fontWeight: '900' }, findMembersText: { color: '#D0C4A9', fontSize: 11, marginTop: 4 }, findMembersArrow: { color: '#E9576F', fontSize: 28 },
-  aboutSection: { borderRadius: 0, backgroundColor: '#245A35', padding: 18, marginTop: 22 }, aboutTitle: { color: '#F5E6C8', fontSize: 19, fontWeight: '900', marginTop: 6 }, aboutText: { color: '#EFE0C4', lineHeight: 20, marginTop: 9 }, aboutCountry: { color: '#E9576F', fontSize: 12, fontWeight: '800', marginTop: 10 }, activityHeader: { marginTop: 26, marginBottom: -8 },
-  settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#3B7C49' },
-  settingsIcon: { color: '#E9576F', fontSize: 19 },
+  followingCard: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#275456', backgroundColor: '#16484C', padding: 13 },
+  followingValue: { color: '#C99A2E', fontSize: 18, fontWeight: '900' },
+  followingLabel: { color: '#C9D6D1', fontSize: 11, marginTop: 3 },
+  findMembersButton: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#4B8180', backgroundColor: '#16484C', padding: 15, marginTop: 12 },
+  findMembersIcon: { color: '#C99A2E', fontSize: 30 }, findMembersContent: { flex: 1, marginLeft: 12 }, findMembersTitle: { color: '#F4EBD8', fontSize: 15, fontWeight: '900' }, findMembersText: { color: '#B8C8C2', fontSize: 11, marginTop: 4 }, findMembersArrow: { color: '#C99A2E', fontSize: 28 },
+  aboutSection: { borderRadius: 0, backgroundColor: '#10363A', padding: 18, marginTop: 22 }, aboutTitle: { color: '#F4EBD8', fontSize: 19, fontWeight: '900', marginTop: 6 }, aboutText: { color: '#E6E2D5', lineHeight: 20, marginTop: 9 }, aboutCountry: { color: '#C99A2E', fontSize: 12, fontWeight: '800', marginTop: 10 }, activityHeader: { marginTop: 26, marginBottom: -8 },
+  settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#1D5A5E' },
+  settingsIcon: { color: '#C99A2E', fontSize: 19 },
   socialLinks: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },
-  socialLink: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#6D9F6B', backgroundColor: '#2F6F3E', paddingHorizontal: 13, paddingVertical: 9 },
-  socialLinkText: { color: '#FFF1D6', fontSize: 12, fontWeight: '800' },
-  socialLinkArrow: { color: '#E9576F', fontSize: 13, marginLeft: 6 },
+  socialLink: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#4B8180', backgroundColor: '#16484C', paddingHorizontal: 13, paddingVertical: 9 },
+  socialLinkText: { color: '#FFF6E5', fontSize: 12, fontWeight: '800' },
+  socialLinkArrow: { color: '#C99A2E', fontSize: 13, marginLeft: 6 },
 
   library: {
     width: '100%',
@@ -708,21 +708,21 @@ const styles = StyleSheet.create({
   },
 
   libraryEyebrow: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.3,
   },
 
   libraryTitle: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 21,
     fontWeight: '900',
     marginTop: 4,
   },
 
   libraryCount: {
-    color: '#D8CFBA',
+    color: '#C9D6D1',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -733,8 +733,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#315F3C',
-    backgroundColor: '#245A35',
+    borderColor: '#275456',
+    backgroundColor: '#10363A',
     padding: 10,
     marginBottom: 10,
   },
@@ -751,11 +751,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#3B7C49',
+    backgroundColor: '#1D5A5E',
   },
 
   contentImageFallbackText: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 23,
   },
 
@@ -765,27 +765,27 @@ const styles = StyleSheet.create({
   },
 
   contentBadge: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 0.8,
   },
 
   contentTitle: {
-    color: '#F5E6C8',
+    color: '#F4EBD8',
     fontSize: 15,
     fontWeight: '900',
     marginTop: 4,
   },
 
   contentSubtitle: {
-    color: '#D0C4A9',
+    color: '#B8C8C2',
     fontSize: 11,
     marginTop: 4,
   },
 
   contentArrow: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 27,
     paddingRight: 5,
   },
@@ -796,7 +796,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#315F3C',
+    borderColor: '#275456',
     padding: 18,
   },
 
@@ -806,12 +806,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#E9576F',
+    backgroundColor: '#C99A2E',
     marginTop: 30,
   },
 
   primaryButtonText: {
-    color: '#173E28',
+    color: '#071A1C',
     fontSize: 15,
     fontWeight: '900',
   },
@@ -823,13 +823,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#7BA578',
-    backgroundColor: '#2F6F3E',
+    borderColor: '#6A9692',
+    backgroundColor: '#16484C',
     marginTop: 12,
   },
 
   secondaryButtonText: {
-    color: '#FFF1D6',
+    color: '#FFF6E5',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -840,14 +840,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#E9576F',
+    backgroundColor: '#C99A2E',
     marginTop: 30,
   },
-  moderationButton: { width: '100%', minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#F0A36B', backgroundColor: '#211D0E', marginTop: 30 },
-  moderationButtonText: { color: '#F0A36B', fontSize: 14, fontWeight: '900' },
+  moderationButton: { width: '100%', minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#D8B65A', backgroundColor: '#211D0E', marginTop: 30 },
+  moderationButtonText: { color: '#D8B65A', fontSize: 14, fontWeight: '900' },
 
   editButtonText: {
-    color: '#173E28',
+    color: '#071A1C',
     fontSize: 15,
     fontWeight: '900',
   },
@@ -872,27 +872,27 @@ const styles = StyleSheet.create({
   deleteAccountButton: { width: '100%', minHeight: 48, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   deleteAccountText: { color: '#B77A7A', fontSize: 12, fontWeight: '800' },
   blockedUsersButton: { width: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  blockedUsersText: { color: '#D8CFBA', fontSize: 12, fontWeight: '800' },
+  blockedUsersText: { color: '#C9D6D1', fontSize: 12, fontWeight: '800' },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 22, marginTop: 12 },
-  legalText: { color: '#E9576F', fontSize: 11, fontWeight: '800', textDecorationLine: 'underline' },
+  legalText: { color: '#C99A2E', fontSize: 11, fontWeight: '800', textDecorationLine: 'underline' },
   emailStatus: { alignSelf: 'center', borderRadius: 0, backgroundColor: '#2A2412', paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
-  emailStatusConfirmed: { backgroundColor: '#3B7C49' },
-  emailStatusText: { color: '#F0A36B', fontSize: 9, fontWeight: '900' },
-  emailStatusTextConfirmed: { color: '#E9576F' },
-  resendText: { color: '#D8CFBA', fontSize: 10, fontWeight: '800', textAlign: 'center', marginTop: 8, textDecorationLine: 'underline' },
+  emailStatusConfirmed: { backgroundColor: '#1D5A5E' },
+  emailStatusText: { color: '#D8B65A', fontSize: 9, fontWeight: '900' },
+  emailStatusTextConfirmed: { color: '#C99A2E' },
+  resendText: { color: '#C9D6D1', fontSize: 10, fontWeight: '800', textAlign: 'center', marginTop: 8, textDecorationLine: 'underline' },
 
   quoteCard: {
     width: '100%',
-    backgroundColor: '#245A35',
+    backgroundColor: '#10363A',
     borderWidth: 1,
-    borderColor: '#315F3C',
+    borderColor: '#275456',
     borderRadius: 0,
     padding: 20,
     marginTop: 28,
   },
 
   quote: {
-    color: '#E9576F',
+    color: '#C99A2E',
     fontSize: 18,
     fontWeight: '900',
     textAlign: 'center',
