@@ -40,7 +40,7 @@ export function LaunchIntro({ onFinish }: { onFinish: () => void }) {
           <Animated.View style={[styles.words, { opacity: wordsOpacity, transform: [{ translateY: wordsTranslate }] }]}>
             {pillars.map((pillar, index) => (
               <View key={pillar} style={styles.pillarRow}>
-                {index > 0 ? <View style={styles.dot} /> : null}
+                {index > 0 && index !== 3 ? <View style={styles.dot} /> : null}
                 <Text style={styles.pillar}>{pillar}</Text>
               </View>
             ))}
