@@ -274,17 +274,11 @@ export default function ExploreScreen() {
     const randomCuriosity =
       filteredCuriosities[randomIndex];
 
-    Alert.alert(
-      randomCuriosity.title,
-      `${formatLocation(randomCuriosity)}\n\n${randomCuriosity.description}`
-    );
+    router.push({ pathname: '/curiosity/[id]', params: { id: randomCuriosity.id } });
   }
 
   function openCuriosity(curiosity: Curiosity) {
-    Alert.alert(
-      curiosity.title,
-      `${formatLocation(curiosity)}\n\n${curiosity.description}`
-    );
+    router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } });
   }
 
   function openAdventure(adventure: Adventure) {
@@ -329,38 +323,6 @@ export default function ExploreScreen() {
             communauté.
           </Text>
         </View>
-
-        <Pressable
-          style={styles.contributionCard}
-          onPress={openAddCuriosity}
-        >
-          <View style={styles.contributionIcon}>
-            <Text style={styles.contributionEmoji}>
-              📍
-            </Text>
-          </View>
-
-          <View style={styles.contributionContent}>
-            <Text style={styles.contributionEyebrow}>
-              CONTRIBUTION COMMUNAUTAIRE
-            </Text>
-
-            <Text style={styles.contributionTitle}>
-              Ajouter une curiosité
-            </Text>
-
-            <Text style={styles.contributionText}>
-              Partage un lieu étrange, historique ou
-              remarquable découvert pendant une aventure.
-            </Text>
-          </View>
-
-          <View style={styles.contributionArrow}>
-            <Text style={styles.contributionArrowText}>
-              ›
-            </Text>
-          </View>
-        </Pressable>
 
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>⌕</Text>
@@ -595,20 +557,6 @@ export default function ExploreScreen() {
               </View>
             )}
 
-            <View style={styles.bottomBanner}>
-              <Text style={styles.bottomBannerEyebrow}>
-                FRAGMENTA
-              </Text>
-
-              <Text style={styles.bottomBannerTitle}>
-                Chaque détour peut cacher une histoire
-              </Text>
-
-              <Text style={styles.bottomBannerText}>
-                Explore, documente et partage les endroits qui
-                méritent de ne pas être oubliés.
-              </Text>
-            </View>
           </>
         )}
       </ScrollView>
@@ -753,6 +701,8 @@ function CuriosityCard({
         </View>
       )}
 
+      <View style={styles.curiosityOverlay} />
+
       <View style={styles.curiosityContent}>
         <Text style={styles.curiosityCategory}>
           {curiosity.category}
@@ -810,6 +760,8 @@ function AdventureCard({
           </Text>
         </View>
       )}
+
+      <View style={styles.adventureOverlay} />
 
       <View style={styles.adventureContent}>
         <View style={styles.adventureTopRow}>
@@ -913,13 +865,13 @@ const styles = StyleSheet.create({
   },
 
   container: {
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 135,
+    paddingTop: 22,
+    paddingBottom: 110,
   },
 
   header: {
-    marginBottom: 20,
+    paddingHorizontal: 22,
+    marginBottom: 24,
   },
 
   headerTopRow: {
@@ -941,17 +893,18 @@ const styles = StyleSheet.create({
 
   title: {
     color: '#F4EBD8',
-    fontSize: 31,
-    lineHeight: 37,
+    fontSize: 39,
+    lineHeight: 44,
     fontWeight: '900',
     marginTop: 8,
   },
 
   subtitle: {
     color: '#C9D6D1',
-    fontSize: 14,
-    lineHeight: 21,
-    marginTop: 11,
+    maxWidth: 430,
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 14,
   },
 
   addHeaderButton: {
@@ -1042,13 +995,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#265F63',
+    borderBottomWidth: 1,
+    borderColor: '#4B8180',
     backgroundColor: '#10363A',
     paddingHorizontal: 15,
+    marginHorizontal: 22,
   },
 
-  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#4B8180', backgroundColor: '#16484C', padding: 13, marginTop: 11 },
+  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#0B2528', paddingHorizontal: 15, marginHorizontal: 22, marginTop: 10 },
   memberSearchIcon: { color: '#C99A2E', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F4EBD8', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#B8C8C2', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#C99A2E', fontSize: 28 },
 
   searchIcon: {
@@ -1079,6 +1033,7 @@ const styles = StyleSheet.create({
 
   categories: {
     gap: 9,
+    paddingHorizontal: 22,
     paddingTop: 15,
     paddingBottom: 8,
   },
@@ -1088,8 +1043,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#265F63',
     backgroundColor: '#10363A',
     paddingHorizontal: 15,
   },
@@ -1110,7 +1063,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#1D5A5E', paddingHorizontal: 12, paddingVertical: 8, marginTop: 4 },
+  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#1D5A5E', paddingHorizontal: 12, paddingVertical: 8, marginHorizontal: 22, marginTop: 4 },
   nearbyNoticeText: { color: '#C99A2E', fontSize: 10, fontWeight: '800' },
 
   loadingArea: {
@@ -1129,8 +1082,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    marginTop: 28,
-    marginBottom: 14,
+    marginHorizontal: 22,
+    marginTop: 44,
+    marginBottom: 18,
   },
 
   sectionEyebrow: {
@@ -1142,7 +1096,7 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     color: '#F4EBD8',
-    fontSize: 21,
+    fontSize: 27,
     fontWeight: '900',
     marginTop: 4,
   },
@@ -1175,11 +1129,9 @@ const styles = StyleSheet.create({
   },
 
   featuredCard: {
-    minHeight: 430,
+    minHeight: 540,
     overflow: 'hidden',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#3C7475',
     backgroundColor: '#16484C',
   },
 
@@ -1214,9 +1166,9 @@ const styles = StyleSheet.create({
 
   featuredTopRow: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
+    top: 22,
+    left: 22,
+    right: 22,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1269,15 +1221,18 @@ const styles = StyleSheet.create({
 
   featuredContent: {
     position: 'absolute',
-    left: 18,
-    right: 18,
-    bottom: 19,
+    left: 22,
+    right: 22,
+    bottom: 26,
+    borderLeftWidth: 3,
+    borderLeftColor: '#C99A2E',
+    paddingLeft: 16,
   },
 
   featuredTitle: {
     color: '#FFFFFF',
-    fontSize: 27,
-    lineHeight: 32,
+    fontSize: 32,
+    lineHeight: 37,
     fontWeight: '900',
   },
 
@@ -1365,7 +1320,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 23,
+    marginHorizontal: 22,
+    marginTop: 34,
     marginBottom: 13,
   },
 
@@ -1376,39 +1332,40 @@ const styles = StyleSheet.create({
   },
 
   curiositiesGrid: {
-    gap: 12,
+    gap: 10,
   },
 
   curiosityCard: {
-    minHeight: 135,
-    flexDirection: 'row',
+    height: 330,
     overflow: 'hidden',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#275456',
     backgroundColor: '#10363A',
   },
 
   curiosityImage: {
-    width: 122,
-    minHeight: 135,
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
 
   curiosityFallback: {
-    width: 122,
-    minHeight: 135,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#1D5A5E',
   },
+
+  curiosityOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,18,20,.44)' },
 
   curiosityFallbackEmoji: {
     fontSize: 37,
   },
 
   curiosityContent: {
-    flex: 1,
-    padding: 13,
+    position: 'absolute',
+    left: 22,
+    right: 22,
+    bottom: 20,
   },
 
   curiosityCategory: {
@@ -1420,15 +1377,15 @@ const styles = StyleSheet.create({
   },
 
   curiosityTitle: {
-    color: '#F4EBD8',
-    fontSize: 16,
-    lineHeight: 20,
+    color: '#FFFFFF',
+    fontSize: 23,
+    lineHeight: 27,
     fontWeight: '900',
     marginTop: 6,
   },
 
   curiosityLocation: {
-    color: '#79BDA1',
+    color: '#E4C778',
     fontSize: 10,
     fontWeight: '800',
     marginTop: 7,
@@ -1442,7 +1399,7 @@ const styles = StyleSheet.create({
   },
 
   curiosityAuthor: {
-    color: '#6E857B',
+    color: '#E6E2D5',
     fontSize: 9,
     fontWeight: '700',
   },
@@ -1458,11 +1415,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#265F63',
     backgroundColor: '#16484C',
     padding: 15,
-    marginTop: 22,
+    marginHorizontal: 22,
+    marginTop: 28,
   },
 
   randomIcon: {
@@ -1513,39 +1469,40 @@ const styles = StyleSheet.create({
   },
 
   adventuresList: {
-    gap: 14,
+    gap: 10,
   },
 
   adventureCard: {
-    flexDirection: 'row',
     overflow: 'hidden',
-    minHeight: 190,
+    height: 410,
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#275456',
     backgroundColor: '#10363A',
   },
 
   adventureImage: {
-    width: 125,
-    minHeight: 190,
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
 
   adventureFallback: {
-    width: 125,
-    minHeight: 190,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#1D5A5E',
   },
+
+  adventureOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,17,19,.5)' },
 
   adventureEmoji: {
     fontSize: 44,
   },
 
   adventureContent: {
-    flex: 1,
-    padding: 14,
+    position: 'absolute',
+    left: 22,
+    right: 22,
+    bottom: 22,
   },
 
   adventureTopRow: {
@@ -1569,15 +1526,15 @@ const styles = StyleSheet.create({
   },
 
   adventureTitle: {
-    color: '#F4EBD8',
-    fontSize: 17,
-    lineHeight: 21,
+    color: '#FFFFFF',
+    fontSize: 25,
+    lineHeight: 29,
     fontWeight: '900',
     marginTop: 8,
   },
 
   adventureLocation: {
-    color: '#78DDB4',
+    color: '#E4C778',
     fontSize: 10,
     fontWeight: '800',
     marginTop: 6,
