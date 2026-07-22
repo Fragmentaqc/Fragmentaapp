@@ -54,7 +54,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Accueil',
+          title: 'Départ',
           tabBarIcon: ({ color }) => (
             <IconSymbol
               size={26}
@@ -68,7 +68,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explorer',
+          title: 'Trouve',
           tabBarIcon: ({ color }) => (
             <IconSymbol
               size={26}
@@ -82,7 +82,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="publish"
         options={{
-          title: 'Fragment',
+          title: 'Créer',
           tabBarIcon: ({ color }) => (
             <IconSymbol
               size={31}
@@ -108,25 +108,21 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="messages"
+        options={{
+          title: 'Écrire',
+          tabBarBadge: unreadMessages > 0 ? (unreadMessages > 99 ? '99+' : unreadMessages) : undefined,
+          tabBarBadgeStyle: { backgroundColor: '#B86F4B', color: '#0B1710', fontSize: 9, fontWeight: '900' },
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="message.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profil',
           tabBarIcon: ({ color }) => (
-            <IconSymbol
-              size={26}
-              name="person.fill"
-              color={color}
-            />
+            <IconSymbol size={26} name="person.fill" color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="messages"
-        options={{
-          title: 'Messages',
-          tabBarBadge: unreadMessages > 0 ? (unreadMessages > 99 ? '99+' : unreadMessages) : undefined,
-          tabBarBadgeStyle: { backgroundColor: '#B86F4B', color: '#0B1710', fontSize: 9, fontWeight: '900' },
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="message.fill" color={color} />,
         }}
       />
     </Tabs>
