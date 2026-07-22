@@ -49,6 +49,7 @@ export default function ProfileScreen() {
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
   const [newCollectionName, setNewCollectionName] = useState('');
   const [creatingCollection, setCreatingCollection] = useState(false);
+  const [profileMapFilter, setProfileMapFilter] = useState<'all' | 'adventure' | 'curiosity'>('all');
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -170,10 +171,13 @@ export default function ProfileScreen() {
     ...myAdventures.filter((item) => typeof item.latitude === 'number' && typeof item.longitude === 'number').map((item) => ({ id: item.id, type: 'adventure' as const, title: item.title, latitude: item.latitude as number, longitude: item.longitude as number })),
     ...myCuriosities.filter((item) => typeof item.latitude === 'number' && typeof item.longitude === 'number').map((item) => ({ id: item.id, type: 'curiosity' as const, title: item.title, latitude: item.latitude as number, longitude: item.longitude as number })),
   ], [myAdventures, myCuriosities]);
+  const visibleProfileMapItems = useMemo(() => profileMapFilter === 'all'
+    ? profileMapItems
+    : profileMapItems.filter((item) => item.type === profileMapFilter), [profileMapFilter, profileMapItems]);
   const profileMapRegion = useMemo<Region>(() => {
-    if (profileMapItems.length === 0) return { latitude: 20, longitude: 0, latitudeDelta: 125, longitudeDelta: 180 };
-    const latitudes = profileMapItems.map((item) => item.latitude);
-    const longitudes = profileMapItems.map((item) => item.longitude);
+    if (visibleProfileMapItems.length === 0) return { latitude: 20, longitude: 0, latitudeDelta: 125, longitudeDelta: 180 };
+    const latitudes = visibleProfileMapItems.map((item) => item.latitude);
+    const longitudes = visibleProfileMapItems.map((item) => item.longitude);
     const minLatitude = Math.min(...latitudes);
     const maxLatitude = Math.max(...latitudes);
     const minLongitude = Math.min(...longitudes);
@@ -184,7 +188,7 @@ export default function ProfileScreen() {
       latitudeDelta: Math.max(8, (maxLatitude - minLatitude) * 1.7),
       longitudeDelta: Math.max(8, (maxLongitude - minLongitude) * 1.7),
     };
-  }, [profileMapItems]);
+  }, [visibleProfileMapItems]);
 
   if (loading) {
     return (
@@ -205,6 +209,7 @@ export default function ProfileScreen() {
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
       >
         <View style={styles.passportHero}>
           {coverImage ? <Image source={{ uri: coverImage }} style={styles.coverImage} /> : <View style={styles.coverFallback}><Text style={styles.coverMark}>F</Text></View>}
@@ -241,12 +246,16 @@ export default function ProfileScreen() {
         {user ? <>
           <View style={styles.pageSectionHeader}><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View>
           <View style={styles.profileMapSection}>
-            <View style={styles.profileMapHeader}><View><Text style={styles.sectionCardEyebrow}>MA CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes activités autour du monde</Text></View><Text style={styles.profileMapCount}>{profileMapItems.length}</Text></View>
-            <MapView style={styles.profileMap} region={profileMapRegion} scrollEnabled={false} zoomEnabled={false} rotateEnabled={false} pitchEnabled={false} toolbarEnabled={false}>
-              {profileMapItems.map((item) => <Marker key={`${item.type}-${item.id}`} coordinate={{ latitude: item.latitude, longitude: item.longitude }} title={item.title} pinColor={item.type === 'adventure' ? '#4DA3FF' : '#62E6B1'} onPress={() => router.push(item.type === 'adventure' ? { pathname: '/adventure/[id]', params: { id: item.id } } : { pathname: '/curiosity/[id]', params: { id: item.id } })} />)}
+            <View style={styles.profileMapHeader}><View><Text style={styles.sectionCardEyebrow}>MA CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes activités autour du monde</Text></View><Text style={styles.profileMapCount}>{visibleProfileMapItems.length}</Text></View>
+            <MapView key={`profile-map-${profileMapFilter}-${visibleProfileMapItems.length}`} style={styles.profileMap} initialRegion={profileMapRegion} scrollEnabled zoomEnabled zoomControlEnabled rotateEnabled={false} pitchEnabled={false} toolbarEnabled={false}>
+              {visibleProfileMapItems.map((item) => <Marker key={`${item.type}-${item.id}`} coordinate={{ latitude: item.latitude, longitude: item.longitude }} title={item.title} pinColor={item.type === 'adventure' ? '#4DA3FF' : '#62E6B1'} onPress={() => router.push(item.type === 'adventure' ? { pathname: '/adventure/[id]', params: { id: item.id } } : { pathname: '/curiosity/[id]', params: { id: item.id } })} />)}
             </MapView>
-            <View style={styles.profileMapLegend}><Text style={styles.profileMapLegendText}>● Aventures</Text><Text style={[styles.profileMapLegendText, styles.profileMapLegendCuriosity]}>● Curiosités</Text></View>
-            {profileMapItems.length === 0 ? <View style={styles.profileMapEmpty}><Text style={styles.profileMapEmptyTitle}>Ta carte est prête</Text><Text style={styles.profileMapEmptyText}>Les pins apparaîtront dès qu’une de tes activités possède un emplacement.</Text></View> : null}
+            <View style={styles.profileMapFilters}>
+              <Pressable style={[styles.profileMapFilter, profileMapFilter === 'all' && styles.profileMapFilterActive]} onPress={() => setProfileMapFilter('all')}><Text style={[styles.profileMapFilterText, profileMapFilter === 'all' && styles.profileMapFilterTextActive]}>Tout</Text></Pressable>
+              <Pressable style={[styles.profileMapFilter, profileMapFilter === 'adventure' && styles.profileMapFilterAdventure]} onPress={() => setProfileMapFilter('adventure')}><Text style={[styles.profileMapFilterText, profileMapFilter === 'adventure' && styles.profileMapFilterTextActive]}>● Aventures</Text></Pressable>
+              <Pressable style={[styles.profileMapFilter, profileMapFilter === 'curiosity' && styles.profileMapFilterCuriosity]} onPress={() => setProfileMapFilter('curiosity')}><Text style={[styles.profileMapFilterText, profileMapFilter === 'curiosity' && styles.profileMapFilterTextActive]}>● Curiosités</Text></Pressable>
+            </View>
+            {visibleProfileMapItems.length === 0 ? <View style={styles.profileMapEmpty}><Text style={styles.profileMapEmptyTitle}>Aucune activité dans ce filtre</Text><Text style={styles.profileMapEmptyText}>Les pins apparaîtront dès qu’une activité possède un emplacement.</Text></View> : null}
           </View>
           <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View>
           <View style={styles.sectionIntro}>
@@ -517,9 +526,13 @@ const styles = StyleSheet.create({
   profileMapHeader: { minHeight: 82, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 17 },
   profileMapCount: { minWidth: 38, height: 38, color: '#071310', fontSize: 13, fontWeight: '900', lineHeight: 38, textAlign: 'center', backgroundColor: '#62E6B1', overflow: 'hidden' },
   profileMap: { width: '100%', height: 280 },
-  profileMapLegend: { flexDirection: 'row', gap: 18, paddingHorizontal: 14, paddingVertical: 12 },
-  profileMapLegendText: { color: '#4DA3FF', fontSize: 10, fontWeight: '900' },
-  profileMapLegendCuriosity: { color: '#62E6B1' },
+  profileMapFilters: { flexDirection: 'row', gap: 7, padding: 10 },
+  profileMapFilter: { flex: 1, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#285345', backgroundColor: '#0C1C17', paddingHorizontal: 6 },
+  profileMapFilterActive: { backgroundColor: '#F3FFF9', borderColor: '#F3FFF9' },
+  profileMapFilterAdventure: { backgroundColor: '#4DA3FF', borderColor: '#4DA3FF' },
+  profileMapFilterCuriosity: { backgroundColor: '#62E6B1', borderColor: '#62E6B1' },
+  profileMapFilterText: { color: '#B7C9C1', fontSize: 9, fontWeight: '900' },
+  profileMapFilterTextActive: { color: '#071310' },
   profileMapEmpty: { position: 'absolute', left: 18, right: 18, top: 155, backgroundColor: 'rgba(7,19,16,.88)', padding: 16 },
   profileMapEmptyTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '900' },
   profileMapEmptyText: { color: '#9CB0A7', fontSize: 11, lineHeight: 16, marginTop: 5 },
