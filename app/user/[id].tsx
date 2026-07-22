@@ -5,6 +5,7 @@ import { useBlocks } from '@/context/blocks-context';
 import { useFollows } from '@/context/follows-context';
 import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { supabase } from '@/lib/supabase';
+import { openDirectConversation } from '@/lib/messages';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -31,6 +32,7 @@ export default function PublicProfileScreen() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({ followers: 0, following: 0 });
+  const [openingChat, setOpeningChat] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -70,6 +72,16 @@ export default function PublicProfileScreen() {
     ]);
   }
 
+  async function startChat() {
+    if (!user) { router.push('/auth'); return; }
+    if (!userId || openingChat) return;
+    setOpeningChat(true);
+    const result = await openDirectConversation(userId);
+    setOpeningChat(false);
+    if (!result.id) { Alert.alert('Conversation indisponible', result.error || 'Impossible d’ouvrir cette conversation.'); return; }
+    router.push({ pathname: '/chat/[id]', params: { id: result.id, otherId: userId, name, avatar: profile?.avatar_url || '' } });
+  }
+
   if (loading) {
     return <SafeAreaView style={styles.safeArea}><View style={styles.center}><ActivityIndicator color="#B86F4B" size="large" /></View></SafeAreaView>;
   }
@@ -94,7 +106,7 @@ export default function PublicProfileScreen() {
         <Text style={styles.handle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{profile?.username ? `@${profile.username}` : 'Profil Fragmenta'}</Text>
         {profile?.country ? <Text style={styles.country}>⌖ {profile.country}</Text> : null}
         {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
-        {user?.id !== userId ? <Pressable style={[styles.followButton, isFollowing && styles.followingButton]} onPress={() => user ? void toggleFollow(userId).then((success) => { if (success) setCounts((current) => ({ ...current, followers: Math.max(0, current.followers + (isFollowing ? -1 : 1)) })); }) : router.push('/auth')}><Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>{isFollowing ? 'Abonné' : 'Suivre'}</Text></Pressable> : null}
+        {user?.id !== userId ? <View style={styles.profileActions}><Pressable style={[styles.followButton, isFollowing && styles.followingButton]} onPress={() => user ? void toggleFollow(userId).then((success) => { if (success) setCounts((current) => ({ ...current, followers: Math.max(0, current.followers + (isFollowing ? -1 : 1)) })); }) : router.push('/auth')}><Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>{isFollowing ? 'Abonné' : 'Suivre'}</Text></Pressable><Pressable style={styles.messageButton} onPress={() => void startChat()} disabled={openingChat}>{openingChat ? <ActivityIndicator color="#F4E9D6" /> : <Text style={styles.messageButtonText}>✦ Écrire</Text>}</Pressable></View> : null}
         {user?.id !== userId ? <View style={styles.safetyActions}><Pressable style={styles.reportButton} onPress={() => user ? router.push({ pathname: '/report', params: { type: 'user', id: userId, label: name } }) : router.push('/auth')}><Text style={styles.reportText}>⚑ Signaler</Text></Pressable><Pressable style={styles.reportButton} onPress={confirmBlock}><Text style={styles.blockText}>Bloquer</Text></Pressable></View> : null}
 
         {socialLinks.length > 0 ? (
@@ -149,7 +161,7 @@ const styles = StyleSheet.create({
   name: { color: '#F4E9D6', fontSize: 28, fontWeight: '900', textAlign: 'center', marginTop: 16 }, handle: { color: '#B86F4B', textAlign: 'center', marginTop: 5 }, country: { color: '#CBD5C8', textAlign: 'center', marginTop: 8 }, bio: { color: '#E6E2D5', fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 16 },
   socials: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 20 }, social: { flexDirection: 'row', borderRadius: 0, borderWidth: 1, borderColor: '#6F8D6C', backgroundColor: '#21472F', paddingHorizontal: 13, paddingVertical: 9 }, socialText: { color: '#FBF1DF', fontSize: 12, fontWeight: '800' }, socialArrow: { color: '#B86F4B', marginLeft: 6 },
   stats: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 24 }, stat: { color: '#E6E2D5', borderRadius: 0, backgroundColor: '#173523', padding: 12 },
-  followButton: { alignSelf: 'center', borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 30, paddingVertical: 12, marginTop: 18 }, followingButton: { backgroundColor: '#2D5B3D' }, followButtonText: { color: '#0B1710', fontWeight: '900' }, followingButtonText: { color: '#B86F4B' },
+  profileActions: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 18 }, followButton: { minWidth: 116, alignItems: 'center', borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 22, paddingVertical: 12 }, followingButton: { backgroundColor: '#2D5B3D' }, followButtonText: { color: '#0B1710', fontWeight: '900' }, followingButtonText: { color: '#B86F4B' }, messageButton: { minWidth: 116, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#6F8D6C', paddingHorizontal: 20, paddingVertical: 11 }, messageButtonText: { color: '#F4E9D6', fontWeight: '900' },
   socialStats: { flexDirection: 'row', justifyContent: 'center', gap: 40, marginTop: 14 }, socialStatValue: { color: '#F4E9D6', fontSize: 20, fontWeight: '900', textAlign: 'center' }, socialStatLabel: { color: '#BCC8B8', fontSize: 11, marginTop: 3 }, aboutCard: { borderRadius: 0, backgroundColor: '#173523', padding: 18, marginTop: 24 }, aboutText: { color: '#E6E2D5', lineHeight: 21, marginTop: 8 }, aboutMeta: { color: '#B86F4B', fontSize: 12, fontWeight: '800', marginTop: 12 },
   safetyActions: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12 }, reportButton: { paddingHorizontal: 14, paddingVertical: 10 }, reportText: { color: '#BCC8B8', fontSize: 11, fontWeight: '800' }, blockText: { color: '#B77A7A', fontSize: 11, fontWeight: '800' },
   sectionTitle: { color: '#F4E9D6', fontSize: 20, fontWeight: '900', marginTop: 28, marginBottom: 10 }, card: { minHeight: 78, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#173523', borderWidth: 1, borderColor: '#35563E', padding: 9, marginBottom: 9 }, cardImage: { width: 60, height: 60, borderRadius: 0, backgroundColor: '#2D5B3D' }, cardContent: { flex: 1, paddingHorizontal: 12 }, cardTitle: { color: '#F4E9D6', fontSize: 14, fontWeight: '900' }, cardSubtitle: { color: '#BCC8B8', fontSize: 11, marginTop: 5 }, arrow: { color: '#B86F4B', fontSize: 27, paddingRight: 5 },

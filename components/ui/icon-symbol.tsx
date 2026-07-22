@@ -19,6 +19,7 @@ const MAPPING = {
   'plus.circle.fill': 'add-circle',
   'map.fill': 'map',
   'person.fill': 'person',
+  'message.fill': 'chat',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
