@@ -352,7 +352,7 @@ export default function AddCuriosityScreen() {
             value={title}
             onChangeText={setTitle}
             placeholder="Ex. Le tunnel oublié de la montagne"
-            placeholderTextColor="#61766D"
+            placeholderTextColor="#B7B09B"
             style={styles.input}
             maxLength={120}
           />
@@ -366,7 +366,7 @@ export default function AddCuriosityScreen() {
             value={description}
             onChangeText={setDescription}
             placeholder="Explique ce qui rend ce lieu unique, étrange ou intéressant..."
-            placeholderTextColor="#61766D"
+            placeholderTextColor="#B7B09B"
             style={[
               styles.input,
               styles.textAreaLarge,
@@ -425,7 +425,7 @@ export default function AddCuriosityScreen() {
             value={locationName}
             onChangeText={setLocationName}
             placeholder="Ex. Montréal, Québec"
-            placeholderTextColor="#61766D"
+            placeholderTextColor="#B7B09B"
             style={styles.input}
           />
 
@@ -435,7 +435,7 @@ export default function AddCuriosityScreen() {
             value={address}
             onChangeText={setAddress}
             placeholder="Adresse, route, parc ou point de repère"
-            placeholderTextColor="#61766D"
+            placeholderTextColor="#B7B09B"
             style={styles.input}
           />
 
@@ -447,7 +447,7 @@ export default function AddCuriosityScreen() {
                 value={latitude}
                 onChangeText={setLatitude}
                 placeholder="45.5019"
-                placeholderTextColor="#61766D"
+                placeholderTextColor="#B7B09B"
                 style={styles.input}
                 keyboardType="numbers-and-punctuation"
               />
@@ -460,7 +460,7 @@ export default function AddCuriosityScreen() {
                 value={longitude}
                 onChangeText={setLongitude}
                 placeholder="-73.5674"
-                placeholderTextColor="#61766D"
+                placeholderTextColor="#B7B09B"
                 style={styles.input}
                 keyboardType="numbers-and-punctuation"
               />
@@ -495,7 +495,7 @@ export default function AddCuriosityScreen() {
             value={accessibility}
             onChangeText={setAccessibility}
             placeholder="Ex. Accessible à pied, stationnement proche..."
-            placeholderTextColor="#61766D"
+            placeholderTextColor="#B7B09B"
             style={[
               styles.input,
               styles.textArea,
@@ -510,7 +510,7 @@ export default function AddCuriosityScreen() {
             value={bestTimeToVisit}
             onChangeText={setBestTimeToVisit}
             placeholder="Ex. Au coucher du soleil, en automne..."
-            placeholderTextColor="#61766D"
+            placeholderTextColor="#B7B09B"
             style={styles.input}
           />
 
@@ -520,7 +520,7 @@ export default function AddCuriosityScreen() {
             value={recommendedDuration}
             onChangeText={setRecommendedDuration}
             placeholder="Ex. 30 minutes, 2 heures..."
-            placeholderTextColor="#61766D"
+            placeholderTextColor="#B7B09B"
             style={styles.input}
           />
 
@@ -721,7 +721,7 @@ export default function AddCuriosityScreen() {
             >
               {publishing ? (
                 <ActivityIndicator
-                  color="#071310"
+                  color="#173E28"
                   size="small"
                 />
               ) : (
@@ -781,7 +781,7 @@ function SectionTitle({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071310',
+    backgroundColor: '#173E28',
   },
 
   keyboardView: {
@@ -806,12 +806,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
+    borderColor: '#356F43',
+    backgroundColor: '#245A35',
   },
 
   backIcon: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 34,
     lineHeight: 36,
     fontWeight: '500',
@@ -824,21 +824,21 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.3,
   },
 
   title: {
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 25,
     fontWeight: '900',
     marginTop: 4,
   },
 
   intro: {
-    color: '#8FA69B',
+    color: '#D8CFBA',
     fontSize: 14,
     lineHeight: 21,
     marginTop: 20,
@@ -895,24 +895,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#3B7C49',
     marginRight: 10,
   },
 
   sectionNumberText: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 11,
     fontWeight: '900',
   },
 
   sectionTitle: {
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 19,
     fontWeight: '900',
   },
 
   sectionDescription: {
-    color: '#81958C',
+    color: '#D0C4A9',
     fontSize: 12,
     lineHeight: 18,
     marginTop: -7,
@@ -933,12 +933,12 @@ const styles = StyleSheet.create({
 
   input: {
     minHeight: 54,
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 14,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
+    borderColor: '#356F43',
+    backgroundColor: '#245A35',
     paddingHorizontal: 15,
     paddingVertical: 13,
   },
@@ -953,7 +953,7 @@ const styles = StyleSheet.create({
 
   characterCount: {
     alignSelf: 'flex-end',
-    color: '#61766D',
+    color: '#B7B09B',
     fontSize: 10,
     marginTop: 6,
   },
@@ -969,14 +969,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
+    borderColor: '#356F43',
+    backgroundColor: '#245A35',
     paddingHorizontal: 15,
   },
 
   categoryButtonSelected: {
-    borderColor: '#62E6B1',
-    backgroundColor: '#62E6B1',
+    borderColor: '#E9576F',
+    backgroundColor: '#E9576F',
   },
 
   categoryText: {
@@ -986,7 +986,7 @@ const styles = StyleSheet.create({
   },
 
   categoryTextSelected: {
-    color: '#071310',
+    color: '#173E28',
     fontWeight: '900',
   },
 
@@ -1000,7 +1000,7 @@ const styles = StyleSheet.create({
   },
 
   helperText: {
-    color: '#61766D',
+    color: '#B7B09B',
     fontSize: 11,
     lineHeight: 16,
     marginTop: 9,
@@ -1014,24 +1014,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#2B6552',
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#245A35',
   },
 
   imagePickerIcon: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 34,
     fontWeight: '300',
   },
 
   imagePickerTitle: {
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 14,
     fontWeight: '900',
     marginTop: 5,
   },
 
   imagePickerText: {
-    color: '#61766D',
+    color: '#B7B09B',
     fontSize: 11,
     marginTop: 4,
   },
@@ -1047,7 +1047,7 @@ const styles = StyleSheet.create({
     height: 130,
     overflow: 'hidden',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#3B7C49',
   },
 
   previewImage: {
@@ -1084,7 +1084,7 @@ const styles = StyleSheet.create({
   },
 
   coverBadgeText: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 8,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1096,15 +1096,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#315F3C',
+    backgroundColor: '#245A35',
     padding: 12,
     marginBottom: 10,
   },
 
   adventureChoiceSelected: {
-    borderColor: '#62E6B1',
-    backgroundColor: '#10251E',
+    borderColor: '#E9576F',
+    backgroundColor: '#2F6F3E',
   },
 
   adventureChoiceIcon: {
@@ -1113,7 +1113,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#3B7C49',
   },
 
   adventureChoiceEmoji: {
@@ -1126,7 +1126,7 @@ const styles = StyleSheet.create({
   },
 
   adventureChoiceTitle: {
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 13,
     fontWeight: '900',
   },
@@ -1147,16 +1147,16 @@ const styles = StyleSheet.create({
 
   radioSelected: {
     borderWidth: 5,
-    borderColor: '#62E6B1',
-    backgroundColor: '#071310',
+    borderColor: '#E9576F',
+    backgroundColor: '#173E28',
   },
 
   noticeCard: {
     flexDirection: 'row',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#10251E',
+    borderColor: '#356F43',
+    backgroundColor: '#2F6F3E',
     padding: 15,
     marginTop: 22,
   },
@@ -1164,13 +1164,13 @@ const styles = StyleSheet.create({
   noticeIcon: {
     width: 34,
     height: 34,
-    color: '#071310',
+    color: '#173E28',
     fontSize: 18,
     lineHeight: 34,
     fontWeight: '900',
     textAlign: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#E9576F',
     overflow: 'hidden',
   },
 
@@ -1180,13 +1180,13 @@ const styles = StyleSheet.create({
   },
 
   noticeTitle: {
-    color: '#DFFFF2',
+    color: '#FFF1D6',
     fontSize: 13,
     fontWeight: '900',
   },
 
   noticeText: {
-    color: '#81958C',
+    color: '#D0C4A9',
     fontSize: 11,
     lineHeight: 17,
     marginTop: 5,
@@ -1206,12 +1206,12 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderColor: '#2A5B49',
-    backgroundColor: '#10251E',
+    backgroundColor: '#2F6F3E',
     paddingHorizontal: 10,
   },
 
   draftButtonText: {
-    color: '#DFFFF2',
+    color: '#FFF1D6',
     fontSize: 12,
     fontWeight: '900',
     textAlign: 'center',
@@ -1224,18 +1224,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#E9576F',
     paddingHorizontal: 16,
   },
 
   publishButtonText: {
-    color: '#071310',
+    color: '#173E28',
     fontSize: 14,
     fontWeight: '900',
   },
 
   publishArrow: {
-    color: '#071310',
+    color: '#173E28',
     fontSize: 24,
     fontWeight: '800',
     marginLeft: 6,

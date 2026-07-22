@@ -25,7 +25,7 @@ export function CollectionPicker({ target, visible, onClose }: { target: { type:
     <Pressable style={styles.backdrop} onPress={onClose} />
     <View style={styles.sheet}>
       <View style={styles.header}><View><Text style={styles.eyebrow}>COLLECTIONS</Text><Text style={styles.title}>Enregistrer l’aventure</Text></View><Pressable onPress={onClose}><Text style={styles.close}>×</Text></Pressable></View>
-      {loading ? <ActivityIndicator color="#62E6B1" /> : collections.map((collection) => {
+      {loading ? <ActivityIndicator color="#E9576F" /> : collections.map((collection) => {
         const selected = target.type === 'adventure' ? collection.adventureIds.includes(target.id) : collection.curiosityIds.includes(target.id);
         return <Pressable key={collection.id} style={styles.row} onPress={() => void toggle(collection.id)} disabled={savingId === collection.id}>
           <View><Text style={styles.rowTitle}>{collection.name}</Text><Text style={styles.rowMeta}>{collection.adventureIds.length + collection.curiosityIds.length} élément(s)</Text></View>
@@ -39,18 +39,18 @@ export function CollectionPicker({ target, visible, onClose }: { target: { type:
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,.65)' },
-  sheet: { maxHeight: '72%', backgroundColor: '#0C1C17', borderTopWidth: 1, borderColor: '#285345', padding: 20, paddingBottom: 36 },
+  sheet: { maxHeight: '72%', backgroundColor: '#245A35', borderTopWidth: 1, borderColor: '#5B8F5D', padding: 20, paddingBottom: 36 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
-  eyebrow: { color: '#62E6B1', fontSize: 10, fontWeight: '900', letterSpacing: 1.4 },
-  title: { color: '#F3FFF9', fontSize: 24, fontWeight: '900', marginTop: 4 },
-  close: { color: '#F3FFF9', fontSize: 34, lineHeight: 36 },
+  eyebrow: { color: '#E9576F', fontSize: 10, fontWeight: '900', letterSpacing: 1.4 },
+  title: { color: '#F5E6C8', fontSize: 24, fontWeight: '900', marginTop: 4 },
+  close: { color: '#F5E6C8', fontSize: 34, lineHeight: 36 },
   row: { minHeight: 64, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderColor: '#214337', paddingVertical: 10 },
-  rowTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '800' },
+  rowTitle: { color: '#F5E6C8', fontSize: 15, fontWeight: '800' },
   rowMeta: { color: '#789086', fontSize: 11, marginTop: 3 },
-  check: { width: 34, height: 34, color: '#62E6B1', fontSize: 22, lineHeight: 32, textAlign: 'center', borderWidth: 1, borderColor: '#386B59' },
-  checkSelected: { color: '#071310', backgroundColor: '#62E6B1' },
+  check: { width: 34, height: 34, color: '#E9576F', fontSize: 22, lineHeight: 32, textAlign: 'center', borderWidth: 1, borderColor: '#7BA578' },
+  checkSelected: { color: '#173E28', backgroundColor: '#E9576F' },
   createRow: { flexDirection: 'row', gap: 8, marginTop: 18 },
-  input: { flex: 1, height: 48, color: '#F3FFF9', borderWidth: 1, borderColor: '#386B59', paddingHorizontal: 12 },
-  createButton: { height: 48, justifyContent: 'center', backgroundColor: '#62E6B1', paddingHorizontal: 18 },
-  createButtonText: { color: '#071310', fontSize: 13, fontWeight: '900' },
+  input: { flex: 1, height: 48, color: '#F5E6C8', borderWidth: 1, borderColor: '#7BA578', paddingHorizontal: 12 },
+  createButton: { height: 48, justifyContent: 'center', backgroundColor: '#E9576F', paddingHorizontal: 18 },
+  createButtonText: { color: '#173E28', fontSize: 13, fontWeight: '900' },
 });

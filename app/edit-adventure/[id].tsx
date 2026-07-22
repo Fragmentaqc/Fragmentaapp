@@ -70,7 +70,7 @@ export default function EditAdventureScreen() {
     if (suggestedProfile) setRoutingProfile(suggestedProfile);
   }
 
-  if (loading) return <SafeAreaView style={styles.safeArea}><View style={styles.center}><ActivityIndicator color="#62E6B1" size="large" /></View></SafeAreaView>;
+  if (loading) return <SafeAreaView style={styles.safeArea}><View style={styles.center}><ActivityIndicator color="#E9576F" size="large" /></View></SafeAreaView>;
   if (!adventure || adventure.ownerId !== user?.id) return <SafeAreaView style={styles.safeArea}><View style={styles.center}><Text style={styles.errorTitle}>Modification non autorisée</Text><Pressable style={styles.primaryButton} onPress={() => router.back()}><Text style={styles.primaryText}>Revenir</Text></Pressable></View></SafeAreaView>;
 
   return (
@@ -86,12 +86,12 @@ export default function EditAdventureScreen() {
           <Text style={styles.label}>Mode du trajet</Text>
           <Text style={styles.routeHint}>Choisi automatiquement selon la catégorie, mais reste modifiable.</Text>
           <View style={styles.progressColumn}>{routeProfiles.map((item) => <Pressable key={item.value} style={[styles.progressButton, routingProfile === item.value && styles.statusActive]} onPress={() => setRoutingProfile(item.value)}><View style={[styles.progressDot, routingProfile === item.value && styles.progressDotActive]} /><Text style={styles.statusText}>{item.label}</Text></Pressable>)}</View>
-          <Text style={styles.label}>Durée totale</Text><View style={styles.durationRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" placeholder="Ex. 12" placeholderTextColor="#63766D" /><Text style={styles.durationUnit}>heures</Text></View>
+          <Text style={styles.label}>Durée totale</Text><View style={styles.durationRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" placeholder="Ex. 12" placeholderTextColor="#B8B59E" /><Text style={styles.durationUnit}>heures</Text></View>
           <Text style={styles.label}>Progression de l’aventure</Text>
           <View style={styles.progressColumn}>{progressStatuses.map((item) => <Pressable key={item.value} style={[styles.progressButton, status === item.value && styles.statusActive]} onPress={() => setStatus(item.value)}><View style={[styles.progressDot, status === item.value && styles.progressDotActive]} /><Text style={styles.statusText}>{item.label}</Text></Pressable>)}</View>
           <Text style={styles.label}>Publication</Text><View style={styles.statusRow}><Pressable style={[styles.statusButton, publicationStatus === 'draft' && styles.statusActive]} onPress={() => setPublicationStatus('draft')}><Text style={styles.statusText}>Brouillon</Text></Pressable><Pressable style={[styles.statusButton, publicationStatus === 'published' && styles.statusActive]} onPress={() => setPublicationStatus('published')}><Text style={styles.statusText}>Publié</Text></Pressable></View>
           <Text style={styles.photoNote}>Les photos actuelles seront conservées.</Text>
-          <Pressable style={styles.primaryButton} onPress={() => void save()} disabled={saving}>{saving ? <ActivityIndicator color="#071310" /> : <Text style={styles.primaryText}>Enregistrer les changements</Text>}</Pressable>
+          <Pressable style={styles.primaryButton} onPress={() => void save()} disabled={saving}>{saving ? <ActivityIndicator color="#173E28" /> : <Text style={styles.primaryText}>Enregistrer les changements</Text>}</Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -99,13 +99,13 @@ export default function EditAdventureScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 }, safeArea: { flex: 1, backgroundColor: '#071310' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }, container: { padding: 20, paddingBottom: 70 },
-  header: { minHeight: 48, justifyContent: 'center', marginBottom: 18 }, back: { color: '#62E6B1', fontSize: 15, fontWeight: '800' }, heading: { position: 'absolute', alignSelf: 'center', color: '#F3FFF9', fontSize: 19, fontWeight: '900' },
-  label: { color: '#DFFFF2', fontSize: 13, fontWeight: '800', marginTop: 16, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', color: '#F3FFF9', paddingHorizontal: 15, paddingVertical: 13 }, textarea: { minHeight: 145 },
-  chip: { borderRadius: 0, backgroundColor: '#10251E', paddingHorizontal: 14, paddingVertical: 10, marginRight: 8 }, chipActive: { backgroundColor: '#28634F' }, chipText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' },
-  statusRow: { flexDirection: 'row', gap: 9 }, statusButton: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#285345', padding: 14 }, statusActive: { backgroundColor: '#28634F' }, statusText: { color: '#F3FFF9', fontWeight: '800' }, photoNote: { color: '#81958C', fontSize: 12, marginTop: 20 },
-  routeHint: { color: '#81958C', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
-  durationRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#62E6B1', fontSize: 13, fontWeight: '900', paddingRight: 8 },
-  progressColumn: { gap: 8 }, progressButton: { minHeight: 50, flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#285345', paddingHorizontal: 14 }, progressDot: { width: 10, height: 10, borderRadius: 0, borderWidth: 2, borderColor: '#71877D', marginRight: 11 }, progressDotActive: { borderColor: '#62E6B1', backgroundColor: '#62E6B1' },
-  primaryButton: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#62E6B1', paddingHorizontal: 20, marginTop: 24 }, primaryText: { color: '#071310', fontSize: 14, fontWeight: '900' }, errorTitle: { color: '#F3FFF9', fontSize: 20, fontWeight: '900' },
+  flex: { flex: 1 }, safeArea: { flex: 1, backgroundColor: '#173E28' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }, container: { padding: 20, paddingBottom: 70 },
+  header: { minHeight: 48, justifyContent: 'center', marginBottom: 18 }, back: { color: '#E9576F', fontSize: 15, fontWeight: '800' }, heading: { position: 'absolute', alignSelf: 'center', color: '#F5E6C8', fontSize: 19, fontWeight: '900' },
+  label: { color: '#FFF1D6', fontSize: 13, fontWeight: '800', marginTop: 16, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 0, borderWidth: 1, borderColor: '#356F43', backgroundColor: '#245A35', color: '#F5E6C8', paddingHorizontal: 15, paddingVertical: 13 }, textarea: { minHeight: 145 },
+  chip: { borderRadius: 0, backgroundColor: '#2F6F3E', paddingHorizontal: 14, paddingVertical: 10, marginRight: 8 }, chipActive: { backgroundColor: '#6D9F6B' }, chipText: { color: '#FFF1D6', fontSize: 12, fontWeight: '800' },
+  statusRow: { flexDirection: 'row', gap: 9 }, statusButton: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#5B8F5D', padding: 14 }, statusActive: { backgroundColor: '#6D9F6B' }, statusText: { color: '#F5E6C8', fontWeight: '800' }, photoNote: { color: '#D0C4A9', fontSize: 12, marginTop: 20 },
+  routeHint: { color: '#D0C4A9', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
+  durationRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#E9576F', fontSize: 13, fontWeight: '900', paddingRight: 8 },
+  progressColumn: { gap: 8 }, progressButton: { minHeight: 50, flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#5B8F5D', paddingHorizontal: 14 }, progressDot: { width: 10, height: 10, borderRadius: 0, borderWidth: 2, borderColor: '#BDB7A3', marginRight: 11 }, progressDotActive: { borderColor: '#E9576F', backgroundColor: '#E9576F' },
+  primaryButton: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#E9576F', paddingHorizontal: 20, marginTop: 24 }, primaryText: { color: '#173E28', fontSize: 14, fontWeight: '900' }, errorTitle: { color: '#F5E6C8', fontSize: 20, fontWeight: '900' },
 });

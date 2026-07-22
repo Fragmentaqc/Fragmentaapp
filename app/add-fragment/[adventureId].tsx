@@ -69,15 +69,15 @@ export default function AddFragmentScreen() {
           {images.length ? <ScrollView horizontal contentContainerStyle={styles.images}>{images.map((uri) => <View key={uri}><Image source={{ uri }} style={styles.image} /><Pressable style={styles.remove} onPress={() => setImages((current) => current.filter((item) => item !== uri))}><Text style={styles.removeText}>×</Text></Pressable></View>)}</ScrollView> : null}
 
           <Text style={styles.label}>Titre du moment</Text>
-          <TextInput style={styles.input} value={title} onChangeText={setTitle} maxLength={80} placeholder="Ex. Premier sommet atteint" placeholderTextColor="#63766D" editable={!saving} />
+          <TextInput style={styles.input} value={title} onChangeText={setTitle} maxLength={80} placeholder="Ex. Premier sommet atteint" placeholderTextColor="#B8B59E" editable={!saving} />
           <Text style={styles.label}>Récit</Text>
-          <TextInput style={[styles.input, styles.area]} value={body} onChangeText={setBody} maxLength={1000} multiline textAlignVertical="top" placeholder="Raconte ce qui s’est passé…" placeholderTextColor="#63766D" editable={!saving} />
+          <TextInput style={[styles.input, styles.area]} value={body} onChangeText={setBody} maxLength={1000} multiline textAlignVertical="top" placeholder="Raconte ce qui s’est passé…" placeholderTextColor="#B8B59E" editable={!saving} />
           <Text style={styles.label}>Date (AAAA-MM-JJ)</Text>
-          <TextInput style={styles.input} value={date} onChangeText={setDate} maxLength={10} keyboardType="numbers-and-punctuation" placeholder="2026-07-20" placeholderTextColor="#63766D" editable={!saving} />
+          <TextInput style={styles.input} value={date} onChangeText={setDate} maxLength={10} keyboardType="numbers-and-punctuation" placeholder="2026-07-20" placeholderTextColor="#B8B59E" editable={!saving} />
           <Text style={styles.label}>Position du moment</Text>
           <LocationPicker coordinate={coordinate} onSelect={setCoordinate} />
 
-          <Pressable style={styles.publish} onPress={() => void save('published')} disabled={saving}>{saving ? <ActivityIndicator color="#071310" /> : <Text style={styles.publishText}>Publier le fragment</Text>}</Pressable>
+          <Pressable style={styles.publish} onPress={() => void save('published')} disabled={saving}>{saving ? <ActivityIndicator color="#173E28" /> : <Text style={styles.publishText}>Publier le fragment</Text>}</Pressable>
           <Pressable style={styles.draft} onPress={() => void save('draft')} disabled={saving}><Text style={styles.draftText}>Enregistrer comme brouillon</Text></Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -86,13 +86,13 @@ export default function AddFragmentScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#071310' }, flex: { flex: 1 }, container: { padding: 18, paddingBottom: 70 }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  back: { color: '#62E6B1', fontSize: 15, fontWeight: '800', marginBottom: 22 }, eyebrow: { color: '#62E6B1', fontSize: 10, fontWeight: '900', letterSpacing: 1.2 },
-  title: { color: '#F3FFF9', fontSize: 30, fontWeight: '900', marginTop: 6 }, subtitle: { color: '#8FA69B', fontSize: 14, marginTop: 7, marginBottom: 20 }, link: { color: '#62E6B1', marginTop: 18 },
-  photoButton: { height: 150, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderStyle: 'dashed', borderColor: '#386B59', backgroundColor: '#0C1C17' },
-  photoIcon: { color: '#62E6B1', fontSize: 35 }, photoTitle: { color: '#F3FFF9', fontWeight: '800' }, helper: { color: '#7F968B', fontSize: 11, marginTop: 5 }, images: { gap: 10, paddingVertical: 14 },
+  safe: { flex: 1, backgroundColor: '#173E28' }, flex: { flex: 1 }, container: { padding: 18, paddingBottom: 70 }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  back: { color: '#E9576F', fontSize: 15, fontWeight: '800', marginBottom: 22 }, eyebrow: { color: '#E9576F', fontSize: 10, fontWeight: '900', letterSpacing: 1.2 },
+  title: { color: '#F5E6C8', fontSize: 30, fontWeight: '900', marginTop: 6 }, subtitle: { color: '#D8CFBA', fontSize: 14, marginTop: 7, marginBottom: 20 }, link: { color: '#E9576F', marginTop: 18 },
+  photoButton: { height: 150, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderStyle: 'dashed', borderColor: '#7BA578', backgroundColor: '#245A35' },
+  photoIcon: { color: '#E9576F', fontSize: 35 }, photoTitle: { color: '#F5E6C8', fontWeight: '800' }, helper: { color: '#7F968B', fontSize: 11, marginTop: 5 }, images: { gap: 10, paddingVertical: 14 },
   image: { width: 120, height: 140, borderRadius: 0}, remove: { position: 'absolute', right: 6, top: 6, width: 28, height: 28, borderRadius: 0, backgroundColor: 'rgba(0,0,0,.7)', alignItems: 'center', justifyContent: 'center' }, removeText: { color: '#FFF', fontSize: 20 },
-  label: { color: '#DFFFF2', fontSize: 14, fontWeight: '800', marginTop: 18, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', color: '#F3FFF9', padding: 15 }, area: { minHeight: 150 },
-  publish: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#62E6B1', marginTop: 26 }, publishText: { color: '#071310', fontWeight: '900', fontSize: 15 },
+  label: { color: '#FFF1D6', fontSize: 14, fontWeight: '800', marginTop: 18, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 0, borderWidth: 1, borderColor: '#356F43', backgroundColor: '#245A35', color: '#F5E6C8', padding: 15 }, area: { minHeight: 150 },
+  publish: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#E9576F', marginTop: 26 }, publishText: { color: '#173E28', fontWeight: '900', fontSize: 15 },
   draft: { minHeight: 52, alignItems: 'center', justifyContent: 'center' }, draftText: { color: '#A4B8AF', fontWeight: '800' },
 });

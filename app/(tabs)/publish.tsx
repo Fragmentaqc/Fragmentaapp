@@ -398,7 +398,7 @@ export default function PublishScreen() {
             value={title}
             onChangeText={setTitle}
             placeholder="Ex. Traverser le Canada à vélo"
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#B8B59E"
             style={styles.input}
             maxLength={80}
             editable={!publishing}
@@ -414,7 +414,7 @@ export default function PublishScreen() {
             value={description}
             onChangeText={setDescription}
             placeholder="Raconte ton objectif, ton plan et pourquoi cette aventure est folle."
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#B8B59E"
             style={[styles.input, styles.textArea]}
             multiline
             textAlignVertical="top"
@@ -488,7 +488,7 @@ export default function PublishScreen() {
             value={startLocation}
             onChangeText={setStartLocation}
             placeholder="Ex. Montréal, Québec"
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#B8B59E"
             style={styles.input}
             maxLength={100}
             editable={!publishing}
@@ -500,14 +500,14 @@ export default function PublishScreen() {
             value={destination}
             onChangeText={setDestination}
             placeholder="Ex. Ushuaïa, Argentine"
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#B8B59E"
             style={styles.input}
             maxLength={100}
             editable={!publishing}
           />
 
           <Text style={styles.label}>Durée totale estimée</Text>
-          <View style={styles.durationInputRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} placeholder="Ex. 12" placeholderTextColor="#63766D" style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" maxLength={7} editable={!publishing} /><Text style={styles.durationUnit}>heures</Text></View>
+          <View style={styles.durationInputRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} placeholder="Ex. 12" placeholderTextColor="#B8B59E" style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" maxLength={7} editable={!publishing} /><Text style={styles.durationUnit}>heures</Text></View>
 
           <Text style={styles.label}>Position sur la carte</Text>
           <LocationPicker coordinate={coordinate} onSelect={setCoordinate} />
@@ -551,7 +551,7 @@ export default function PublishScreen() {
               <View style={styles.loadingButtonContent}>
                 <ActivityIndicator
                   size="small"
-                  color="#071310"
+                  color="#173E28"
                 />
 
                 <Text style={styles.publishButtonText}>
@@ -585,7 +585,7 @@ export default function PublishScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071310',
+    backgroundColor: '#173E28',
   },
 
   keyboardView: {
@@ -603,21 +603,21 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1.3,
   },
 
   title: {
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 30,
     fontWeight: '900',
     marginTop: 6,
   },
 
   subtitle: {
-    color: '#8FA69B',
+    color: '#D8CFBA',
     fontSize: 15,
     lineHeight: 22,
     marginTop: 8,
@@ -630,18 +630,18 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#386B59',
-    backgroundColor: '#0C1C17',
+    borderColor: '#7BA578',
+    backgroundColor: '#245A35',
     marginBottom: 20,
   },
 
   coverIcon: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 42,
   },
 
   coverTitle: {
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 16,
     fontWeight: '800',
     marginTop: 4,
@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 0,
     overflow: 'hidden',
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#245A35',
   },
 
   previewImage: {
@@ -686,14 +686,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 8,
     bottom: 8,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#E9576F',
     borderRadius: 0,
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
 
   coverBadgeText: {
-    color: '#071310',
+    color: '#173E28',
     fontSize: 10,
     fontWeight: '900',
   },
@@ -722,14 +722,14 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#386B59',
+    borderColor: '#7BA578',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#245A35',
   },
 
   addMoreIcon: {
-    color: '#62E6B1',
+    color: '#E9576F',
     fontSize: 32,
   },
 
@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: '#DFFFF2',
+    color: '#FFF1D6',
     fontSize: 14,
     fontWeight: '800',
     marginBottom: 9,
@@ -752,9 +752,9 @@ const styles = StyleSheet.create({
     minHeight: 55,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
-    color: '#F3FFF9',
+    borderColor: '#356F43',
+    backgroundColor: '#245A35',
+    color: '#F5E6C8',
     fontSize: 15,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -765,7 +765,7 @@ const styles = StyleSheet.create({
   },
 
   characterCount: {
-    color: '#63766D',
+    color: '#B8B59E',
     fontSize: 11,
     textAlign: 'right',
     marginTop: 5,
@@ -781,14 +781,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 0,
-    backgroundColor: '#10251E',
+    backgroundColor: '#2F6F3E',
     borderWidth: 1,
-    borderColor: '#1D4538',
+    borderColor: '#356F43',
   },
 
   categoryButtonActive: {
-    backgroundColor: '#62E6B1',
-    borderColor: '#62E6B1',
+    backgroundColor: '#E9576F',
+    borderColor: '#E9576F',
   },
 
   categoryText: {
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
   },
 
   categoryTextActive: {
-    color: '#071310',
+    color: '#173E28',
     fontWeight: '900',
   },
 
@@ -806,24 +806,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#245A35',
     borderWidth: 1,
-    borderColor: '#19392E',
+    borderColor: '#315F3C',
     padding: 16,
     marginTop: 22,
     marginBottom: 22,
   },
 
-  routeHint: { color: '#81958C', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
-  durationInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#62E6B1', fontSize: 13, fontWeight: '900', paddingRight: 8 },
+  routeHint: { color: '#D0C4A9', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
+  durationInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#E9576F', fontSize: 13, fontWeight: '900', paddingRight: 8 },
   routeProfiles: { gap: 8 },
-  routeProfileButton: { borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', paddingHorizontal: 15, paddingVertical: 12 },
-  routeProfileButtonActive: { borderColor: '#62E6B1', backgroundColor: '#173D31' },
-  routeProfileLabel: { color: '#DFFFF2', fontSize: 13, fontWeight: '900' },
-  routeProfileLabelActive: { color: '#62E6B1' },
-  routeProfileDetail: { color: '#71877D', fontSize: 11, marginTop: 3 },
+  routeProfileButton: { borderRadius: 0, borderWidth: 1, borderColor: '#356F43', backgroundColor: '#245A35', paddingHorizontal: 15, paddingVertical: 12 },
+  routeProfileButtonActive: { borderColor: '#E9576F', backgroundColor: '#3B7C49' },
+  routeProfileLabel: { color: '#FFF1D6', fontSize: 13, fontWeight: '900' },
+  routeProfileLabelActive: { color: '#E9576F' },
+  routeProfileDetail: { color: '#BDB7A3', fontSize: 11, marginTop: 3 },
   routeProfileDetailActive: { color: '#BFEEDB' },
-  mapHelper: { color: '#63766D', fontSize: 11, marginTop: 8 },
+  mapHelper: { color: '#B8B59E', fontSize: 11, marginTop: 8 },
 
   visibilityIcon: {
     width: 46,
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#173D31',
+    backgroundColor: '#3B7C49',
   },
 
   visibilityEmoji: {
@@ -844,7 +844,7 @@ const styles = StyleSheet.create({
   },
 
   visibilityTitle: {
-    color: '#F3FFF9',
+    color: '#F5E6C8',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#E9576F',
   },
 
   loadingButtonContent: {
@@ -871,7 +871,7 @@ const styles = StyleSheet.create({
   },
 
   publishButtonText: {
-    color: '#071310',
+    color: '#173E28',
     fontSize: 16,
     fontWeight: '900',
   },
