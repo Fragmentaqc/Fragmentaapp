@@ -84,6 +84,8 @@ export default function RootLayout() {
 
               <Stack.Screen name="chat/[id]" />
 
+              <Stack.Screen name="notifications" />
+
               <Stack.Screen name="report" />
 
               <Stack.Screen name="moderation" />

@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/auth-context';
+import { NotificationBell } from '@/components/notification-bell';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -77,7 +78,7 @@ export default function MessagesScreen() {
   if (!user) return <SafeAreaView style={styles.safe}><View style={styles.empty}><Text style={styles.eyebrow}>COMMUNAUTÉ</Text><Text style={styles.emptyTitle}>Tes conversations</Text><Text style={styles.emptyText}>Connecte-toi pour écrire aux aventuriers de la communauté.</Text><Pressable style={styles.primary} onPress={() => router.push('/auth')}><Text style={styles.primaryText}>Me connecter</Text></Pressable></View></SafeAreaView>;
 
   return <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-    <View style={styles.header}><Text style={styles.eyebrow}>CONNECTER</Text><Text style={styles.title}>Messages</Text><Text style={styles.subtitle}>Les conversations qui font naître les prochaines aventures.</Text></View>
+    <View style={styles.header}><View style={styles.bell}><NotificationBell /></View><Text style={styles.eyebrow}>CONNECTER</Text><Text style={styles.title}>Messages</Text><Text style={styles.subtitle}>Les conversations qui font naître les prochaines aventures.</Text></View>
     {loading ? <ActivityIndicator color="#B86F4B" size="large" style={styles.loader} /> : <FlatList
       data={items}
       keyExtractor={(item) => item.id}
@@ -97,7 +98,7 @@ export default function MessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0B1710' }, header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 18 }, eyebrow: { color: '#B86F4B', fontSize: 9, fontWeight: '900', letterSpacing: 2 }, title: { color: '#F4E9D6', fontSize: 34, fontWeight: '900', marginTop: 6 }, subtitle: { color: '#BCC8B8', fontSize: 12, lineHeight: 18, marginTop: 7 }, loader: { marginTop: 50 }, list: { paddingHorizontal: 14, paddingBottom: 90 }, emptyList: { flexGrow: 1 },
+  safe: { flex: 1, backgroundColor: '#0B1710' }, header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 18 }, bell: { position: 'absolute', top: 12, right: 20, zIndex: 2 }, eyebrow: { color: '#B86F4B', fontSize: 9, fontWeight: '900', letterSpacing: 2 }, title: { color: '#F4E9D6', fontSize: 34, fontWeight: '900', marginTop: 6 }, subtitle: { maxWidth: '78%', color: '#BCC8B8', fontSize: 12, lineHeight: 18, marginTop: 7 }, loader: { marginTop: 50 }, list: { paddingHorizontal: 14, paddingBottom: 90 }, emptyList: { flexGrow: 1 },
   row: { minHeight: 82, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#35563E', paddingHorizontal: 7, paddingVertical: 11 }, avatar: { width: 55, height: 55, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#21472F' }, avatarImage: { width: '100%', height: '100%' }, avatarText: { color: '#F4E9D6', fontSize: 20, fontWeight: '900' }, body: { flex: 1, marginLeft: 13 }, nameRow: { flexDirection: 'row', alignItems: 'center' }, name: { flex: 1, color: '#F4E9D6', fontSize: 15, fontWeight: '900' }, date: { color: '#829080', fontSize: 9, marginLeft: 8 }, preview: { color: '#AEBBAA', fontSize: 12, marginTop: 6 }, previewUnread: { color: '#FBF1DF', fontWeight: '800' }, badge: { minWidth: 25, height: 25, color: '#0B1710', backgroundColor: '#B86F4B', textAlign: 'center', lineHeight: 25, fontSize: 10, fontWeight: '900', marginLeft: 9, overflow: 'hidden' }, arrow: { color: '#B86F4B', fontSize: 28, marginLeft: 9 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }, emptyMark: { color: '#B86F4B', fontSize: 40 }, emptyTitle: { color: '#F4E9D6', fontSize: 24, fontWeight: '900', textAlign: 'center', marginTop: 12 }, emptyText: { maxWidth: 320, color: '#BCC8B8', fontSize: 12, lineHeight: 19, textAlign: 'center', marginTop: 8 }, primary: { minHeight: 52, justifyContent: 'center', backgroundColor: '#B86F4B', paddingHorizontal: 24, marginTop: 22 }, primaryText: { color: '#0B1710', fontWeight: '900' }, secondary: { borderWidth: 1, borderColor: '#6F8D6C', paddingHorizontal: 18, paddingVertical: 12, marginTop: 21 }, secondaryText: { color: '#F4E9D6', fontWeight: '900' },
 });
