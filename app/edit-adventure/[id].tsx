@@ -1,6 +1,7 @@
 import { type AdventureStatus, useAdventures } from '@/context/adventures-context';
 import { useAuth } from '@/context/auth-context';
 import { getRouteProfileForCategory, type RouteProfile } from '@/lib/routing';
+import { PlaceAutocomplete } from '@/components/place-autocomplete';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -28,6 +29,9 @@ export default function EditAdventureScreen() {
   const [description, setDescription] = useState('');
   const [startLocation, setStartLocation] = useState('');
   const [destination, setDestination] = useState('');
+  const [startLocationSelected, setStartLocationSelected] = useState(false);
+  const [destinationSelected, setDestinationSelected] = useState(false);
+  const [destinationCoordinate, setDestinationCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
   const [category, setCategory] = useState('Autre');
   const [routingProfile, setRoutingProfile] = useState<RouteProfile>('walking');
   const [durationHours, setDurationHours] = useState('');
@@ -41,6 +45,9 @@ export default function EditAdventureScreen() {
     setDescription(adventure.description);
     setStartLocation(adventure.startLocation);
     setDestination(adventure.destination);
+    setStartLocationSelected(Boolean(adventure.startLocation));
+    setDestinationSelected(Boolean(adventure.destination));
+    setDestinationCoordinate(adventure.latitude !== null && adventure.longitude !== null ? { latitude: adventure.latitude, longitude: adventure.longitude } : null);
     setCategory(adventure.category);
     setRoutingProfile(adventure.routingProfile);
     setDurationHours(adventure.durationMinutes ? String(adventure.durationMinutes / 60) : '');
@@ -54,8 +61,12 @@ export default function EditAdventureScreen() {
       Alert.alert('Informations manquantes', 'Le titre et la description sont obligatoires.');
       return;
     }
+    if (!startLocationSelected || !destinationSelected) {
+      Alert.alert('Lieux à confirmer', 'Choisis le départ et la destination dans les suggestions Mapbox.');
+      return;
+    }
     setSaving(true);
-    const success = await updateAdventure(adventure.id, { title, description, startLocation, destination, category, routingProfile, durationMinutes: durationHours.trim() ? Math.round(Number(durationHours.replace(',', '.')) * 60) : 0, publicationStatus, status });
+    const success = await updateAdventure(adventure.id, { title, description, startLocation, destination, category, routingProfile, durationMinutes: durationHours.trim() ? Math.round(Number(durationHours.replace(',', '.')) * 60) : 0, publicationStatus, status, latitude: destinationCoordinate?.latitude ?? null, longitude: destinationCoordinate?.longitude ?? null });
     setSaving(false);
     if (success) {
       Alert.alert('Aventure modifiée', 'Tes changements sont enregistrés.', [{ text: 'Voir la fiche', onPress: () => router.back() }]);
@@ -80,8 +91,8 @@ export default function EditAdventureScreen() {
           <View style={styles.header}><Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Retour</Text></Pressable><Text style={styles.heading}>Modifier</Text></View>
           <Text style={styles.label}>Titre</Text><TextInput value={title} onChangeText={setTitle} style={styles.input} maxLength={100} />
           <Text style={styles.label}>Description</Text><TextInput value={description} onChangeText={setDescription} style={[styles.input, styles.textarea]} multiline textAlignVertical="top" maxLength={2000} />
-          <Text style={styles.label}>Départ</Text><TextInput value={startLocation} onChangeText={setStartLocation} style={styles.input} />
-          <Text style={styles.label}>Destination</Text><TextInput value={destination} onChangeText={setDestination} style={styles.input} />
+          <Text style={styles.label}>Départ</Text><PlaceAutocomplete value={startLocation} onChangeText={(value) => { setStartLocation(value); setStartLocationSelected(false); }} onSelect={(place) => { setStartLocation(place.label); setStartLocationSelected(true); }} selected={startLocationSelected} />
+          <Text style={styles.label}>Destination</Text><PlaceAutocomplete value={destination} onChangeText={(value) => { setDestination(value); setDestinationSelected(false); setDestinationCoordinate(null); }} onSelect={(place) => { setDestination(place.label); setDestinationCoordinate({ latitude: place.latitude, longitude: place.longitude }); setDestinationSelected(true); }} selected={destinationSelected} />
           <Text style={styles.label}>Catégorie</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>{categories.map((item) => <Pressable key={item} style={[styles.chip, category === item && styles.chipActive]} onPress={() => selectCategory(item)}><Text style={styles.chipText}>{item}</Text></Pressable>)}</ScrollView>
           <Text style={styles.label}>Mode du trajet</Text>
           <Text style={styles.routeHint}>Choisi automatiquement selon la catégorie, mais reste modifiable.</Text>

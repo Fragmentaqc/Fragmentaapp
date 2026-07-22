@@ -2,6 +2,7 @@ import { useAdventures } from '@/context/adventures-context';
 import { useAuth } from '@/context/auth-context';
 import { useCuriosities } from '@/context/curiosities-context';
 import { LocationPicker } from '@/components/location-picker';
+import { PlaceAutocomplete } from '@/components/place-autocomplete';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -44,6 +45,7 @@ export default function AddCuriosityScreen() {
     useState('Lieu insolite');
   const [locationName, setLocationName] = useState('');
   const [address, setAddress] = useState('');
+  const [placeSelected, setPlaceSelected] = useState(false);
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [accessibility, setAccessibility] = useState('');
@@ -176,6 +178,11 @@ export default function AddCuriosityScreen() {
         'Décris ce qui rend ce lieu intéressant.'
       );
 
+      return;
+    }
+
+    if (!placeSelected || !locationName.trim() || !address.trim()) {
+      Alert.alert('Emplacement à confirmer', 'Recherche le lieu et choisis obligatoirement une suggestion Mapbox.');
       return;
     }
 
@@ -419,24 +426,20 @@ export default function AddCuriosityScreen() {
             title="Emplacement"
           />
 
-          <FieldLabel title="Nom de l’endroit" />
+          <FieldLabel title="Lieu, ville ou adresse" />
 
-          <TextInput
-            value={locationName}
-            onChangeText={setLocationName}
-            placeholder="Ex. Montréal, Québec"
-            placeholderTextColor="#9FAFAA"
-            style={styles.input}
-          />
-
-          <FieldLabel title="Adresse ou indication" />
-
-          <TextInput
+          <PlaceAutocomplete
             value={address}
-            onChangeText={setAddress}
-            placeholder="Adresse, route, parc ou point de repère"
-            placeholderTextColor="#9FAFAA"
-            style={styles.input}
+            onChangeText={(value) => { setAddress(value); setLocationName(''); setPlaceSelected(false); }}
+            onSelect={(place) => {
+              setAddress(place.label);
+              setLocationName(place.city || place.label);
+              setLatitude(place.latitude.toFixed(6));
+              setLongitude(place.longitude.toFixed(6));
+              setPlaceSelected(true);
+            }}
+            placeholder="Commence à écrire puis choisis un résultat"
+            selected={placeSelected}
           />
 
           <View style={styles.coordinateRow}>

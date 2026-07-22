@@ -59,7 +59,7 @@ export type AdventureStatus = 'preparation' | 'active' | 'completed';
 
 export type AdventureUpdate = Pick<
   NewAdventure,
-  'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus' | 'routingProfile' | 'durationMinutes'
+  'title' | 'description' | 'startLocation' | 'destination' | 'category' | 'publicationStatus' | 'routingProfile' | 'durationMinutes' | 'latitude' | 'longitude'
 > & { status: AdventureStatus };
 
 type AdventuresContextValue = {
@@ -668,6 +668,8 @@ export function AdventuresProvider({
         publication_status: update.publicationStatus || 'published',
         routing_profile: update.routingProfile || 'walking',
         duration_minutes: Number.isFinite(Number(update.durationMinutes)) ? Math.max(0, Math.round(Number(update.durationMinutes))) : 0,
+        latitude: update.latitude ?? null,
+        longitude: update.longitude ?? null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', adventureId)

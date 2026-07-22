@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
 import { SOCIAL_PLATFORMS, normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
+import { PlaceAutocomplete } from '@/components/place-autocomplete';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -47,6 +48,7 @@ export default function EditProfileScreen() {
   const [selectedCover, setSelectedCover] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [countrySelected, setCountrySelected] = useState(false);
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -76,6 +78,7 @@ if (data) {
     coverUrl: data.cover_url ?? null,
     socialLinks: parseSocialLinks(data.social_links),
   });
+  setCountrySelected(Boolean(data.country));
 }
 
     setLoading(false);
@@ -170,6 +173,11 @@ if (data) {
         'Pseudo invalide',
         'Le nom d’utilisateur doit contenir au moins 3 caractères.'
       );
+      return;
+    }
+
+    if (form.country.trim() && !countrySelected) {
+      Alert.alert('Pays à confirmer', 'Choisis ton pays dans les suggestions Mapbox.');
       return;
     }
 
@@ -342,18 +350,13 @@ if (data) {
 
           <Text style={styles.label}>Pays</Text>
 
-          <TextInput
+          <PlaceAutocomplete
             value={form.country}
-            onChangeText={(value) =>
-              setForm((current) => ({
-                ...current,
-                country: value,
-              }))
-            }
-            placeholder="Canada"
-            placeholderTextColor="#9FB2AD"
-            style={styles.input}
-            maxLength={60}
+            onChangeText={(value) => { setForm((current) => ({ ...current, country: value })); setCountrySelected(false); }}
+            onSelect={(place) => { setForm((current) => ({ ...current, country: place.country || place.label })); setCountrySelected(true); }}
+            placeholder="Commence à écrire ton pays"
+            types="country"
+            selected={countrySelected}
           />
 
           <View style={styles.socialHeader}>

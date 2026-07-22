@@ -1,5 +1,6 @@
 import { useAdventures } from '@/context/adventures-context';
 import { LocationPicker } from '@/components/location-picker';
+import { PlaceAutocomplete } from '@/components/place-autocomplete';
 import { useAuth } from '@/context/auth-context';
 import { getRouteProfileForCategory, type RouteProfile } from '@/lib/routing';
 import * as ImagePicker from 'expo-image-picker';
@@ -45,6 +46,8 @@ export default function PublishScreen() {
   const [description, setDescription] = useState('');
   const [startLocation, setStartLocation] = useState('');
   const [destination, setDestination] = useState('');
+  const [startLocationSelected, setStartLocationSelected] = useState(false);
+  const [destinationSelected, setDestinationSelected] = useState(false);
   const [category, setCategory] = useState('Vélo');
   const [routingProfile, setRoutingProfile] = useState<RouteProfile>('cycling');
   const [durationHours, setDurationHours] = useState('');
@@ -182,6 +185,11 @@ export default function PublishScreen() {
       return;
     }
 
+    if (!startLocation.trim() || !startLocationSelected || !destination.trim() || !destinationSelected) {
+      Alert.alert('Lieux à confirmer', 'Choisis le départ et la destination dans les suggestions Mapbox avant de continuer.');
+      return;
+    }
+
     setPublishing(true);
 
     try {
@@ -213,6 +221,8 @@ export default function PublishScreen() {
       setDescription('');
       setStartLocation('');
       setDestination('');
+      setStartLocationSelected(false);
+      setDestinationSelected(false);
       setCategory('Vélo');
       setRoutingProfile('cycling');
       setDurationHours('');
@@ -484,26 +494,22 @@ export default function PublishScreen() {
             Point de départ
           </Text>
 
-          <TextInput
+          <PlaceAutocomplete
             value={startLocation}
-            onChangeText={setStartLocation}
-            placeholder="Ex. Montréal, Québec"
-            placeholderTextColor="#9FB2AD"
-            style={styles.input}
-            maxLength={100}
-            editable={!publishing}
+            onChangeText={(value) => { setStartLocation(value); setStartLocationSelected(false); }}
+            onSelect={(place) => { setStartLocation(place.label); setStartLocationSelected(true); }}
+            placeholder="Ville ou adresse de départ"
+            selected={startLocationSelected}
           />
 
           <Text style={styles.label}>Destination</Text>
 
-          <TextInput
+          <PlaceAutocomplete
             value={destination}
-            onChangeText={setDestination}
-            placeholder="Ex. Ushuaïa, Argentine"
-            placeholderTextColor="#9FB2AD"
-            style={styles.input}
-            maxLength={100}
-            editable={!publishing}
+            onChangeText={(value) => { setDestination(value); setDestinationSelected(false); }}
+            onSelect={(place) => { setDestination(place.label); setDestinationSelected(true); setCoordinate({ latitude: place.latitude, longitude: place.longitude }); }}
+            placeholder="Ville ou adresse de destination"
+            selected={destinationSelected}
           />
 
           <Text style={styles.label}>Durée totale estimée</Text>
