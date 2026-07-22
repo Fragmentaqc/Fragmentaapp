@@ -18,6 +18,6 @@ export function OfflineBanner() {
 }
 
 const styles = StyleSheet.create({
-  banner: { position: 'absolute', zIndex: 100, top: 0, left: 0, right: 0, alignItems: 'center', backgroundColor: '#D8B65A', paddingBottom: 7, paddingHorizontal: 12 },
-  text: { color: '#071A1C', fontSize: 10, fontWeight: '900' },
+  banner: { position: 'absolute', zIndex: 100, top: 0, left: 0, right: 0, alignItems: 'center', backgroundColor: '#C58A62', paddingBottom: 7, paddingHorizontal: 12 },
+  text: { color: '#0B1710', fontSize: 10, fontWeight: '900' },
 });

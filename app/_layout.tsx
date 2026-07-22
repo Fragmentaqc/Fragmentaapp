@@ -46,7 +46,7 @@ export default function RootLayout() {
               screenOptions={{
                 headerShown: false,
                 contentStyle: {
-                  backgroundColor: '#071A1C',
+                  backgroundColor: '#0B1710',
                 },
               }}
             >
@@ -94,7 +94,7 @@ export default function RootLayout() {
 
             <StatusBar
               style="light"
-              backgroundColor="#071A1C"
+              backgroundColor="#0B1710"
             />
             <OfflineBanner />
             <ConnectionSync />

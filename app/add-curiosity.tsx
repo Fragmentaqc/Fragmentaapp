@@ -359,7 +359,7 @@ export default function AddCuriosityScreen() {
             value={title}
             onChangeText={setTitle}
             placeholder="Ex. Le tunnel oublié de la montagne"
-            placeholderTextColor="#9FAFAA"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
             maxLength={120}
           />
@@ -373,7 +373,7 @@ export default function AddCuriosityScreen() {
             value={description}
             onChangeText={setDescription}
             placeholder="Explique ce qui rend ce lieu unique, étrange ou intéressant..."
-            placeholderTextColor="#9FAFAA"
+            placeholderTextColor="#A8B3A4"
             style={[
               styles.input,
               styles.textAreaLarge,
@@ -450,7 +450,7 @@ export default function AddCuriosityScreen() {
                 value={latitude}
                 onChangeText={setLatitude}
                 placeholder="45.5019"
-                placeholderTextColor="#9FAFAA"
+                placeholderTextColor="#A8B3A4"
                 style={styles.input}
                 keyboardType="numbers-and-punctuation"
               />
@@ -463,7 +463,7 @@ export default function AddCuriosityScreen() {
                 value={longitude}
                 onChangeText={setLongitude}
                 placeholder="-73.5674"
-                placeholderTextColor="#9FAFAA"
+                placeholderTextColor="#A8B3A4"
                 style={styles.input}
                 keyboardType="numbers-and-punctuation"
               />
@@ -498,7 +498,7 @@ export default function AddCuriosityScreen() {
             value={accessibility}
             onChangeText={setAccessibility}
             placeholder="Ex. Accessible à pied, stationnement proche..."
-            placeholderTextColor="#9FAFAA"
+            placeholderTextColor="#A8B3A4"
             style={[
               styles.input,
               styles.textArea,
@@ -513,7 +513,7 @@ export default function AddCuriosityScreen() {
             value={bestTimeToVisit}
             onChangeText={setBestTimeToVisit}
             placeholder="Ex. Au coucher du soleil, en automne..."
-            placeholderTextColor="#9FAFAA"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
           />
 
@@ -523,7 +523,7 @@ export default function AddCuriosityScreen() {
             value={recommendedDuration}
             onChangeText={setRecommendedDuration}
             placeholder="Ex. 30 minutes, 2 heures..."
-            placeholderTextColor="#9FAFAA"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
           />
 
@@ -724,7 +724,7 @@ export default function AddCuriosityScreen() {
             >
               {publishing ? (
                 <ActivityIndicator
-                  color="#071A1C"
+                  color="#0B1710"
                   size="small"
                 />
               ) : (
@@ -784,7 +784,7 @@ function SectionTitle({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071A1C',
+    backgroundColor: '#0B1710',
   },
 
   keyboardView: {
@@ -809,12 +809,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#265F63',
-    backgroundColor: '#10363A',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
   },
 
   backIcon: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 34,
     lineHeight: 36,
     fontWeight: '500',
@@ -827,21 +827,21 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.3,
   },
 
   title: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 25,
     fontWeight: '900',
     marginTop: 4,
   },
 
   intro: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     fontSize: 14,
     lineHeight: 21,
     marginTop: 20,
@@ -898,24 +898,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
     marginRight: 10,
   },
 
   sectionNumberText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 11,
     fontWeight: '900',
   },
 
   sectionTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 19,
     fontWeight: '900',
   },
 
   sectionDescription: {
-    color: '#B8C8C2',
+    color: '#BCC8B8',
     fontSize: 12,
     lineHeight: 18,
     marginTop: -7,
@@ -936,12 +936,12 @@ const styles = StyleSheet.create({
 
   input: {
     minHeight: 54,
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 14,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#265F63',
-    backgroundColor: '#10363A',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
     paddingHorizontal: 15,
     paddingVertical: 13,
   },
@@ -956,7 +956,7 @@ const styles = StyleSheet.create({
 
   characterCount: {
     alignSelf: 'flex-end',
-    color: '#9FAFAA',
+    color: '#A8B3A4',
     fontSize: 10,
     marginTop: 6,
   },
@@ -972,24 +972,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#265F63',
-    backgroundColor: '#10363A',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
     paddingHorizontal: 15,
   },
 
   categoryButtonSelected: {
-    borderColor: '#C99A2E',
-    backgroundColor: '#C99A2E',
+    borderColor: '#B86F4B',
+    backgroundColor: '#B86F4B',
   },
 
   categoryText: {
-    color: '#9EB0A8',
+    color: '#A7B3A3',
     fontSize: 12,
     fontWeight: '800',
   },
 
   categoryTextSelected: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontWeight: '900',
   },
 
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   },
 
   helperText: {
-    color: '#9FAFAA',
+    color: '#A8B3A4',
     fontSize: 11,
     lineHeight: 16,
     marginTop: 9,
@@ -1016,25 +1016,25 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#2B6552',
-    backgroundColor: '#10363A',
+    borderColor: '#436B4A',
+    backgroundColor: '#173523',
   },
 
   imagePickerIcon: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 34,
     fontWeight: '300',
   },
 
   imagePickerTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 14,
     fontWeight: '900',
     marginTop: 5,
   },
 
   imagePickerText: {
-    color: '#9FAFAA',
+    color: '#A8B3A4',
     fontSize: 11,
     marginTop: 4,
   },
@@ -1050,7 +1050,7 @@ const styles = StyleSheet.create({
     height: 130,
     overflow: 'hidden',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   previewImage: {
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
   },
 
   coverBadgeText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 8,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1099,15 +1099,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#275456',
-    backgroundColor: '#10363A',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 12,
     marginBottom: 10,
   },
 
   adventureChoiceSelected: {
-    borderColor: '#C99A2E',
-    backgroundColor: '#16484C',
+    borderColor: '#B86F4B',
+    backgroundColor: '#21472F',
   },
 
   adventureChoiceIcon: {
@@ -1116,7 +1116,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   adventureChoiceEmoji: {
@@ -1129,7 +1129,7 @@ const styles = StyleSheet.create({
   },
 
   adventureChoiceTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 13,
     fontWeight: '900',
   },
@@ -1150,16 +1150,16 @@ const styles = StyleSheet.create({
 
   radioSelected: {
     borderWidth: 5,
-    borderColor: '#C99A2E',
-    backgroundColor: '#071A1C',
+    borderColor: '#B86F4B',
+    backgroundColor: '#0B1710',
   },
 
   noticeCard: {
     flexDirection: 'row',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#265F63',
-    backgroundColor: '#16484C',
+    borderColor: '#3D6648',
+    backgroundColor: '#21472F',
     padding: 15,
     marginTop: 22,
   },
@@ -1167,13 +1167,13 @@ const styles = StyleSheet.create({
   noticeIcon: {
     width: 34,
     height: 34,
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 18,
     lineHeight: 34,
     fontWeight: '900',
     textAlign: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     overflow: 'hidden',
   },
 
@@ -1183,13 +1183,13 @@ const styles = StyleSheet.create({
   },
 
   noticeTitle: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 13,
     fontWeight: '900',
   },
 
   noticeText: {
-    color: '#B8C8C2',
+    color: '#BCC8B8',
     fontSize: 11,
     lineHeight: 17,
     marginTop: 5,
@@ -1209,12 +1209,12 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderColor: '#2A5B49',
-    backgroundColor: '#16484C',
+    backgroundColor: '#21472F',
     paddingHorizontal: 10,
   },
 
   draftButtonText: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 12,
     fontWeight: '900',
     textAlign: 'center',
@@ -1227,18 +1227,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     paddingHorizontal: 16,
   },
 
   publishButtonText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 14,
     fontWeight: '900',
   },
 
   publishArrow: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 24,
     fontWeight: '800',
     marginLeft: 6,

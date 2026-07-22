@@ -408,7 +408,7 @@ export default function PublishScreen() {
             value={title}
             onChangeText={setTitle}
             placeholder="Ex. Traverser le Canada à vélo"
-            placeholderTextColor="#9FB2AD"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
             maxLength={80}
             editable={!publishing}
@@ -424,7 +424,7 @@ export default function PublishScreen() {
             value={description}
             onChangeText={setDescription}
             placeholder="Raconte ton objectif, ton plan et pourquoi cette aventure est folle."
-            placeholderTextColor="#9FB2AD"
+            placeholderTextColor="#A8B3A4"
             style={[styles.input, styles.textArea]}
             multiline
             textAlignVertical="top"
@@ -513,7 +513,7 @@ export default function PublishScreen() {
           />
 
           <Text style={styles.label}>Durée totale estimée</Text>
-          <View style={styles.durationInputRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} placeholder="Ex. 12" placeholderTextColor="#9FB2AD" style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" maxLength={7} editable={!publishing} /><Text style={styles.durationUnit}>heures</Text></View>
+          <View style={styles.durationInputRow}><TextInput value={durationHours} onChangeText={(value) => setDurationHours(value.replace(/[^0-9,.]/g, ''))} placeholder="Ex. 12" placeholderTextColor="#A8B3A4" style={[styles.input, styles.durationInput]} keyboardType="decimal-pad" maxLength={7} editable={!publishing} /><Text style={styles.durationUnit}>heures</Text></View>
 
           <Text style={styles.label}>Position sur la carte</Text>
           <LocationPicker coordinate={coordinate} onSelect={setCoordinate} />
@@ -557,7 +557,7 @@ export default function PublishScreen() {
               <View style={styles.loadingButtonContent}>
                 <ActivityIndicator
                   size="small"
-                  color="#071A1C"
+                  color="#0B1710"
                 />
 
                 <Text style={styles.publishButtonText}>
@@ -591,7 +591,7 @@ export default function PublishScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071A1C',
+    backgroundColor: '#0B1710',
   },
 
   keyboardView: {
@@ -609,21 +609,21 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1.3,
   },
 
   title: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 30,
     fontWeight: '900',
     marginTop: 6,
   },
 
   subtitle: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     fontSize: 15,
     lineHeight: 22,
     marginTop: 8,
@@ -636,18 +636,18 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#6A9692',
-    backgroundColor: '#10363A',
+    borderColor: '#748D73',
+    backgroundColor: '#173523',
     marginBottom: 20,
   },
 
   coverIcon: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 42,
   },
 
   coverTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 16,
     fontWeight: '800',
     marginTop: 4,
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 0,
     overflow: 'hidden',
-    backgroundColor: '#10363A',
+    backgroundColor: '#173523',
   },
 
   previewImage: {
@@ -692,14 +692,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 8,
     bottom: 8,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     borderRadius: 0,
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
 
   coverBadgeText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 10,
     fontWeight: '900',
   },
@@ -728,14 +728,14 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#6A9692',
+    borderColor: '#748D73',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#10363A',
+    backgroundColor: '#173523',
   },
 
   addMoreIcon: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 32,
   },
 
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 14,
     fontWeight: '800',
     marginBottom: 9,
@@ -758,9 +758,9 @@ const styles = StyleSheet.create({
     minHeight: 55,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#265F63',
-    backgroundColor: '#10363A',
-    color: '#F4EBD8',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
+    color: '#F4E9D6',
     fontSize: 15,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
   },
 
   characterCount: {
-    color: '#9FB2AD',
+    color: '#A8B3A4',
     fontSize: 11,
     textAlign: 'right',
     marginTop: 5,
@@ -787,14 +787,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 0,
-    backgroundColor: '#16484C',
+    backgroundColor: '#21472F',
     borderWidth: 1,
-    borderColor: '#265F63',
+    borderColor: '#3D6648',
   },
 
   categoryButtonActive: {
-    backgroundColor: '#C99A2E',
-    borderColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
+    borderColor: '#B86F4B',
   },
 
   categoryText: {
@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
   },
 
   categoryTextActive: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontWeight: '900',
   },
 
@@ -812,24 +812,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    backgroundColor: '#10363A',
+    backgroundColor: '#173523',
     borderWidth: 1,
-    borderColor: '#275456',
+    borderColor: '#35563E',
     padding: 16,
     marginTop: 22,
     marginBottom: 22,
   },
 
-  routeHint: { color: '#B8C8C2', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
-  durationInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#C99A2E', fontSize: 13, fontWeight: '900', paddingRight: 8 },
+  routeHint: { color: '#BCC8B8', fontSize: 11, lineHeight: 16, marginTop: -3, marginBottom: 9 },
+  durationInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, durationInput: { flex: 1 }, durationUnit: { color: '#B86F4B', fontSize: 13, fontWeight: '900', paddingRight: 8 },
   routeProfiles: { gap: 8 },
-  routeProfileButton: { borderRadius: 0, borderWidth: 1, borderColor: '#265F63', backgroundColor: '#10363A', paddingHorizontal: 15, paddingVertical: 12 },
-  routeProfileButtonActive: { borderColor: '#C99A2E', backgroundColor: '#1D5A5E' },
-  routeProfileLabel: { color: '#FFF6E5', fontSize: 13, fontWeight: '900' },
-  routeProfileLabelActive: { color: '#C99A2E' },
-  routeProfileDetail: { color: '#A9BBB5', fontSize: 11, marginTop: 3 },
+  routeProfileButton: { borderRadius: 0, borderWidth: 1, borderColor: '#3D6648', backgroundColor: '#173523', paddingHorizontal: 15, paddingVertical: 12 },
+  routeProfileButtonActive: { borderColor: '#B86F4B', backgroundColor: '#2D5B3D' },
+  routeProfileLabel: { color: '#FBF1DF', fontSize: 13, fontWeight: '900' },
+  routeProfileLabelActive: { color: '#B86F4B' },
+  routeProfileDetail: { color: '#AEBBAA', fontSize: 11, marginTop: 3 },
   routeProfileDetailActive: { color: '#BFEEDB' },
-  mapHelper: { color: '#9FB2AD', fontSize: 11, marginTop: 8 },
+  mapHelper: { color: '#A8B3A4', fontSize: 11, marginTop: 8 },
 
   visibilityIcon: {
     width: 46,
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   visibilityEmoji: {
@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
   },
 
   visibilityTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
   },
 
   loadingButtonContent: {
@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
   },
 
   publishButtonText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 16,
     fontWeight: '900',
   },

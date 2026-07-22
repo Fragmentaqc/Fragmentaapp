@@ -245,7 +245,7 @@ if (data) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#C99A2E" />
+          <ActivityIndicator size="large" color="#B86F4B" />
         </View>
       </SafeAreaView>
     );
@@ -300,7 +300,7 @@ if (data) {
               }))
             }
             placeholder="Ton nom"
-            placeholderTextColor="#9FB2AD"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
             maxLength={60}
           />
@@ -319,7 +319,7 @@ if (data) {
                 }))
               }
               placeholder="aventurier"
-              placeholderTextColor="#9FB2AD"
+              placeholderTextColor="#A8B3A4"
               style={styles.usernameTextInput}
               autoCapitalize="none"
               maxLength={30}
@@ -337,7 +337,7 @@ if (data) {
               }))
             }
             placeholder="Raconte les aventures qui t’inspirent."
-            placeholderTextColor="#9FB2AD"
+            placeholderTextColor="#A8B3A4"
             style={[styles.input, styles.bioInput]}
             multiline
             textAlignVertical="top"
@@ -407,7 +407,7 @@ if (data) {
                   ),
                 }))}
                 placeholder="Nom du réseau"
-                placeholderTextColor="#9FB2AD"
+                placeholderTextColor="#A8B3A4"
                 maxLength={40}
                 style={[styles.input, styles.platformInput]}
               />
@@ -421,7 +421,7 @@ if (data) {
                     ),
                   }))}
                   placeholder="instagram.com/tonprofil"
-                  placeholderTextColor="#9FB2AD"
+                  placeholderTextColor="#A8B3A4"
                   autoCapitalize="none"
                   keyboardType="url"
                   maxLength={300}
@@ -449,7 +449,7 @@ if (data) {
             ]}
           >
             {saving ? (
-              <ActivityIndicator color="#071A1C" />
+              <ActivityIndicator color="#0B1710" />
             ) : (
               <Text style={styles.saveButtonText}>
                 Enregistrer le profil
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
 
   safeArea: {
     flex: 1,
-    backgroundColor: '#071A1C',
+    backgroundColor: '#0B1710',
   },
 
   loadingContainer: {
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   },
 
   backButton: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     alignSelf: 'center',
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 18,
     fontWeight: '900',
   },
@@ -510,8 +510,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 0,
     borderWidth: 2,
-    borderColor: '#C99A2E',
-    backgroundColor: '#174B3B',
+    borderColor: '#B86F4B',
+    backgroundColor: '#264C32',
   },
 
   avatarImage: {
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
 
   avatarPlaceholder: {
     flex: 1,
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 42,
     fontWeight: '900',
     textAlign: 'center',
@@ -538,9 +538,9 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     borderWidth: 3,
-    borderColor: '#071A1C',
+    borderColor: '#0B1710',
   },
 
   cameraBadgeText: {
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
   },
 
   changePhotoText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 13,
     fontWeight: '800',
     textAlign: 'center',
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 14,
     fontWeight: '800',
     marginTop: 14,
@@ -568,9 +568,9 @@ const styles = StyleSheet.create({
     minHeight: 56,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#265F63',
-    backgroundColor: '#10363A',
-    color: '#F4EBD8',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
+    color: '#F4E9D6',
     fontSize: 15,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -582,13 +582,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#265F63',
-    backgroundColor: '#10363A',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
     paddingHorizontal: 16,
   },
 
   atSymbol: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 16,
     fontWeight: '900',
     marginRight: 3,
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
 
   usernameTextInput: {
     flex: 1,
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 15,
   },
 
@@ -605,29 +605,29 @@ const styles = StyleSheet.create({
   },
 
   characterCount: {
-    color: '#9FB2AD',
+    color: '#A8B3A4',
     fontSize: 11,
     textAlign: 'right',
     marginTop: 5,
   },
 
-  coverButton: { height: 190, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#3C7475', backgroundColor: '#16484C', marginBottom: -48 },
+  coverButton: { height: 190, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#55775B', backgroundColor: '#21472F', marginBottom: -48 },
   coverImage: { width: '100%', height: '100%' },
   coverPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  coverPlaceholderIcon: { color: '#C99A2E', fontSize: 34 },
-  coverPlaceholderText: { color: '#C9D6D1', fontSize: 12, fontWeight: '800', marginTop: 6 },
+  coverPlaceholderIcon: { color: '#B86F4B', fontSize: 34 },
+  coverPlaceholderText: { color: '#CBD5C8', fontSize: 12, fontWeight: '800', marginTop: 6 },
   coverCameraBadge: { position: 'absolute', right: 10, top: 10, borderRadius: 0, backgroundColor: 'rgba(7,19,16,0.88)', paddingHorizontal: 12, paddingVertical: 8 },
   coverCameraText: { color: '#E4FFF4', fontSize: 10, fontWeight: '900' },
   socialHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
-  socialHint: { color: '#9FB2AD', fontSize: 11, marginTop: -4 },
-  addSocialButton: { borderRadius: 0, backgroundColor: '#1D5A5E', paddingHorizontal: 13, paddingVertical: 10 },
-  addSocialText: { color: '#C99A2E', fontSize: 12, fontWeight: '900' },
-  socialEditor: { borderRadius: 0, borderWidth: 1, borderColor: '#265F63', backgroundColor: '#10363A', padding: 10, marginTop: 10 },
+  socialHint: { color: '#A8B3A4', fontSize: 11, marginTop: -4 },
+  addSocialButton: { borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 13, paddingVertical: 10 },
+  addSocialText: { color: '#B86F4B', fontSize: 12, fontWeight: '900' },
+  socialEditor: { borderRadius: 0, borderWidth: 1, borderColor: '#3D6648', backgroundColor: '#173523', padding: 10, marginTop: 10 },
   platforms: { marginBottom: 9 },
   platformInput: { minHeight: 46, marginBottom: 8 },
-  platformChip: { borderRadius: 0, backgroundColor: '#16484C', paddingHorizontal: 11, paddingVertical: 8, marginRight: 7 },
-  platformChipActive: { backgroundColor: '#4B8180' },
-  platformChipText: { color: '#FFF6E5', fontSize: 11, fontWeight: '800' },
+  platformChip: { borderRadius: 0, backgroundColor: '#21472F', paddingHorizontal: 11, paddingVertical: 8, marginRight: 7 },
+  platformChipActive: { backgroundColor: '#6F8D6C' },
+  platformChipText: { color: '#FBF1DF', fontSize: 11, fontWeight: '800' },
   socialUrlRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   socialUrlInput: { flex: 1, minHeight: 48 },
   removeSocialButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#351919' },
@@ -638,12 +638,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     marginTop: 30,
   },
 
   saveButtonText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 16,
     fontWeight: '900',
   },

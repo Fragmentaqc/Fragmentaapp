@@ -414,7 +414,7 @@ export default function ExploreScreen() {
           <View style={styles.loadingArea}>
             <ActivityIndicator
               size="large"
-              color="#C99A2E"
+              color="#B86F4B"
             />
 
             <Text style={styles.loadingText}>
@@ -861,7 +861,7 @@ function EmptyCuriosities({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071A1C',
+    backgroundColor: '#0B1710',
   },
 
   container: {
@@ -885,14 +885,14 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.8,
   },
 
   title: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 39,
     lineHeight: 44,
     fontWeight: '900',
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     maxWidth: 430,
     fontSize: 13,
     lineHeight: 20,
@@ -913,11 +913,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
   },
 
   addHeaderIcon: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 30,
     fontWeight: '500',
     marginTop: -2,
@@ -929,8 +929,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#2B6552',
-    backgroundColor: '#16484C',
+    borderColor: '#436B4A',
+    backgroundColor: '#21472F',
     padding: 16,
     marginBottom: 17,
   },
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   contributionEmoji: {
@@ -954,21 +954,21 @@ const styles = StyleSheet.create({
   },
 
   contributionEyebrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 8,
     fontWeight: '900',
     letterSpacing: 1.1,
   },
 
   contributionTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 17,
     fontWeight: '900',
     marginTop: 5,
   },
 
   contributionText: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     fontSize: 11,
     lineHeight: 17,
     marginTop: 5,
@@ -980,12 +980,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     marginLeft: 10,
   },
 
   contributionArrowText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 26,
     fontWeight: '800',
   },
@@ -996,24 +996,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderBottomWidth: 1,
-    borderColor: '#4B8180',
-    backgroundColor: '#10363A',
+    borderColor: '#6F8D6C',
+    backgroundColor: '#173523',
     paddingHorizontal: 15,
     marginHorizontal: 22,
   },
 
-  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#0B2528', paddingHorizontal: 15, marginHorizontal: 22, marginTop: 10 },
-  memberSearchIcon: { color: '#C99A2E', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F4EBD8', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#B8C8C2', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#C99A2E', fontSize: 28 },
+  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#102218', paddingHorizontal: 15, marginHorizontal: 22, marginTop: 10 },
+  memberSearchIcon: { color: '#B86F4B', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F4E9D6', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#BCC8B8', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#B86F4B', fontSize: 28 },
 
   searchIcon: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 26,
     marginRight: 10,
   },
 
   searchInput: {
     flex: 1,
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 14,
   },
 
@@ -1023,11 +1023,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   clearText: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 21,
   },
 
@@ -1043,28 +1043,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#10363A',
+    backgroundColor: '#173523',
     paddingHorizontal: 15,
   },
 
   categoryButtonSelected: {
-    borderColor: '#C99A2E',
-    backgroundColor: '#C99A2E',
+    borderColor: '#B86F4B',
+    backgroundColor: '#B86F4B',
   },
 
   categoryText: {
-    color: '#9EB0A8',
+    color: '#A7B3A3',
     fontSize: 12,
     fontWeight: '800',
   },
 
   categoryTextSelected: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontWeight: '900',
   },
 
-  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#1D5A5E', paddingHorizontal: 12, paddingVertical: 8, marginHorizontal: 22, marginTop: 4 },
-  nearbyNoticeText: { color: '#C99A2E', fontSize: 10, fontWeight: '800' },
+  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 12, paddingVertical: 8, marginHorizontal: 22, marginTop: 4 },
+  nearbyNoticeText: { color: '#B86F4B', fontSize: 10, fontWeight: '800' },
 
   loadingArea: {
     minHeight: 320,
@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
-    color: '#B8C8C2',
+    color: '#BCC8B8',
     fontSize: 13,
     marginTop: 13,
   },
@@ -1088,14 +1088,14 @@ const styles = StyleSheet.create({
   },
 
   sectionEyebrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.4,
   },
 
   sectionTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 27,
     fontWeight: '900',
     marginTop: 4,
@@ -1107,11 +1107,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   refreshText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 20,
     fontWeight: '900',
   },
@@ -1119,20 +1119,20 @@ const styles = StyleSheet.create({
   resultCount: {
     minWidth: 32,
     height: 32,
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 12,
     fontWeight: '900',
     textAlign: 'center',
     textAlignVertical: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   featuredCard: {
     minHeight: 540,
     overflow: 'hidden',
     borderRadius: 0,
-    backgroundColor: '#16484C',
+    backgroundColor: '#21472F',
   },
 
   featuredImage: {
@@ -1145,7 +1145,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   featuredFallbackEmoji: {
@@ -1183,7 +1183,7 @@ const styles = StyleSheet.create({
   },
 
   featuredBadgeText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1202,19 +1202,19 @@ const styles = StyleSheet.create({
   verificationIcon: {
     width: 18,
     height: 18,
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 10,
     lineHeight: 18,
     fontWeight: '900',
     textAlign: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     overflow: 'hidden',
     marginRight: 6,
   },
 
   verificationText: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 9,
     fontWeight: '900',
   },
@@ -1225,7 +1225,7 @@ const styles = StyleSheet.create({
     right: 22,
     bottom: 26,
     borderLeftWidth: 3,
-    borderLeftColor: '#C99A2E',
+    borderLeftColor: '#B86F4B',
     paddingLeft: 16,
   },
 
@@ -1271,18 +1271,18 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderColor: '#3D705D',
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
     marginRight: 9,
   },
 
   featuredAvatarText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 15,
     fontWeight: '900',
   },
 
   featuredAuthorName: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 11,
     fontWeight: '900',
   },
@@ -1298,19 +1298,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     paddingHorizontal: 14,
     marginLeft: 8,
   },
 
   featuredOpenText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 11,
     fontWeight: '900',
   },
 
   featuredOpenArrow: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 23,
     fontWeight: '800',
     marginLeft: 5,
@@ -1326,7 +1326,7 @@ const styles = StyleSheet.create({
   },
 
   smallSectionTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 17,
     fontWeight: '900',
   },
@@ -1339,7 +1339,7 @@ const styles = StyleSheet.create({
     height: 330,
     overflow: 'hidden',
     borderRadius: 0,
-    backgroundColor: '#10363A',
+    backgroundColor: '#173523',
   },
 
   curiosityImage: {
@@ -1352,7 +1352,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   curiosityOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,18,20,.44)' },
@@ -1369,7 +1369,7 @@ const styles = StyleSheet.create({
   },
 
   curiosityCategory: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 8,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1405,7 +1405,7 @@ const styles = StyleSheet.create({
   },
 
   curiosityArrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 23,
     fontWeight: '800',
   },
@@ -1415,7 +1415,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    backgroundColor: '#16484C',
+    backgroundColor: '#21472F',
     padding: 15,
     marginHorizontal: 22,
     marginTop: 28,
@@ -1427,7 +1427,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   randomEmoji: {
@@ -1440,13 +1440,13 @@ const styles = StyleSheet.create({
   },
 
   randomTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 15,
     fontWeight: '900',
   },
 
   randomText: {
-    color: '#B8C8C2',
+    color: '#BCC8B8',
     fontSize: 12,
     lineHeight: 17,
     marginTop: 4,
@@ -1458,12 +1458,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     marginLeft: 10,
   },
 
   randomArrow: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 27,
     fontWeight: '800',
   },
@@ -1476,7 +1476,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     height: 410,
     borderRadius: 0,
-    backgroundColor: '#10363A',
+    backgroundColor: '#173523',
   },
 
   adventureImage: {
@@ -1489,7 +1489,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   adventureOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,17,19,.5)' },
@@ -1512,7 +1512,7 @@ const styles = StyleSheet.create({
   },
 
   adventureCategory: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1541,7 +1541,7 @@ const styles = StyleSheet.create({
   },
 
   adventureDescription: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     fontSize: 11,
     lineHeight: 16,
     marginTop: 7,
@@ -1559,11 +1559,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   avatarText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 12,
     fontWeight: '900',
   },
@@ -1574,7 +1574,7 @@ const styles = StyleSheet.create({
   },
 
   authorName: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 10,
     fontWeight: '800',
   },
@@ -1591,11 +1591,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
   },
 
   openCircleText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 21,
     fontWeight: '800',
   },
@@ -1604,8 +1604,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#275456',
-    backgroundColor: '#10363A',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 28,
   },
 
@@ -1615,7 +1615,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
   },
 
   emptyCuriositiesEmoji: {
@@ -1623,14 +1623,14 @@ const styles = StyleSheet.create({
   },
 
   emptyCuriositiesTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 17,
     fontWeight: '900',
     marginTop: 13,
   },
 
   emptyCuriositiesText: {
-    color: '#B8C8C2',
+    color: '#BCC8B8',
     fontSize: 12,
     lineHeight: 18,
     textAlign: 'center',
@@ -1642,13 +1642,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     paddingHorizontal: 16,
     marginTop: 16,
   },
 
   emptyAddButtonText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 12,
     fontWeight: '900',
   },
@@ -1657,8 +1657,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#275456',
-    backgroundColor: '#10363A',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 28,
   },
 
@@ -1667,14 +1667,14 @@ const styles = StyleSheet.create({
   },
 
   emptyCommunityTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 16,
     fontWeight: '900',
     marginTop: 10,
   },
 
   emptyCommunityText: {
-    color: '#B8C8C2',
+    color: '#BCC8B8',
     fontSize: 12,
     textAlign: 'center',
     marginTop: 6,
@@ -1683,21 +1683,21 @@ const styles = StyleSheet.create({
   bottomBanner: {
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#3C7475',
-    backgroundColor: '#16484C',
+    borderColor: '#55775B',
+    backgroundColor: '#21472F',
     padding: 22,
     marginTop: 28,
   },
 
   bottomBannerEyebrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.5,
   },
 
   bottomBannerTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 21,
     lineHeight: 27,
     fontWeight: '900',
@@ -1705,7 +1705,7 @@ const styles = StyleSheet.create({
   },
 
   bottomBannerText: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     fontSize: 13,
     lineHeight: 20,
     marginTop: 9,

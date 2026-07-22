@@ -80,8 +80,8 @@ export function PlaceAutocomplete({ value, onChangeText, onSelect, placeholder =
 
   return <View style={styles.wrapper}>
     <View style={[styles.inputRow, selected && styles.inputRowSelected]}>
-      <TextInput value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor="#9FAFAA" style={styles.input} autoCorrect={false} autoCapitalize="words" />
-      {loading ? <ActivityIndicator color="#C99A2E" /> : <Text style={[styles.status, selected && styles.statusSelected]}>{selected ? '✓' : '⌕'}</Text>}
+      <TextInput value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor="#A8B3A4" style={styles.input} autoCorrect={false} autoCapitalize="words" />
+      {loading ? <ActivityIndicator color="#B86F4B" /> : <Text style={[styles.status, selected && styles.statusSelected]}>{selected ? '✓' : '⌕'}</Text>}
     </View>
     {!selected && value.trim().length >= 2 ? <Text style={styles.helper}>Choisis obligatoirement une suggestion ci-dessous.</Text> : null}
     {!MAPBOX_TOKEN ? <Text style={styles.error}>La recherche de lieux nécessite le jeton Mapbox.</Text> : null}
@@ -91,15 +91,15 @@ export function PlaceAutocomplete({ value, onChangeText, onSelect, placeholder =
 
 const styles = StyleSheet.create({
   wrapper: { width: '100%', zIndex: 20 },
-  inputRow: { minHeight: 54, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#265F63', backgroundColor: '#10363A', paddingHorizontal: 14 },
-  inputRowSelected: { borderColor: '#C99A2E' },
-  input: { flex: 1, color: '#F4EBD8', fontSize: 14, paddingVertical: 13 },
-  status: { width: 28, color: '#9FAFAA', fontSize: 19, textAlign: 'center' },
-  statusSelected: { color: '#C99A2E' },
-  helper: { color: '#D8B65A', fontSize: 10, lineHeight: 15, marginTop: 6 },
+  inputRow: { minHeight: 54, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#3D6648', backgroundColor: '#173523', paddingHorizontal: 14 },
+  inputRowSelected: { borderColor: '#B86F4B' },
+  input: { flex: 1, color: '#F4E9D6', fontSize: 14, paddingVertical: 13 },
+  status: { width: 28, color: '#A8B3A4', fontSize: 19, textAlign: 'center' },
+  statusSelected: { color: '#B86F4B' },
+  helper: { color: '#C58A62', fontSize: 10, lineHeight: 15, marginTop: 6 },
   error: { color: '#E7A29A', fontSize: 10, lineHeight: 15, marginTop: 6 },
-  suggestions: { borderWidth: 1, borderTopWidth: 0, borderColor: '#4B8180', backgroundColor: '#0B2528' },
-  suggestion: { minHeight: 58, justifyContent: 'center', borderTopWidth: 1, borderTopColor: '#275456', paddingHorizontal: 14, paddingVertical: 9 },
-  suggestionTitle: { color: '#F4EBD8', fontSize: 13, fontWeight: '900' },
-  suggestionAddress: { color: '#A9BBB5', fontSize: 10, lineHeight: 14, marginTop: 3 },
+  suggestions: { borderWidth: 1, borderTopWidth: 0, borderColor: '#6F8D6C', backgroundColor: '#102218' },
+  suggestion: { minHeight: 58, justifyContent: 'center', borderTopWidth: 1, borderTopColor: '#35563E', paddingHorizontal: 14, paddingVertical: 9 },
+  suggestionTitle: { color: '#F4E9D6', fontSize: 13, fontWeight: '900' },
+  suggestionAddress: { color: '#AEBBAA', fontSize: 10, lineHeight: 14, marginTop: 3 },
 });

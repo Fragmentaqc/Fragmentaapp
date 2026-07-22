@@ -67,7 +67,7 @@ const adventureCategoryColors: Record<string, string> = {
 };
 
 const curiosityCategoryColors: Record<string, string> = {
-  'Lieu insolite': '#D8B65A',
+  'Lieu insolite': '#C58A62',
   'Histoire locale': '#D98E73',
   'Architecture étrange': '#E18FFF',
   'Nature remarquable': '#61D394',
@@ -90,7 +90,7 @@ function getAdventureColor(category: string) {
 }
 
 function getCuriosityColor(category: string) {
-  return curiosityCategoryColors[category] ?? '#D8B65A';
+  return curiosityCategoryColors[category] ?? '#C58A62';
 }
 
 function hasAdventureCoordinates(adventure: Adventure) {
@@ -428,7 +428,7 @@ export default function MapScreen() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator
             size="large"
-            color="#C99A2E"
+            color="#B86F4B"
           />
 
           <Text style={styles.loadingText}>
@@ -461,7 +461,7 @@ export default function MapScreen() {
           {selectedRoute.route.coordinates.length > 1 ? (
             <Polyline
               coordinates={selectedRoute.route.coordinates}
-              strokeColor="#C99A2E"
+              strokeColor="#B86F4B"
               strokeWidth={5}
             />
           ) : null}
@@ -474,7 +474,7 @@ export default function MapScreen() {
                 coordinate={{ latitude: fragment.latitude as number, longitude: fragment.longitude as number }}
                 title={fragment.title}
                 description={`Fragment ${index + 1}`}
-                pinColor="#C99A2E"
+                pinColor="#B86F4B"
               />
             ))}
 
@@ -548,8 +548,8 @@ export default function MapScreen() {
                 filter === 'Aventures'
                   ? '#5B879D'
                   : filter === 'Curiosités'
-                    ? '#D8B65A'
-                    : '#C99A2E';
+                    ? '#C58A62'
+                    : '#B86F4B';
 
               const icon =
                 filter === 'Aventures'
@@ -568,7 +568,7 @@ export default function MapScreen() {
                     styles.filterButton,
                     selected && {
                       borderColor: color,
-                      backgroundColor: '#16484C',
+                      backgroundColor: '#21472F',
                     },
                   ]}
                 >
@@ -867,12 +867,12 @@ function CuriosityDetailCard({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071A1C',
+    backgroundColor: '#0B1710',
   },
 
   container: {
     flex: 1,
-    backgroundColor: '#071A1C',
+    backgroundColor: '#0B1710',
   },
 
   loadingContainer: {
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     fontSize: 14,
     marginTop: 14,
   },
@@ -917,21 +917,21 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.6,
   },
 
   title: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 23,
     fontWeight: '900',
     marginTop: 4,
   },
 
   subtitle: {
-    color: '#C9D6D1',
+    color: '#CBD5C8',
     fontSize: 12,
     marginTop: 5,
   },
@@ -960,13 +960,13 @@ const styles = StyleSheet.create({
   },
 
   filterText: {
-    color: '#A2B3AB',
+    color: '#AAB6A6',
     fontSize: 12,
     fontWeight: '700',
   },
 
   filterTextSelected: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontWeight: '900',
   },
 
@@ -990,7 +990,7 @@ const styles = StyleSheet.create({
   },
 
   mapButtonIcon: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 23,
     fontWeight: '900',
   },
@@ -1000,7 +1000,7 @@ const styles = StyleSheet.create({
   },
 
   showAllButtonText: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 11,
     fontWeight: '900',
   },
@@ -1074,33 +1074,33 @@ const styles = StyleSheet.create({
 
   verificationBadge: {
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
     paddingHorizontal: 9,
     paddingVertical: 6,
   },
 
   verificationText: {
-    color: '#D8B65A',
+    color: '#C58A62',
     fontSize: 8,
     fontWeight: '900',
     textTransform: 'uppercase',
   },
 
   cardTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 21,
     fontWeight: '900',
     marginTop: 10,
   },
 
   cardLocation: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 12,
     fontWeight: '800',
     marginTop: 6,
   },
 
-  cardRoute: { color: '#D8B65A', fontSize: 11, fontWeight: '900', marginTop: 6 },
+  cardRoute: { color: '#C58A62', fontSize: 11, fontWeight: '900', marginTop: 6 },
 
   cardDescription: {
     color: '#95AAA1',
@@ -1128,14 +1128,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#1D5A5E',
+    backgroundColor: '#2D5B3D',
     borderWidth: 1,
     borderColor: '#2A5B49',
     marginRight: 9,
   },
 
   authorInitial: {
-    color: '#C99A2E',
+    color: '#B86F4B',
     fontSize: 15,
     fontWeight: '900',
   },
@@ -1148,7 +1148,7 @@ const styles = StyleSheet.create({
   },
 
   authorName: {
-    color: '#FFF6E5',
+    color: '#FBF1DF',
     fontSize: 12,
     fontWeight: '800',
     marginTop: 2,
@@ -1160,19 +1160,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#C99A2E',
+    backgroundColor: '#B86F4B',
     paddingHorizontal: 14,
     marginLeft: 8,
   },
 
   openButtonText: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 11,
     fontWeight: '900',
   },
 
   openButtonArrow: {
-    color: '#071A1C',
+    color: '#0B1710',
     fontSize: 23,
     fontWeight: '700',
     marginLeft: 5,
@@ -1184,7 +1184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#D8B65A',
+    backgroundColor: '#C58A62',
     paddingHorizontal: 15,
     marginLeft: 8,
   },
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#275456',
+    borderColor: '#35563E',
     backgroundColor: 'rgba(7, 19, 16, 0.97)',
     padding: 20,
   },
@@ -1220,14 +1220,14 @@ const styles = StyleSheet.create({
   },
 
   emptyTitle: {
-    color: '#F4EBD8',
+    color: '#F4E9D6',
     fontSize: 16,
     fontWeight: '900',
     marginTop: 6,
   },
 
   emptyText: {
-    color: '#B8C8C2',
+    color: '#BCC8B8',
     fontSize: 12,
     lineHeight: 18,
     marginTop: 5,

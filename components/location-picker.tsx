@@ -66,7 +66,7 @@ export function LocationPicker({
         showsUserLocation={locationEnabled}
         showsMyLocationButton={false}
       >
-        {coordinate ? <Marker coordinate={coordinate} pinColor="#C99A2E" /> : null}
+        {coordinate ? <Marker coordinate={coordinate} pinColor="#B86F4B" /> : null}
       </MapView>
       <Pressable
         style={styles.gpsButton}
@@ -88,11 +88,11 @@ export function LocationPicker({
 }
 
 const styles = StyleSheet.create({
-  container: { height: 230, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#3C7475', marginTop: 10 },
+  container: { height: 230, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#55775B', marginTop: 10 },
   map: { flex: 1 },
   hint: { position: 'absolute', left: 12, right: 12, bottom: 12, alignItems: 'center' },
-  hintText: { color: '#F4EBD8', fontSize: 11, fontWeight: '800', borderRadius: 0, backgroundColor: 'rgba(7, 19, 16, 0.84)', paddingHorizontal: 12, paddingVertical: 8 },
+  hintText: { color: '#F4E9D6', fontSize: 11, fontWeight: '800', borderRadius: 0, backgroundColor: 'rgba(7, 19, 16, 0.84)', paddingHorizontal: 12, paddingVertical: 8 },
   attribution: { position: 'absolute', left: 7, bottom: 5, color: '#50645B', fontSize: 8 },
-  gpsButton: { position: 'absolute', top: 12, right: 12, borderRadius: 0, backgroundColor: '#C99A2E', paddingHorizontal: 12, paddingVertical: 9 },
-  gpsButtonText: { color: '#071A1C', fontSize: 11, fontWeight: '900' },
+  gpsButton: { position: 'absolute', top: 12, right: 12, borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 12, paddingVertical: 9 },
+  gpsButtonText: { color: '#0B1710', fontSize: 11, fontWeight: '900' },
 });
