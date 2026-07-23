@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
+import { resolvePrivateImageUrls } from '@/lib/storage-urls';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
 import { readOfflineCache, writeOfflineCache } from '@/lib/offline-cache';
@@ -75,10 +76,11 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
 
       const ids = (rows ?? []).map((row) => row.id as string);
       const imageResult = ids.length
-        ? await supabase.from('fragment_images').select('fragment_id, image_url, position').in('fragment_id', ids).order('position')
+        ? await supabase.from('fragment_images').select('fragment_id, image_url, storage_path, position').in('fragment_id', ids).order('position')
         : { data: [], error: null };
       if (imageResult.error) throw imageResult.error;
 
+      const resolvedImages = await resolvePrivateImageUrls('fragment-images', imageResult.data ?? []);
       const fragments: Fragment[] = (rows ?? []).map((row) => ({
         id: row.id,
         adventureId: row.adventure_id,
@@ -89,7 +91,7 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
         latitude: row.latitude,
         longitude: row.longitude,
         status: row.status === 'draft' ? 'draft' : 'published',
-        images: (imageResult.data ?? [])
+        images: resolvedImages
           .filter((image) => image.fragment_id === row.id)
           .map((image) => image.image_url),
       }));
@@ -174,15 +176,18 @@ export function FragmentsProvider({ children }: { children: ReactNode }) {
     if (!user) return false;
     const imageResult = await supabase.from('fragment_images').select('storage_path').eq('fragment_id', fragmentId).eq('owner_id', user.id);
     if (imageResult.error) return false;
+    const paths = (imageResult.data ?? []).map((row) => row.storage_path as string).filter(Boolean);
+    if (paths.length) {
+      const storageResult = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+      if (storageResult.error) {
+        console.error('Nettoyage incomplet des photos :', storageResult.error.message);
+        return false;
+      }
+    }
     const { error } = await supabase.from('fragments').delete().eq('id', fragmentId).eq('owner_id', user.id);
     if (error) {
       console.error('Erreur de suppression du fragment :', error.message);
       return false;
-    }
-    const paths = (imageResult.data ?? []).map((row) => row.storage_path as string).filter(Boolean);
-    if (paths.length) {
-      const storageResult = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
-      if (storageResult.error) console.error('Nettoyage incomplet des photos :', storageResult.error.message);
     }
     await loadFragments(adventureId);
     return true;

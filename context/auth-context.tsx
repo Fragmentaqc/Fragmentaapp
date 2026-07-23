@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { normalizeUsername } from '@/lib/account-validation';
+import { normalizeUsername, validatePassword } from '@/lib/account-validation';
 import type { Session, User } from '@supabase/supabase-js';
 import {
     createContext,
@@ -60,13 +60,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ) {
     const normalizedUsername = normalizeUsername(username);
 
-    if (!normalizedUsername) {
-      return 'Le nom d’utilisateur est invalide.';
+    if (normalizedUsername.length < 3 || normalizedUsername.length > 30) {
+      return 'Le nom d’utilisateur doit contenir entre 3 et 30 caractères.';
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) return passwordError;
+
+    const normalizedDisplayName = displayName.trim();
+    if (!normalizedDisplayName || normalizedDisplayName.length > 80) {
+      return 'Le nom affiché doit contenir entre 1 et 80 caractères.';
     }
 
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
+      options: {
+        data: {
+          username: normalizedUsername,
+          display_name: normalizedDisplayName,
+          adult_confirmed: true,
+          terms_version: '2026-07-20',
+        },
+      },
     });
 
     if (error) {
@@ -75,21 +91,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!data.user) {
       return 'Le compte n’a pas pu être créé.';
-    }
-
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: data.user.id,
-        username: normalizedUsername,
-        display_name: displayName.trim(),
-        terms_accepted_at: new Date().toISOString(),
-        terms_version: '2026-07-20',
-        adult_confirmed_at: new Date().toISOString(),
-      });
-
-    if (profileError) {
-      return profileError.message;
     }
 
     return null;

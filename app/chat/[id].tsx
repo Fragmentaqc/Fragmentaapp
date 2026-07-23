@@ -40,7 +40,7 @@ export default function ChatScreen() {
   useEffect(() => { void loadMessages(); }, [loadMessages]);
   useEffect(() => {
     if (!conversationId) return;
-    const channel = supabase.channel(`chat-${conversationId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) => {
+    const channel = supabase.channel(`chat:${conversationId}`, { config: { private: true } }).on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) => {
       const message = payload.new as Message;
       setMessages((current) => current.some((item) => item.id === message.id) ? current.map((item) => item.id === message.id ? message : item) : [...current, message]);
       if (message.sender_id !== user?.id) void markRead();

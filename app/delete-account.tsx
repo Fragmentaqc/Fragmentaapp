@@ -17,15 +17,28 @@ async function removeFiles(bucket: string, paths: string[]) {
 export default function DeleteAccountScreen() {
   const { user } = useAuth();
   const [confirmation, setConfirmation] = useState('');
+  const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);
 
   async function deleteAccount() {
-    if (!user || confirmation !== 'SUPPRIMER' || deleting) return;
+    if (!user?.email || confirmation !== 'SUPPRIMER' || !password || deleting) return;
     setDeleting(true);
     try {
+      const { error: authenticationError } = await supabase.auth.signInWithPassword({ email: user.email, password });
+      if (authenticationError) {
+        Alert.alert('Mot de passe incorrect', 'Entre ton mot de passe actuel pour confirmer la suppression.');
+        setDeleting(false);
+        return;
+      }
+      const curiosityResult = await supabase.from('curiosities').select('id').eq('owner_id', user.id);
+      if (curiosityResult.error) throw new Error('Lecture des curiosités impossible.');
+      const curiosityIds = (curiosityResult.data ?? []).map((row) => row.id as string);
+      const curiosityImagesPromise = curiosityIds.length
+        ? supabase.from('curiosity_images').select('storage_path').in('curiosity_id', curiosityIds)
+        : Promise.resolve({ data: [], error: null });
       const [adventureImages, curiosityImages, fragmentImages, avatarFiles] = await Promise.all([
         supabase.from('adventure_images').select('storage_path').eq('owner_id', user.id),
-        supabase.from('curiosity_images').select('storage_path').eq('owner_id', user.id),
+        curiosityImagesPromise,
         supabase.from('fragment_images').select('storage_path').eq('owner_id', user.id),
         supabase.storage.from('avatars').list(user.id, { limit: 1000 }),
       ]);
@@ -52,8 +65,9 @@ export default function DeleteAccountScreen() {
     <Pressable onPress={router.back} disabled={deleting}><Text style={styles.back}>‹ Retour</Text></Pressable>
     <Text style={styles.eyebrow}>ZONE DANGEREUSE</Text><Text style={styles.title}>Supprimer mon compte</Text>
     <View style={styles.warning}><Text style={styles.warningTitle}>Cette action est définitive</Text><Text style={styles.warningText}>Ton profil, tes aventures, fragments, curiosités, favoris et photos seront supprimés. Cette action ne peut pas être annulée.</Text></View>
+    <Text style={styles.label}>Mot de passe actuel</Text><TextInput value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} editable={!deleting} style={styles.input} placeholder="Ton mot de passe" placeholderTextColor="#A8B3A4" />
     <Text style={styles.label}>Écris SUPPRIMER pour confirmer</Text><TextInput value={confirmation} onChangeText={setConfirmation} autoCapitalize="characters" autoCorrect={false} editable={!deleting} style={styles.input} placeholder="SUPPRIMER" placeholderTextColor="#A8B3A4" />
-    <Pressable style={[styles.deleteButton, confirmation !== 'SUPPRIMER' && styles.disabled]} disabled={confirmation !== 'SUPPRIMER' || deleting} onPress={() => void deleteAccount()}>{deleting ? <ActivityIndicator color="#FFF" /> : <Text style={styles.deleteText}>Supprimer définitivement mon compte</Text>}</Pressable>
+    <Pressable style={[styles.deleteButton, (confirmation !== 'SUPPRIMER' || !password) && styles.disabled]} disabled={confirmation !== 'SUPPRIMER' || !password || deleting} onPress={() => void deleteAccount()}>{deleting ? <ActivityIndicator color="#FFF" /> : <Text style={styles.deleteText}>Supprimer définitivement mon compte</Text>}</Pressable>
   </ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
 

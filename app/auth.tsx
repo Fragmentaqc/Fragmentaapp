@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/auth-context';
+import { validatePassword } from '@/lib/account-validation';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -34,10 +35,11 @@ export default function AuthScreen() {
       return;
     }
 
-    if (password.length < 6) {
+    const passwordError = validatePassword(password);
+    if (passwordError) {
       Alert.alert(
         'Mot de passe trop court',
-        'Utilise au moins 6 caractères.'
+        passwordError
       );
       return;
     }
@@ -152,7 +154,7 @@ export default function AuthScreen() {
           <TextInput
             value={password}
             onChangeText={setPassword}
-            placeholder="Au moins 6 caractères"
+            placeholder="Au moins 8 caractères"
             placeholderTextColor="#A8B3A4"
             style={styles.input}
             secureTextEntry

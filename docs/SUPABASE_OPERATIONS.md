@@ -85,6 +85,17 @@ Convention suggérée :
 fragmenta-production-YYYYMMDD-HHMM-commit.dump
 ```
 
+### Outils versionnés
+
+Les scripts du dossier `scripts/` ne contiennent aucun secret. La connexion est fournie uniquement au moment de l'exécution.
+
+```powershell
+.\scripts\backup-database.ps1 -DatabaseUrl $env:FRAGMENTA_DATABASE_URL -OutputDirectory 'D:\FragmentaBackups' -Environment production -Commit '<commit>'
+.\scripts\verify-database-backup.ps1 -DumpPath 'D:\FragmentaBackups\fragmenta-production-....dump'
+```
+
+Le fichier `.dump`, son empreinte `.sha256` et ses métadonnées `.json` doivent rester ensemble et hors du dépôt. La sauvegarde PostgreSQL contient les tables et les métadonnées Storage, mais pas les fichiers des buckets. Ces fichiers doivent être copiés séparément vers un stockage privé, chiffré et versionné.
+
 ## Restauration
 
 Une restauration est une opération exceptionnelle. Avant de la lancer :
@@ -119,6 +130,12 @@ Fréquence recommandée :
 - après un changement de forfait ou de stratégie de sauvegarde.
 
 Le test doit être effectué dans un projet isolé, jamais directement dans la production.
+
+```powershell
+.\scripts\test-database-restore.ps1 -DumpPath '<backup.dump>' -TargetDatabaseUrl $env:FRAGMENTA_RESTORE_TEST_URL -Confirmation RESTORE-ISOLATED-DATABASE
+```
+
+Le script exige cette confirmation exacte et refuse une adresse contenant `prod` ou `production`. Après le chargement, exécuter `supabase/tests/security_assertions.sql`, puis tester la connexion, les messages privés, les images signées, l'export et la suppression de compte. Un fichier jamais restauré ne compte pas comme une sauvegarde validée.
 
 ## Journal de déploiement
 
