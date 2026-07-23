@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/auth-context';
 import { useBlocks } from '@/context/blocks-context';
 import { supabase } from '@/lib/supabase';
+import { resolvePrivateImageUrls } from '@/lib/storage-urls';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
 import {
@@ -87,6 +88,7 @@ type CuriosityRow = {
 type CuriosityImageRow = {
   curiosity_id: string;
   image_url: string;
+  storage_path: string | null;
   position: number | null;
 };
 
@@ -146,7 +148,7 @@ async function uploadCuriosityImage({
     localUri.startsWith('https://') ||
     localUri.startsWith('http://')
   ) {
-    return localUri;
+    return { imageUrl: localUri, storagePath: null };
   }
 
   const extension = getFileExtension(localUri);
@@ -187,7 +189,7 @@ async function uploadCuriosityImage({
     );
   }
 
-  return data.publicUrl;
+  return { imageUrl: data.publicUrl, storagePath };
 }
 
 export function CuriositiesProvider({
@@ -271,7 +273,7 @@ export function CuriositiesProvider({
           supabase
             .from('curiosity_images')
             .select(
-              'curiosity_id, image_url, position'
+              'curiosity_id, image_url, storage_path, position'
             )
             .in('curiosity_id', curiosityIds)
             .order('position', {
@@ -305,9 +307,10 @@ export function CuriositiesProvider({
         );
       }
 
-      const images =
-        (imagesResult.data ??
-          []) as CuriosityImageRow[];
+      const images = await resolvePrivateImageUrls(
+        STORAGE_BUCKET,
+        (imagesResult.data ?? []) as CuriosityImageRow[]
+      );
 
       const profiles =
         (profilesResult.data ?? []) as ProfileRow[];
@@ -423,6 +426,7 @@ export function CuriositiesProvider({
       setUploading(true);
 
       let createdCuriosityId: string | null = null;
+      const uploadedStoragePaths: string[] = [];
 
       try {
         const {
@@ -492,14 +496,14 @@ export function CuriositiesProvider({
               uri.trim().length > 0
           );
 
-        const uploadedUrls: string[] = [];
+        const uploadedImages: { imageUrl: string; storagePath: string | null }[] = [];
 
         for (
           let index = 0;
           index < validImages.length;
           index += 1
         ) {
-          const publicUrl =
+          const uploadedImage =
             await uploadCuriosityImage({
               localUri: validImages[index],
               userId: user.id,
@@ -507,14 +511,16 @@ export function CuriositiesProvider({
               position: index,
             });
 
-          uploadedUrls.push(publicUrl);
+          uploadedImages.push(uploadedImage);
+          if (uploadedImage.storagePath) uploadedStoragePaths.push(uploadedImage.storagePath);
         }
 
-        if (uploadedUrls.length > 0) {
-          const imageRows = uploadedUrls.map(
-            (imageUrl, index) => ({
+        if (uploadedImages.length > 0) {
+          const imageRows = uploadedImages.map(
+            (image, index) => ({
               curiosity_id: createdCuriosityId,
-              image_url: imageUrl,
+              image_url: image.imageUrl,
+              storage_path: image.storagePath,
               position: index,
             })
           );
@@ -539,6 +545,10 @@ export function CuriositiesProvider({
           'Erreur pendant la publication :',
           error
         );
+
+        if (uploadedStoragePaths.length > 0) {
+          await supabase.storage.from(STORAGE_BUCKET).remove(uploadedStoragePaths);
+        }
 
         if (createdCuriosityId) {
           await supabase
@@ -590,6 +600,23 @@ export function CuriositiesProvider({
   const deleteCuriosity = useCallback(async (curiosityId: string) => {
     if (!user) return false;
 
+    const imageResult = await supabase
+      .from('curiosity_images')
+      .select('storage_path')
+      .eq('curiosity_id', curiosityId);
+    if (imageResult.error) return false;
+
+    const paths = (imageResult.data ?? [])
+      .map((row) => row.storage_path as string | null)
+      .filter((path): path is string => Boolean(path));
+    if (paths.length > 0) {
+      const storageResult = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+      if (storageResult.error) {
+        console.error('Erreur de suppression des images :', storageResult.error.message);
+        return false;
+      }
+    }
+
     const { error } = await supabase
       .from('curiosities')
       .delete()
@@ -599,16 +626,6 @@ export function CuriositiesProvider({
     if (error) {
       console.error('Erreur de suppression de la curiosité :', error.message);
       return false;
-    }
-
-    const folder = `${user.id}/${curiosityId}`;
-    const { data: files } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .list(folder);
-    if (files && files.length > 0) {
-      await supabase.storage
-        .from(STORAGE_BUCKET)
-        .remove(files.map((file) => `${folder}/${file.name}`));
     }
 
     await refreshCuriosities();

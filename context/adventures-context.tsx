@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/auth-context';
 import { useBlocks } from '@/context/blocks-context';
 import { supabase } from '@/lib/supabase';
+import { resolvePrivateImageUrls } from '@/lib/storage-urls';
 import { decode } from 'base64-arraybuffer';
 import { readOfflineCache, writeOfflineCache } from '@/lib/offline-cache';
 import type { RouteProfile } from '@/lib/routing';
@@ -101,6 +102,7 @@ type ProfileRow = {
 type AdventureImageRow = {
   adventure_id: string;
   image_url: string;
+  storage_path: string | null;
   position: number | null;
 };
 
@@ -343,7 +345,7 @@ export function AdventuresProvider({
           ? supabase
               .from('adventure_images')
               .select(
-                'adventure_id, image_url, position'
+                'adventure_id, image_url, storage_path, position'
               )
               .in('adventure_id', adventureIds)
               .order('position', {
@@ -372,9 +374,10 @@ export function AdventuresProvider({
       const profiles =
         (profileResult.data ?? []) as ProfileRow[];
 
-      const images =
-        (imageResult.data ??
-          []) as AdventureImageRow[];
+      const images = await resolvePrivateImageUrls(
+        STORAGE_BUCKET,
+        (imageResult.data ?? []) as AdventureImageRow[]
+      );
 
       const formattedAdventures: Adventure[] =
         rows.map((adventure) => {
@@ -698,6 +701,17 @@ export function AdventuresProvider({
       return false;
     }
 
+    const paths = (imageRows ?? [])
+      .map((row) => row.storage_path as string | null)
+      .filter((path): path is string => Boolean(path));
+    if (paths.length > 0) {
+      const storageResult = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+      if (storageResult.error) {
+        console.error('Erreur de suppression des images :', storageResult.error.message);
+        return false;
+      }
+    }
+
     const { error } = await supabase
       .from('adventures')
       .delete()
@@ -707,13 +721,6 @@ export function AdventuresProvider({
     if (error) {
       console.error("Erreur de suppression de l'aventure :", error.message);
       return false;
-    }
-
-    const paths = (imageRows ?? [])
-      .map((row) => row.storage_path as string | null)
-      .filter((path): path is string => Boolean(path));
-    if (paths.length > 0) {
-      await supabase.storage.from(STORAGE_BUCKET).remove(paths);
     }
 
     await refreshAdventures();

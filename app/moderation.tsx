@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, Text
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ReportStatus = 'pending' | 'reviewing' | 'resolved' | 'dismissed';
-type Report = { id: string; reporter_id: string; adventure_id: string | null; curiosity_id: string | null; reported_user_id: string | null; message_id: string | null; reason: string; details: string; status: ReportStatus; moderation_note: string; created_at: string };
+type Report = { id: string; reporter_id: string; adventure_id: string | null; curiosity_id: string | null; reported_user_id: string | null; message_id: string | null; reason: string; details: string; evidence: Record<string, unknown>; status: ReportStatus; moderation_note: string; created_at: string };
 type ModerationLog = { id: string; report_id: string | null; old_status: ReportStatus; new_status: ReportStatus; note: string; created_at: string };
 type VerificationRequest = { id: string; curiosity_id: string; requester_id: string; status: 'pending' | 'approved' | 'rejected'; decision_note: string; created_at: string; curiosities: { title: string; location_name: string | null } | null };
 const reasonLabels: Record<string, string> = { spam: 'Contenu indésirable', harassment: 'Harcèlement', dangerous: 'Contenu dangereux', false_information: 'Information fausse', inappropriate: 'Contenu inapproprié', other: 'Autre raison' };
@@ -27,7 +27,7 @@ export default function ModerationScreen() {
       setAuthorized(false); setLoading(false); return;
     }
     setAuthorized(true);
-    const { data, error } = await supabase.from('reports').select('id, reporter_id, adventure_id, curiosity_id, reported_user_id, message_id, reason, details, status, moderation_note, created_at').order('created_at', { ascending: true });
+    const { data, error } = await supabase.from('reports').select('id, reporter_id, adventure_id, curiosity_id, reported_user_id, message_id, reason, details, evidence, status, moderation_note, created_at').order('created_at', { ascending: true });
     if (error) Alert.alert('Erreur', 'Impossible de charger les signalements.');
     else setReports((data ?? []) as Report[]);
     const logResult = await supabase.from('moderation_logs').select('id, report_id, old_status, new_status, note, created_at').order('created_at', { ascending: false }).limit(25);
@@ -43,7 +43,7 @@ export default function ModerationScreen() {
     if (updatingId) return;
     setUpdatingId(id);
     const note = (notes[id] ?? '').trim();
-    const { error } = await supabase.from('reports').update({ status, reviewed_at: new Date().toISOString(), moderation_note: note }).eq('id', id);
+    const { error } = await supabase.rpc('review_report', { target_report_id: id, target_status: status, review_note: note });
     setUpdatingId(null);
     if (error) Alert.alert('Erreur', 'Impossible de modifier ce signalement.');
     else {
@@ -81,6 +81,7 @@ export default function ModerationScreen() {
       <View style={styles.cardTop}><Text style={styles.reason}>{reasonLabels[report.reason] ?? report.reason}</Text><Text style={styles.status}>{report.status === 'pending' ? 'NOUVEAU' : 'EN EXAMEN'}</Text></View>
       <Text style={styles.date}>{new Date(report.created_at).toLocaleString('fr-CA')}</Text>
       {report.details ? <Text style={styles.details}>{report.details}</Text> : <Text style={styles.noDetails}>Aucune précision fournie.</Text>}
+      {typeof report.evidence?.body === 'string' ? <View style={styles.evidence}><Text style={styles.evidenceLabel}>PREUVE CONSERVÉE</Text><Text style={styles.details}>{report.evidence.body}</Text></View> : null}
       {report.message_id ? <View style={styles.target}><Text style={styles.targetText}>Message privé signalé</Text></View> : <Pressable style={styles.target} onPress={() => openTarget(report)}><Text style={styles.targetText}>Voir le contenu signalé →</Text></Pressable>}
       <TextInput value={notes[report.id] ?? ''} onChangeText={(value) => setNotes((current) => ({ ...current, [report.id]: value }))} style={styles.noteInput} maxLength={1000} placeholder="Note interne facultative" placeholderTextColor="#A8B3A4" />
       <View style={styles.actions}>
@@ -106,4 +107,5 @@ export default function ModerationScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0B1710' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }, container: { padding: 20, paddingBottom: 70 }, back: { color: '#B86F4B', fontSize: 15, fontWeight: '800', marginBottom: 22 }, eyebrow: { color: '#C58A62', fontSize: 10, fontWeight: '900', letterSpacing: 1.2 }, title: { color: '#F4E9D6', fontSize: 28, fontWeight: '900', marginTop: 6 }, subtitle: { color: '#CBD5C8', fontSize: 13, marginTop: 7, marginBottom: 14 }, empty: { color: '#BCC8B8', fontSize: 13, lineHeight: 20, textAlign: 'center', marginTop: 18 },
   card: { borderRadius: 0, borderWidth: 1, borderColor: '#55775B', backgroundColor: '#173523', padding: 16, marginTop: 12 }, cardTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 }, reason: { flex: 1, color: '#F4E9D6', fontSize: 15, fontWeight: '900' }, status: { color: '#0B1710', backgroundColor: '#C58A62', borderRadius: 0, paddingHorizontal: 8, paddingVertical: 5, fontSize: 8, fontWeight: '900' }, date: { color: '#A8B3A4', fontSize: 10, marginTop: 7 }, details: { color: '#E6E2D5', fontSize: 13, lineHeight: 20, marginTop: 12 }, noDetails: { color: '#A8B3A4', fontSize: 11, fontStyle: 'italic', marginTop: 12 }, target: { borderRadius: 0, backgroundColor: '#2D5B3D', padding: 12, marginTop: 13 }, targetText: { color: '#B86F4B', fontSize: 11, fontWeight: '900' }, noteInput: { minHeight: 46, borderRadius: 0, borderWidth: 1, borderColor: '#55775B', color: '#F4E9D6', padding: 12, marginTop: 10 }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }, review: { borderRadius: 0, backgroundColor: '#6F8D6C', padding: 10 }, reviewText: { color: '#FFF', fontSize: 10, fontWeight: '900' }, resolve: { borderRadius: 0, backgroundColor: '#B86F4B', padding: 10 }, resolveText: { color: '#0B1710', fontSize: 10, fontWeight: '900' }, dismiss: { borderRadius: 0, borderWidth: 1, borderColor: '#7B3535', padding: 10 }, dismissText: { color: '#FFB8B8', fontSize: 10, fontWeight: '900' }, historyTitle: { color: '#F4E9D6', fontSize: 20, fontWeight: '900', marginTop: 30 }, logCard: { borderLeftWidth: 2, borderLeftColor: '#B86F4B', paddingLeft: 13, paddingVertical: 8, marginTop: 8 }, logChange: { color: '#FBF1DF', fontSize: 12, fontWeight: '900' }, logNote: { color: '#BCC8B8', fontSize: 11, lineHeight: 17, marginTop: 5 }, primary: { minHeight: 50, justifyContent: 'center', borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 20, marginTop: 20 }, primaryText: { color: '#0B1710', fontWeight: '900' },
+  evidence: { borderLeftWidth: 2, borderLeftColor: '#C58A62', paddingLeft: 12, marginTop: 12 }, evidenceLabel: { color: '#C58A62', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
 });
