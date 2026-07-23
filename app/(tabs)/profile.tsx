@@ -3,8 +3,9 @@ import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
 import { useCollections } from '@/context/collections-context';
 import { useFollows } from '@/context/follows-context';
+import { SocialLinksRow } from '@/components/social-links-row';
 import { supabase } from '@/lib/supabase';
-import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
+import { parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { useFocusEffect } from '@react-navigation/native';
 import * as ExpoLinking from 'expo-linking';
 import { useRouter } from 'expo-router';
@@ -13,7 +14,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -214,14 +214,16 @@ export default function ProfileScreen() {
         <View style={styles.passportHero}>
           {coverImage ? <Image source={{ uri: coverImage }} style={styles.coverImage} /> : <View style={styles.coverFallback}><Text style={styles.coverMark}>F</Text></View>}
           <View style={styles.coverShade} />
-          <View style={styles.heroTop}><View><Text style={styles.heroEyebrow}>PASSEPORT D’AVENTURIER</Text><Text style={styles.heroBrand}>FRAGMENTA</Text></View>{user ? <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')}><Text style={styles.settingsIcon}>⚙</Text></Pressable> : null}</View>
+          <View style={styles.heroTop}>{user ? <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')} accessibilityLabel="Modifier le profil"><Text style={styles.settingsIcon}>⚙</Text></Pressable> : null}</View>
           <View style={styles.heroIdentity}>
             <View style={styles.avatar}>{user && profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{user ? initial : '?'}</Text>}</View>
             <View style={styles.identityText}><Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{user ? displayName : 'Bienvenue sur Fragmenta'}</Text><Text style={styles.username} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{user ? username : 'Le réseau des aventures vécues'}</Text>{profile?.country ? <Text style={styles.heroCountry} numberOfLines={1}>⌖ {profile.country}</Text> : null}</View>
           </View>
         </View>
 
-        {user ? <View style={styles.profileIntro}><Text style={profile?.bio ? styles.bio : styles.bioPlaceholder}>{profile?.bio || 'Ajoute une bio pour raconter le genre d’aventures que tu veux vivre.'}</Text><Pressable style={styles.editProfilePill} onPress={() => router.push('/edit-profile')}><Text style={styles.editProfilePillText}>Modifier le profil</Text></Pressable></View> : null}
+        <SocialLinksRow links={parseSocialLinks(profile?.social_links)} />
+
+        {user && profile?.bio ? <View style={styles.profileIntro}><Text style={styles.bio}>{profile.bio}</Text></View> : null}
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}><Text style={styles.statValue}>{myAdventures.length}</Text><Text style={styles.statLabel}>Aventures</Text></View>
@@ -244,9 +246,9 @@ export default function ProfileScreen() {
         </View> : null}
 
         {user ? <>
-          <View style={styles.pageSectionHeader}><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View>
+          <View style={styles.pageSectionHeader}><View><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View><Text style={styles.routeActivityCount}>{visibleProfileMapItems.length} {visibleProfileMapItems.length === 1 ? 'activité' : 'activités'}</Text></View>
           <View style={styles.profileMapSection}>
-            <View style={styles.profileMapHeader}><View><Text style={styles.sectionCardEyebrow}>MA CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes activités autour du monde</Text></View><Text style={styles.profileMapCount}>{visibleProfileMapItems.length}</Text></View>
+            <View style={styles.profileMapHeader}><View><Text style={styles.sectionCardEyebrow}>MA CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes activités autour du monde</Text></View></View>
             <MapView key={`profile-map-${profileMapFilter}-${visibleProfileMapItems.length}`} style={styles.profileMap} initialRegion={profileMapRegion} scrollEnabled zoomEnabled zoomControlEnabled rotateEnabled={false} pitchEnabled={false} toolbarEnabled={false}>
               {visibleProfileMapItems.map((item) => <Marker key={`${item.type}-${item.id}`} coordinate={{ latitude: item.latitude, longitude: item.longitude }} title={item.title} pinColor={item.type === 'adventure' ? '#5B879D' : '#B86F4B'} onPress={() => router.push(item.type === 'adventure' ? { pathname: '/adventure/[id]', params: { id: item.id } } : { pathname: '/curiosity/[id]', params: { id: item.id } })} />)}
             </MapView>
@@ -257,7 +259,7 @@ export default function ProfileScreen() {
             </View>
             {visibleProfileMapItems.length === 0 ? <View style={styles.profileMapEmpty}><Text style={styles.profileMapEmptyTitle}>Aucune activité dans ce filtre</Text><Text style={styles.profileMapEmptyText}>Les pins apparaîtront dès qu’une activité possède un emplacement.</Text></View> : null}
           </View>
-          <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View>
+          <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text>{profile?.bio ? <Text style={styles.aboutText}>{profile.bio}</Text> : null}{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View>
           <View style={styles.sectionIntro}>
             <View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes listes d’aventures</Text></View><Text style={styles.collectionCount}>{collections.length}</Text></View>
             <Text style={styles.aboutText}>Crée des listes et range les aventures que tu veux retrouver.</Text>
@@ -340,33 +342,9 @@ export default function ProfileScreen() {
           </View>
         ) : null}
 
-        {user && parseSocialLinks(profile?.social_links).length > 0 ? (
-          <View style={styles.socialLinks}>
-            {parseSocialLinks(profile?.social_links).map((link, index) => (
-              <Pressable
-                key={`${link.platform}-${index}`}
-                style={styles.socialLink}
-                onPress={() => void Linking.openURL(normalizeSocialUrl(link.url))}
-              >
-                <Text style={styles.socialLinkText}>{link.platform}</Text>
-                <Text style={styles.socialLinkArrow}>↗</Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-
         {user ? (
           <>
             {isModerator ? <Pressable style={styles.moderationButton} onPress={() => router.push('/moderation')}><Text style={styles.moderationButtonText}>⚑ Ouvrir la modération</Text></Pressable> : null}
-            <Pressable
-              style={styles.editButton}
-              onPress={() => router.push('/edit-profile')}
-            >
-              <Text style={styles.editButtonText}>
-                Modifier mon profil
-              </Text>
-            </Pressable>
-
             <Pressable
               style={styles.logoutButton}
               onPress={handleSignOut}
@@ -496,20 +474,16 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
 
-  passportHero: { width: '100%', height: 350, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#55775B', backgroundColor: '#21472F' },
+  passportHero: { alignSelf: 'stretch', height: 350, overflow: 'hidden', marginHorizontal: -16, marginTop: -8, backgroundColor: '#21472F' },
   coverImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   coverFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', justifyContent: 'center', backgroundColor: '#12382D' },
   coverMark: { color: 'rgba(98,230,177,0.08)', fontSize: 260, fontWeight: '900', marginRight: -20 },
   coverShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,12,9,0.52)' },
-  heroTop: { position: 'absolute', top: 20, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  heroEyebrow: { color: '#E4C778', fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
-  heroBrand: { color: '#FFFFFF', fontSize: 18, fontWeight: '900', letterSpacing: 2.5, marginTop: 5 },
+  heroTop: { position: 'absolute', top: 20, left: 20, right: 20, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' },
   heroIdentity: { position: 'absolute', left: 20, right: 20, bottom: 20, alignItems: 'flex-start' },
   identityText: { width: '100%', marginTop: 13 },
   heroCountry: { color: '#C4D9D0', fontSize: 11, fontWeight: '700', marginTop: 7 },
   profileIntro: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, marginTop: 16 },
-  editProfilePill: { borderRadius: 0, borderWidth: 1, borderColor: '#6F8D6C', paddingHorizontal: 13, paddingVertical: 9 },
-  editProfilePillText: { color: '#B86F4B', fontSize: 10, fontWeight: '900' },
   statDivider: { width: 1, height: 30, backgroundColor: '#24483B', alignSelf: 'center' },
   profileNav: { width: '100%', flexDirection: 'row', borderRadius: 0, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#173523', padding: 6, marginTop: 18 },
   navItem: { flex: 1, minHeight: 58, alignItems: 'center', justifyContent: 'center', borderRadius: 0},
@@ -521,10 +495,10 @@ const styles = StyleSheet.create({
   discoverButton: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 15, paddingVertical: 10, marginTop: 15 },
   discoverButtonText: { color: '#B86F4B', fontSize: 11, fontWeight: '900' },
   sectionIntro: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#173523', padding: 18, marginTop: 22 },
-  pageSectionHeader: { width: '100%', marginTop: 27, marginBottom: 12 },
+  pageSectionHeader: { width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 27, marginBottom: 12 },
+  routeActivityCount: { color: '#B86F4B', fontSize: 12, fontWeight: '900', paddingBottom: 2 },
   profileMapSection: { width: '100%', borderWidth: 1, borderColor: '#436B4A', backgroundColor: '#21472F', overflow: 'hidden' },
   profileMapHeader: { minHeight: 82, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 17 },
-  profileMapCount: { minWidth: 38, height: 38, color: '#0B1710', fontSize: 13, fontWeight: '900', lineHeight: 38, textAlign: 'center', backgroundColor: '#B86F4B', overflow: 'hidden' },
   profileMap: { width: '100%', height: 280 },
   profileMapFilters: { flexDirection: 'row', gap: 7, padding: 10 },
   profileMapFilter: { flex: 1, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#55775B', backgroundColor: '#173523', paddingHorizontal: 6 },
@@ -686,10 +660,6 @@ const styles = StyleSheet.create({
   aboutSection: { borderRadius: 0, backgroundColor: '#173523', padding: 18, marginTop: 22 }, aboutTitle: { color: '#F4E9D6', fontSize: 19, fontWeight: '900', marginTop: 6 }, aboutText: { color: '#E6E2D5', lineHeight: 20, marginTop: 9 }, aboutCountry: { color: '#B86F4B', fontSize: 12, fontWeight: '800', marginTop: 10 }, activityHeader: { marginTop: 26, marginBottom: -8 },
   settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#2D5B3D' },
   settingsIcon: { color: '#B86F4B', fontSize: 19 },
-  socialLinks: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },
-  socialLink: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#6F8D6C', backgroundColor: '#21472F', paddingHorizontal: 13, paddingVertical: 9 },
-  socialLinkText: { color: '#FBF1DF', fontSize: 12, fontWeight: '800' },
-  socialLinkArrow: { color: '#B86F4B', fontSize: 13, marginLeft: 6 },
 
   library: {
     width: '100%',
