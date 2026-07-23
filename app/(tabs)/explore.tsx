@@ -10,6 +10,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as Location from 'expo-location';
+import { matchesSearchQuery } from '@/lib/search';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -35,6 +36,9 @@ type ExploreCategory =
   | 'Musée atypique'
   | 'Commerce unique'
   | 'Mystère local';
+
+type ContentType = 'Tout' | 'Curiosités' | 'Aventures';
+const contentTypes: ContentType[] = ['Tout', 'Curiosités', 'Aventures'];
 
 const categories: ExploreCategory[] = [
   'Tout',
@@ -114,6 +118,7 @@ export default function ExploreScreen() {
 
   const [selectedCategory, setSelectedCategory] =
     useState<ExploreCategory>('Tout');
+  const [contentType, setContentType] = useState<ContentType>('Tout');
 
   const [search, setSearch] = useState(initialSearch ?? '');
   const [userCoordinate, setUserCoordinate] = useState<Coordinate | null>(null);
@@ -151,14 +156,14 @@ export default function ExploreScreen() {
   }, [curiosities]);
 
   const filteredCuriosities = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    if (contentType === 'Aventures') return [];
 
     const results = publishedCuriosities.filter((curiosity) => {
       const matchesCategory =
         selectedCategory === 'Tout' ||
         curiosity.category === selectedCategory;
 
-      const searchableContent = [
+      const matchesSearch = matchesSearchQuery(search, [
         curiosity.title,
         curiosity.description,
         curiosity.category,
@@ -166,13 +171,7 @@ export default function ExploreScreen() {
         curiosity.address,
         curiosity.authorName,
         curiosity.authorHandle,
-      ]
-        .join(' ')
-        .toLowerCase();
-
-      const matchesSearch =
-        !normalizedSearch ||
-        searchableContent.includes(normalizedSearch);
+      ]);
 
       return matchesCategory && matchesSearch;
     });
@@ -187,31 +186,25 @@ export default function ExploreScreen() {
     search,
     selectedCategory,
     userCoordinate,
+    contentType,
   ]);
 
   const filteredAdventures = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    if (contentType === 'Curiosités' || selectedCategory !== 'Tout') return [];
 
     const results = adventures.filter((adventure) => {
       if (adventure.publicationStatus !== 'published') {
         return false;
       }
 
-      const searchableContent = [
+      return matchesSearchQuery(search, [
         adventure.title,
         adventure.description,
         adventure.location,
         adventure.category,
         adventure.user,
         adventure.handle,
-      ]
-        .join(' ')
-        .toLowerCase();
-
-      return (
-        !normalizedSearch ||
-        searchableContent.includes(normalizedSearch)
-      );
+      ]);
     });
     return userCoordinate
       ? [...results].sort((first, second) =>
@@ -219,7 +212,7 @@ export default function ExploreScreen() {
           distanceInKm(userCoordinate, second.latitude, second.longitude)
         )
       : results;
-  }, [adventures, search, userCoordinate]);
+  }, [adventures, search, userCoordinate, contentType, selectedCategory]);
 
   const featuredCuriosity =
     filteredCuriosities.length > 0
@@ -352,6 +345,16 @@ export default function ExploreScreen() {
           <Text style={styles.memberSearchArrow}>›</Text>
         </Pressable>
 
+        <View style={styles.contentTypeFilters}>
+          {contentTypes.map((type) => {
+            const isSelected = type === contentType;
+            return <Pressable key={type} style={[styles.contentTypeButton, isSelected && styles.contentTypeButtonSelected]} onPress={() => {
+              setContentType(type);
+              if (type === 'Aventures') setSelectedCategory('Tout');
+            }}><Text style={[styles.contentTypeText, isSelected && styles.contentTypeTextSelected]}>{type}</Text></Pressable>;
+          })}
+        </View>
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -379,9 +382,10 @@ export default function ExploreScreen() {
             return (
               <Pressable
                 key={category}
-                onPress={() =>
-                  setSelectedCategory(category)
-                }
+                onPress={() => {
+                  setSelectedCategory(category);
+                  if (category !== 'Tout') setContentType('Curiosités');
+                }}
                 style={[
                   styles.categoryButton,
                   isSelected &&
@@ -409,6 +413,8 @@ export default function ExploreScreen() {
             </Text>
           </View>
         ) : null}
+
+        {(search.trim() || selectedCategory !== 'Tout' || contentType !== 'Tout') ? <Text style={styles.activeResults}>{filteredCuriosities.length + filteredAdventures.length} résultat{filteredCuriosities.length + filteredAdventures.length === 1 ? '' : 's'} trouvé{filteredCuriosities.length + filteredAdventures.length === 1 ? '' : 's'}</Text> : null}
 
         {loading ? (
           <View style={styles.loadingArea}>
@@ -1005,6 +1011,12 @@ const styles = StyleSheet.create({
   memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#102218', paddingHorizontal: 15, marginHorizontal: 22, marginTop: 10 },
   memberSearchIcon: { color: '#B86F4B', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F4E9D6', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#BCC8B8', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#B86F4B', fontSize: 28 },
 
+  contentTypeFilters: { flexDirection: 'row', marginHorizontal: 22, marginTop: 14, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#102218' },
+  contentTypeButton: { flex: 1, minHeight: 42, alignItems: 'center', justifyContent: 'center' },
+  contentTypeButtonSelected: { backgroundColor: '#B86F4B' },
+  contentTypeText: { color: '#A7B3A3', fontSize: 11, fontWeight: '900' },
+  contentTypeTextSelected: { color: '#0B1710' },
+
   searchIcon: {
     color: '#B86F4B',
     fontSize: 26,
@@ -1065,6 +1077,7 @@ const styles = StyleSheet.create({
 
   nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 12, paddingVertical: 8, marginHorizontal: 22, marginTop: 4 },
   nearbyNoticeText: { color: '#B86F4B', fontSize: 10, fontWeight: '800' },
+  activeResults: { color: '#A7B3A3', fontSize: 11, fontWeight: '800', marginHorizontal: 22, marginTop: 10 },
 
   loadingArea: {
     minHeight: 320,
