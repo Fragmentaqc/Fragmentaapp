@@ -1,26 +1,28 @@
 import { useAuth } from '@/context/auth-context';
 import { useAdventures } from '@/context/adventures-context';
 import { useCuriosities } from '@/context/curiosities-context';
-import { useFavorites } from '@/context/favorites-context';
+import { useCollections } from '@/context/collections-context';
 import { useFollows } from '@/context/follows-context';
+import { SocialLinksRow } from '@/components/social-links-row';
 import { supabase } from '@/lib/supabase';
-import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
+import { parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { useFocusEffect } from '@react-navigation/native';
 import * as ExpoLinking from 'expo-linking';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Image,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MapView, { Marker, type Region } from 'react-native-maps';
 
 type Profile = {
   username: string | null;
@@ -37,7 +39,7 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { adventures } = useAdventures();
   const { curiosities } = useCuriosities();
-  const { adventureIds: favoriteAdventureIds, curiosityIds: favoriteCuriosityIds } = useFavorites();
+  const { collections, createCollection, deleteCollection } = useCollections();
   const { getCounts } = useFollows();
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -45,6 +47,9 @@ export default function ProfileScreen() {
   const [isModerator, setIsModerator] = useState(false);
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [creatingCollection, setCreatingCollection] = useState(false);
+  const [profileMapFilter, setProfileMapFilter] = useState<'all' | 'adventure' | 'curiosity'>('all');
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -118,6 +123,24 @@ export default function ProfileScreen() {
     else Alert.alert('Courriel envoyé', 'Consulte ta boîte de réception pour confirmer ton adresse.');
   }
 
+  async function handleCreateCollection() {
+    if (!newCollectionName.trim() || creatingCollection) return;
+    setCreatingCollection(true);
+    const id = await createCollection(newCollectionName);
+    setCreatingCollection(false);
+    if (id) setNewCollectionName('');
+    else Alert.alert('Création impossible', 'Vérifie le nom de la collection et réessaie.');
+  }
+
+  function confirmDeleteCollection(collectionId: string, name: string) {
+    Alert.alert('Supprimer la collection', `Supprimer « ${name} »? Les aventures ne seront pas supprimées.`, [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: async () => {
+        if (!await deleteCollection(collectionId)) Alert.alert('Erreur', 'Impossible de supprimer cette collection.');
+      } },
+    ]);
+  }
+
   const displayName =
     profile?.display_name?.trim() ||
     user?.email?.split('@')[0] ||
@@ -128,14 +151,12 @@ export default function ProfileScreen() {
     : 'Profil Fragmenta';
 
   const initial = displayName.charAt(0).toUpperCase();
-  const myAdventures = user
+  const myAdventures = useMemo(() => user
     ? adventures.filter((adventure) => adventure.ownerId === user.id)
-    : [];
-  const myCuriosities = user
+    : [], [adventures, user]);
+  const myCuriosities = useMemo(() => user
     ? curiosities.filter((curiosity) => curiosity.ownerId === user.id)
-    : [];
-  const favoriteAdventures = adventures.filter((adventure) => favoriteAdventureIds.includes(adventure.id));
-  const favoriteCuriosities = curiosities.filter((curiosity) => favoriteCuriosityIds.includes(curiosity.id));
+    : [], [curiosities, user]);
   const coverImage = profile?.cover_url || myAdventures.find((adventure) => adventure.images[0])?.images[0];
   const totalDistanceKm = myAdventures.reduce((total, adventure) => total + Number(adventure.distanceKm ?? 0), 0);
   const totalDurationMinutes = myAdventures.reduce((total, adventure) => total + Number(adventure.durationMinutes ?? 0), 0);
@@ -146,12 +167,34 @@ export default function ProfileScreen() {
     walking: myAdventures.filter((item) => item.routingProfile === 'walking').reduce((total, item) => total + Number(item.distanceKm ?? 0), 0),
     driving: myAdventures.filter((item) => item.routingProfile === 'driving').reduce((total, item) => total + Number(item.distanceKm ?? 0), 0),
   };
+  const profileMapItems = useMemo(() => [
+    ...myAdventures.filter((item) => typeof item.latitude === 'number' && typeof item.longitude === 'number').map((item) => ({ id: item.id, type: 'adventure' as const, title: item.title, latitude: item.latitude as number, longitude: item.longitude as number })),
+    ...myCuriosities.filter((item) => typeof item.latitude === 'number' && typeof item.longitude === 'number').map((item) => ({ id: item.id, type: 'curiosity' as const, title: item.title, latitude: item.latitude as number, longitude: item.longitude as number })),
+  ], [myAdventures, myCuriosities]);
+  const visibleProfileMapItems = useMemo(() => profileMapFilter === 'all'
+    ? profileMapItems
+    : profileMapItems.filter((item) => item.type === profileMapFilter), [profileMapFilter, profileMapItems]);
+  const profileMapRegion = useMemo<Region>(() => {
+    if (visibleProfileMapItems.length === 0) return { latitude: 20, longitude: 0, latitudeDelta: 125, longitudeDelta: 180 };
+    const latitudes = visibleProfileMapItems.map((item) => item.latitude);
+    const longitudes = visibleProfileMapItems.map((item) => item.longitude);
+    const minLatitude = Math.min(...latitudes);
+    const maxLatitude = Math.max(...latitudes);
+    const minLongitude = Math.min(...longitudes);
+    const maxLongitude = Math.max(...longitudes);
+    return {
+      latitude: (minLatitude + maxLatitude) / 2,
+      longitude: (minLongitude + maxLongitude) / 2,
+      latitudeDelta: Math.max(8, (maxLatitude - minLatitude) * 1.7),
+      longitudeDelta: Math.max(8, (maxLongitude - minLongitude) * 1.7),
+    };
+  }, [visibleProfileMapItems]);
 
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#62E6B1" />
+          <ActivityIndicator size="large" color="#B86F4B" />
 
           <Text style={styles.loadingText}>
             Chargement du profil…
@@ -166,18 +209,21 @@ export default function ProfileScreen() {
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
       >
         <View style={styles.passportHero}>
           {coverImage ? <Image source={{ uri: coverImage }} style={styles.coverImage} /> : <View style={styles.coverFallback}><Text style={styles.coverMark}>F</Text></View>}
           <View style={styles.coverShade} />
-          <View style={styles.heroTop}><View><Text style={styles.heroEyebrow}>PASSEPORT D’AVENTURIER</Text><Text style={styles.heroBrand}>FRAGMENTA</Text></View>{user ? <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')}><Text style={styles.settingsIcon}>⚙</Text></Pressable> : null}</View>
+          <View style={styles.heroTop}>{user ? <Pressable style={styles.settingsButton} onPress={() => router.push('/edit-profile')} accessibilityLabel="Modifier le profil"><Text style={styles.settingsIcon}>⚙</Text></Pressable> : null}</View>
           <View style={styles.heroIdentity}>
             <View style={styles.avatar}>{user && profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{user ? initial : '?'}</Text>}</View>
             <View style={styles.identityText}><Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{user ? displayName : 'Bienvenue sur Fragmenta'}</Text><Text style={styles.username} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{user ? username : 'Le réseau des aventures vécues'}</Text>{profile?.country ? <Text style={styles.heroCountry} numberOfLines={1}>⌖ {profile.country}</Text> : null}</View>
           </View>
         </View>
 
-        {user ? <View style={styles.profileIntro}><Text style={profile?.bio ? styles.bio : styles.bioPlaceholder}>{profile?.bio || 'Ajoute une bio pour raconter le genre d’aventures que tu veux vivre.'}</Text><Pressable style={styles.editProfilePill} onPress={() => router.push('/edit-profile')}><Text style={styles.editProfilePillText}>Modifier le profil</Text></Pressable></View> : null}
+        <SocialLinksRow links={parseSocialLinks(profile?.social_links)} />
+
+        {user && profile?.bio ? <View style={styles.profileIntro}><Text style={styles.bio}>{profile.bio}</Text></View> : null}
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}><Text style={styles.statValue}>{myAdventures.length}</Text><Text style={styles.statLabel}>Aventures</Text></View>
@@ -193,18 +239,37 @@ export default function ProfileScreen() {
           <View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>MON BILAN</Text><Text style={styles.aboutTitle}>Vue d’ensemble</Text></View><Text style={styles.bilanYear}>{new Date().getFullYear()}</Text></View>
           <View style={styles.bilanGrid}><BilanMetric value={formatDistance(totalDistanceKm)} label="Distance totale" icon="↝" /><BilanMetric value={formatDuration(totalDurationMinutes)} label="Temps d’activité" icon="◷" /><BilanMetric value={String(completedAdventures)} label="Terminées" icon="✓" /><BilanMetric value={String(myAdventures.length + myCuriosities.length)} label="Activités réalisées" icon="◇" /></View>
           <Text style={styles.breakdownTitle}>Répartition de la distance</Text>
-          <DistanceBar label="Vélo" value={distanceByProfile.cycling} total={totalDistanceKm} color="#4DA3FF" />
-          <DistanceBar label="Marche" value={distanceByProfile.walking} total={totalDistanceKm} color="#62E6B1" />
-          <DistanceBar label="Auto" value={distanceByProfile.driving} total={totalDistanceKm} color="#E9B949" />
+          <DistanceBar label="Vélo" value={distanceByProfile.cycling} total={totalDistanceKm} color="#5B879D" />
+          <DistanceBar label="Marche" value={distanceByProfile.walking} total={totalDistanceKm} color="#B86F4B" />
+          <DistanceBar label="Auto" value={distanceByProfile.driving} total={totalDistanceKm} color="#C58A62" />
           {longestAdventure && longestAdventure.distanceKm > 0 ? <Pressable style={styles.recordCard} onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: longestAdventure.id } })}><View><Text style={styles.recordEyebrow}>RECORD PERSONNEL</Text><Text style={styles.recordTitle} numberOfLines={1}>{longestAdventure.title}</Text></View><Text style={styles.recordDistance}>{formatDistance(longestAdventure.distanceKm)}</Text></Pressable> : <Text style={styles.bilanHelper}>Les distances apparaîtront après le calcul des parcours de tes aventures.</Text>}
         </View> : null}
 
         {user ? <>
-          <View style={styles.pageSectionHeader}><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View>
-          <Pressable style={styles.mapSection} onPress={() => router.push('/map')}><View style={styles.sectionGlyph}><Text style={styles.sectionGlyphText}>⌖</Text></View><View style={styles.sectionCardContent}><Text style={styles.sectionCardEyebrow}>CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes lieux et aventures</Text><Text style={styles.sectionCardText}>Retrouve tous tes parcours et tes découvertes sur la carte.</Text></View><Text style={styles.sectionArrow}>›</Text></Pressable>
-          <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text><Text style={styles.aboutText}>{profile?.bio || 'Ajoute une bio pour présenter tes passions et tes prochaines aventures.'}</Text>{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View>
-          <View style={styles.sectionIntro}><View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes souvenirs sauvegardés</Text></View><Text style={styles.collectionCount}>{favoriteAdventures.length + favoriteCuriosities.length}</Text></View><Text style={styles.aboutText}>Aventures et curiosités que tu veux conserver ou retrouver plus tard.</Text></View>
-          <View style={styles.sectionItems}>{favoriteAdventures.map((adventure) => <ProfileContentCard key={`favorite-adventure-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}{favoriteCuriosities.map((curiosity) => <ProfileContentCard key={`favorite-curiosity-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}{favoriteAdventures.length + favoriteCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Aucun favori enregistré pour le moment.</Text> : null}</View>
+          <View style={styles.pageSectionHeader}><View><Text style={styles.libraryEyebrow}>TON UNIVERS</Text><Text style={styles.aboutTitle}>Explorer mon parcours</Text></View><Text style={styles.routeActivityCount}>{visibleProfileMapItems.length} {visibleProfileMapItems.length === 1 ? 'activité' : 'activités'}</Text></View>
+          <View style={styles.profileMapSection}>
+            <View style={styles.profileMapHeader}><View><Text style={styles.sectionCardEyebrow}>MA CARTE DU MONDE</Text><Text style={styles.sectionCardTitle}>Mes activités autour du monde</Text></View></View>
+            <MapView key={`profile-map-${profileMapFilter}-${visibleProfileMapItems.length}`} style={styles.profileMap} initialRegion={profileMapRegion} scrollEnabled zoomEnabled zoomControlEnabled rotateEnabled={false} pitchEnabled={false} toolbarEnabled={false}>
+              {visibleProfileMapItems.map((item) => <Marker key={`${item.type}-${item.id}`} coordinate={{ latitude: item.latitude, longitude: item.longitude }} title={item.title} pinColor={item.type === 'adventure' ? '#5B879D' : '#B86F4B'} onPress={() => router.push(item.type === 'adventure' ? { pathname: '/adventure/[id]', params: { id: item.id } } : { pathname: '/curiosity/[id]', params: { id: item.id } })} />)}
+            </MapView>
+            <View style={styles.profileMapFilters}>
+              <Pressable style={[styles.profileMapFilter, profileMapFilter === 'all' && styles.profileMapFilterActive]} onPress={() => setProfileMapFilter('all')}><Text style={[styles.profileMapFilterText, profileMapFilter === 'all' && styles.profileMapFilterTextActive]}>Tout</Text></Pressable>
+              <Pressable style={[styles.profileMapFilter, profileMapFilter === 'adventure' && styles.profileMapFilterAdventure]} onPress={() => setProfileMapFilter('adventure')}><Text style={[styles.profileMapFilterText, profileMapFilter === 'adventure' && styles.profileMapFilterTextActive]}>● Aventures</Text></Pressable>
+              <Pressable style={[styles.profileMapFilter, profileMapFilter === 'curiosity' && styles.profileMapFilterCuriosity]} onPress={() => setProfileMapFilter('curiosity')}><Text style={[styles.profileMapFilterText, profileMapFilter === 'curiosity' && styles.profileMapFilterTextActive]}>● Curiosités</Text></Pressable>
+            </View>
+            {visibleProfileMapItems.length === 0 ? <View style={styles.profileMapEmpty}><Text style={styles.profileMapEmptyTitle}>Aucune activité dans ce filtre</Text><Text style={styles.profileMapEmptyText}>Les pins apparaîtront dès qu’une activité possède un emplacement.</Text></View> : null}
+          </View>
+          <View style={styles.aboutSection}><Text style={styles.libraryEyebrow}>À PROPOS</Text><Text style={styles.aboutTitle}>Mon profil d’aventurier</Text>{profile?.bio ? <Text style={styles.aboutText}>{profile.bio}</Text> : null}{profile?.country ? <Text style={styles.aboutCountry}>Pays · {profile.country}</Text> : null}{user.email ? <Text style={styles.aboutMeta}>{user.email} · {user.email_confirmed_at ? 'confirmé' : 'à confirmer'}</Text> : null}{!user.email_confirmed_at ? <Pressable onPress={() => void resendConfirmation()} disabled={resendingConfirmation}><Text style={styles.resendText}>{resendingConfirmation ? 'Envoi…' : 'Renvoyer la confirmation'}</Text></Pressable> : null}<Pressable style={styles.discoverButton} onPress={() => router.push('/members' as never)}><Text style={styles.discoverButtonText}>⌕ Découvrir des aventuriers</Text></Pressable></View>
+          <View style={styles.sectionIntro}>
+            <View style={styles.sectionTitleRow}><View><Text style={styles.libraryEyebrow}>COLLECTIONS</Text><Text style={styles.aboutTitle}>Mes listes d’aventures</Text></View><Text style={styles.collectionCount}>{collections.length}</Text></View>
+            <Text style={styles.aboutText}>Crée des listes et range les aventures que tu veux retrouver.</Text>
+            <View style={styles.collectionCreateRow}><TextInput value={newCollectionName} onChangeText={setNewCollectionName} placeholder="Nom de la collection" placeholderTextColor="#6F837B" style={styles.collectionInput} maxLength={80} /><Pressable style={styles.collectionCreateButton} onPress={() => void handleCreateCollection()} disabled={creatingCollection}><Text style={styles.collectionCreateText}>{creatingCollection ? '…' : 'Créer'}</Text></Pressable></View>
+          </View>
+          <View style={styles.sectionItems}>{collections.map((collection) => {
+            const collectionAdventures = adventures.filter((adventure) => collection.adventureIds.includes(adventure.id));
+            const collectionCuriosities = curiosities.filter((curiosity) => collection.curiosityIds.includes(curiosity.id));
+            return <View key={collection.id} style={styles.collectionCard}><View style={styles.collectionCardHeader}><View><Text style={styles.collectionCardTitle}>{collection.name}</Text><Text style={styles.collectionCardMeta}>{collection.adventureIds.length + collection.curiosityIds.length} élément(s)</Text></View><Pressable onPress={() => confirmDeleteCollection(collection.id, collection.name)}><Text style={styles.collectionDelete}>Supprimer</Text></Pressable></View>{collectionAdventures.map((adventure) => <ProfileContentCard key={`${collection.id}-${adventure.id}`} title={adventure.title} subtitle={adventure.location} imageUrl={adventure.images[0]} badge="Aventure" onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} />)}{collectionCuriosities.map((curiosity) => <ProfileContentCard key={`${collection.id}-${curiosity.id}`} title={curiosity.title} subtitle={curiosity.locationName || curiosity.address} imageUrl={curiosity.images[0]} badge="Curiosité" onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} />)}{collectionAdventures.length + collectionCuriosities.length === 0 ? <Text style={styles.emptyLibraryText}>Ajoute une aventure ou une curiosité depuis sa fiche.</Text> : null}</View>;
+          })}{collections.length === 0 ? <Text style={styles.emptyLibraryText}>Crée ta première collection ci-dessus.</Text> : null}</View>
           <View style={styles.activityHeader}><Text style={styles.libraryEyebrow}>FIL D’ACTIVITÉ</Text><Text style={styles.aboutTitle}>Mes dernières publications</Text></View>
         </> : null}
 
@@ -277,33 +342,9 @@ export default function ProfileScreen() {
           </View>
         ) : null}
 
-        {user && parseSocialLinks(profile?.social_links).length > 0 ? (
-          <View style={styles.socialLinks}>
-            {parseSocialLinks(profile?.social_links).map((link, index) => (
-              <Pressable
-                key={`${link.platform}-${index}`}
-                style={styles.socialLink}
-                onPress={() => void Linking.openURL(normalizeSocialUrl(link.url))}
-              >
-                <Text style={styles.socialLinkText}>{link.platform}</Text>
-                <Text style={styles.socialLinkArrow}>↗</Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-
         {user ? (
           <>
             {isModerator ? <Pressable style={styles.moderationButton} onPress={() => router.push('/moderation')}><Text style={styles.moderationButtonText}>⚑ Ouvrir la modération</Text></Pressable> : null}
-            <Pressable
-              style={styles.editButton}
-              onPress={() => router.push('/edit-profile')}
-            >
-              <Text style={styles.editButtonText}>
-                Modifier mon profil
-              </Text>
-            </Pressable>
-
             <Pressable
               style={styles.logoutButton}
               onPress={handleSignOut}
@@ -410,7 +451,7 @@ function ProfileContentCard({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071310',
+    backgroundColor: '#0B1710',
   },
 
   loadingContainer: {
@@ -420,7 +461,7 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
-    color: '#8FA69B',
+    color: '#CBD5C8',
     fontSize: 14,
     marginTop: 14,
   },
@@ -433,51 +474,69 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
 
-  passportHero: { width: '100%', height: 350, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E' },
+  passportHero: { alignSelf: 'stretch', height: 350, overflow: 'hidden', marginHorizontal: -16, marginTop: -8, backgroundColor: '#21472F' },
   coverImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   coverFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', justifyContent: 'center', backgroundColor: '#12382D' },
   coverMark: { color: 'rgba(98,230,177,0.08)', fontSize: 260, fontWeight: '900', marginRight: -20 },
   coverShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,12,9,0.52)' },
-  heroTop: { position: 'absolute', top: 20, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  heroEyebrow: { color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
-  heroBrand: { color: '#FFFFFF', fontSize: 18, fontWeight: '900', letterSpacing: 2.5, marginTop: 5 },
+  heroTop: { position: 'absolute', top: 20, left: 20, right: 20, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' },
   heroIdentity: { position: 'absolute', left: 20, right: 20, bottom: 20, alignItems: 'flex-start' },
   identityText: { width: '100%', marginTop: 13 },
   heroCountry: { color: '#C4D9D0', fontSize: 11, fontWeight: '700', marginTop: 7 },
   profileIntro: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, marginTop: 16 },
-  editProfilePill: { borderRadius: 0, borderWidth: 1, borderColor: '#28634F', paddingHorizontal: 13, paddingVertical: 9 },
-  editProfilePillText: { color: '#62E6B1', fontSize: 10, fontWeight: '900' },
   statDivider: { width: 1, height: 30, backgroundColor: '#24483B', alignSelf: 'center' },
-  profileNav: { width: '100%', flexDirection: 'row', borderRadius: 0, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 6, marginTop: 18 },
+  profileNav: { width: '100%', flexDirection: 'row', borderRadius: 0, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#173523', padding: 6, marginTop: 18 },
   navItem: { flex: 1, minHeight: 58, alignItems: 'center', justifyContent: 'center', borderRadius: 0},
-  navItemActive: { backgroundColor: '#173D31' },
-  navIcon: { color: '#62E6B1', fontSize: 18 },
-  navLabel: { color: '#71877D', fontSize: 9, fontWeight: '800', marginTop: 5 },
+  navItemActive: { backgroundColor: '#2D5B3D' },
+  navIcon: { color: '#B86F4B', fontSize: 18 },
+  navLabel: { color: '#AEBBAA', fontSize: 9, fontWeight: '800', marginTop: 5 },
   navLabelActive: { color: '#E4FFF4' },
-  aboutMeta: { color: '#81958C', fontSize: 11, marginTop: 10 },
-  discoverButton: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#173D31', paddingHorizontal: 15, paddingVertical: 10, marginTop: 15 },
-  discoverButtonText: { color: '#62E6B1', fontSize: 11, fontWeight: '900' },
-  sectionIntro: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 18, marginTop: 22 },
-  pageSectionHeader: { width: '100%', marginTop: 27, marginBottom: 12 },
-  mapSection: { width: '100%', minHeight: 138, flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#2B6552', backgroundColor: '#10251E', padding: 17 },
-  sectionGlyph: { width: 58, height: 78, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#173D31' },
-  sectionGlyphText: { color: '#62E6B1', fontSize: 31, fontWeight: '900' },
+  aboutMeta: { color: '#BCC8B8', fontSize: 11, marginTop: 10 },
+  discoverButton: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 15, paddingVertical: 10, marginTop: 15 },
+  discoverButtonText: { color: '#B86F4B', fontSize: 11, fontWeight: '900' },
+  sectionIntro: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#173523', padding: 18, marginTop: 22 },
+  pageSectionHeader: { width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 27, marginBottom: 12 },
+  routeActivityCount: { color: '#B86F4B', fontSize: 12, fontWeight: '900', paddingBottom: 2 },
+  profileMapSection: { width: '100%', borderWidth: 1, borderColor: '#436B4A', backgroundColor: '#21472F', overflow: 'hidden' },
+  profileMapHeader: { minHeight: 82, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 17 },
+  profileMap: { width: '100%', height: 280 },
+  profileMapFilters: { flexDirection: 'row', gap: 7, padding: 10 },
+  profileMapFilter: { flex: 1, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#55775B', backgroundColor: '#173523', paddingHorizontal: 6 },
+  profileMapFilterActive: { backgroundColor: '#F4E9D6', borderColor: '#F4E9D6' },
+  profileMapFilterAdventure: { backgroundColor: '#5B879D', borderColor: '#5B879D' },
+  profileMapFilterCuriosity: { backgroundColor: '#B86F4B', borderColor: '#B86F4B' },
+  profileMapFilterText: { color: '#E6E2D5', fontSize: 9, fontWeight: '900' },
+  profileMapFilterTextActive: { color: '#0B1710' },
+  profileMapEmpty: { position: 'absolute', left: 18, right: 18, top: 155, backgroundColor: 'rgba(7,19,16,.88)', padding: 16 },
+  profileMapEmptyTitle: { color: '#F4E9D6', fontSize: 15, fontWeight: '900' },
+  profileMapEmptyText: { color: '#9CB0A7', fontSize: 11, lineHeight: 16, marginTop: 5 },
+  sectionGlyph: { width: 58, height: 78, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#2D5B3D' },
+  sectionGlyphText: { color: '#B86F4B', fontSize: 31, fontWeight: '900' },
   sectionCardContent: { flex: 1, marginLeft: 14 },
-  sectionCardEyebrow: { color: '#62E6B1', fontSize: 8, fontWeight: '900', letterSpacing: 1.2 },
-  sectionCardTitle: { color: '#F3FFF9', fontSize: 17, fontWeight: '900', marginTop: 5 },
-  sectionCardText: { color: '#8FA69B', fontSize: 11, lineHeight: 16, marginTop: 5 },
-  sectionArrow: { color: '#62E6B1', fontSize: 30, marginLeft: 8 },
+  sectionCardEyebrow: { color: '#B86F4B', fontSize: 8, fontWeight: '900', letterSpacing: 1.2 },
+  sectionCardTitle: { color: '#F4E9D6', fontSize: 17, fontWeight: '900', marginTop: 5 },
+  sectionCardText: { color: '#CBD5C8', fontSize: 11, lineHeight: 16, marginTop: 5 },
+  sectionArrow: { color: '#B86F4B', fontSize: 30, marginLeft: 8 },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  collectionCount: { minWidth: 42, height: 42, color: '#071310', fontSize: 14, fontWeight: '900', lineHeight: 42, textAlign: 'center', borderRadius: 0, backgroundColor: '#62E6B1', overflow: 'hidden' },
+  collectionCount: { minWidth: 42, height: 42, color: '#0B1710', fontSize: 14, fontWeight: '900', lineHeight: 42, textAlign: 'center', borderRadius: 0, backgroundColor: '#B86F4B', overflow: 'hidden' },
   sectionItems: { width: '100%', marginTop: 10 },
-  bilanSection: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', padding: 18, marginTop: 18 },
-  bilanYear: { color: '#62E6B1', fontSize: 13, fontWeight: '900', borderRadius: 0, backgroundColor: '#173D31', paddingHorizontal: 11, paddingVertical: 7 },
+  collectionCreateRow: { flexDirection: 'row', gap: 8, marginTop: 16 },
+  collectionInput: { flex: 1, height: 46, color: '#F4E9D6', borderWidth: 1, borderColor: '#748D73', paddingHorizontal: 12 },
+  collectionCreateButton: { height: 46, justifyContent: 'center', backgroundColor: '#B86F4B', paddingHorizontal: 16 },
+  collectionCreateText: { color: '#0B1710', fontSize: 12, fontWeight: '900' },
+  collectionCard: { width: '100%', borderWidth: 1, borderColor: '#31513A', backgroundColor: '#173523', padding: 14, marginBottom: 10 },
+  collectionCardHeader: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  collectionCardTitle: { color: '#F4E9D6', fontSize: 17, fontWeight: '900' },
+  collectionCardMeta: { color: '#789086', fontSize: 10, marginTop: 4 },
+  collectionDelete: { color: '#E89891', fontSize: 10, fontWeight: '800' },
+  bilanSection: { width: '100%', borderRadius: 0, borderWidth: 1, borderColor: '#55775B', backgroundColor: '#21472F', padding: 18, marginTop: 18 },
+  bilanYear: { color: '#B86F4B', fontSize: 13, fontWeight: '900', borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 11, paddingVertical: 7 },
   bilanGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 17 },
-  bilanMetric: { width: '48%', minHeight: 112, borderRadius: 0, borderWidth: 1, borderColor: '#21483B', backgroundColor: '#0C1C17', padding: 14 },
-  bilanMetricIcon: { color: '#62E6B1', fontSize: 18, fontWeight: '900' }, bilanMetricValue: { color: '#F3FFF9', fontSize: 22, fontWeight: '900', marginTop: 9 }, bilanMetricLabel: { color: '#81958C', fontSize: 10, marginTop: 4 },
-  breakdownTitle: { color: '#DFFFF2', fontSize: 13, fontWeight: '900', marginTop: 22, marginBottom: 3 },
-  distanceRow: { marginTop: 12 }, distanceLabels: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }, distanceLabel: { color: '#B7C9C1', fontSize: 11, fontWeight: '800' }, distanceValue: { color: '#81958C', fontSize: 10, fontWeight: '700' }, distanceTrack: { height: 7, overflow: 'hidden', borderRadius: 0, backgroundColor: '#071310' }, distanceFill: { height: '100%', borderRadius: 0},
-  recordCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 0, backgroundColor: '#173D31', padding: 14, marginTop: 19 }, recordEyebrow: { color: '#62E6B1', fontSize: 8, fontWeight: '900', letterSpacing: 1 }, recordTitle: { maxWidth: 190, color: '#F3FFF9', fontSize: 13, fontWeight: '900', marginTop: 4 }, recordDistance: { color: '#62E6B1', fontSize: 16, fontWeight: '900' }, bilanHelper: { color: '#71877D', fontSize: 10, lineHeight: 15, marginTop: 17 },
+  bilanMetric: { width: '48%', minHeight: 112, borderRadius: 0, borderWidth: 1, borderColor: '#34563D', backgroundColor: '#173523', padding: 14 },
+  bilanMetricIcon: { color: '#B86F4B', fontSize: 18, fontWeight: '900' }, bilanMetricValue: { color: '#F4E9D6', fontSize: 22, fontWeight: '900', marginTop: 9 }, bilanMetricLabel: { color: '#BCC8B8', fontSize: 10, marginTop: 4 },
+  breakdownTitle: { color: '#FBF1DF', fontSize: 13, fontWeight: '900', marginTop: 22, marginBottom: 3 },
+  distanceRow: { marginTop: 12 }, distanceLabels: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }, distanceLabel: { color: '#E6E2D5', fontSize: 11, fontWeight: '800' }, distanceValue: { color: '#BCC8B8', fontSize: 10, fontWeight: '700' }, distanceTrack: { height: 7, overflow: 'hidden', borderRadius: 0, backgroundColor: '#0B1710' }, distanceFill: { height: '100%', borderRadius: 0},
+  recordCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 0, backgroundColor: '#2D5B3D', padding: 14, marginTop: 19 }, recordEyebrow: { color: '#B86F4B', fontSize: 8, fontWeight: '900', letterSpacing: 1 }, recordTitle: { maxWidth: 190, color: '#F4E9D6', fontSize: 13, fontWeight: '900', marginTop: 4 }, recordDistance: { color: '#B86F4B', fontSize: 16, fontWeight: '900' }, bilanHelper: { color: '#AEBBAA', fontSize: 10, lineHeight: 15, marginTop: 17 },
 
   topLabel: {
     width: '100%',
@@ -488,14 +547,14 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 20,
     fontWeight: '900',
     letterSpacing: 2,
   },
 
   sectionLabel: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1.5,
@@ -508,9 +567,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    backgroundColor: '#174B3B',
+    backgroundColor: '#264C32',
     borderWidth: 3,
-    borderColor: '#62E6B1',
+    borderColor: '#B86F4B',
   },
 
   avatarImage: {
@@ -519,13 +578,13 @@ const styles = StyleSheet.create({
   },
 
   avatarText: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 32,
     fontWeight: '900',
   },
 
   title: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 25,
     fontWeight: '900',
     textShadowColor: 'rgba(0,0,0,0.55)',
@@ -533,7 +592,7 @@ const styles = StyleSheet.create({
   },
 
   username: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 14,
     fontWeight: '800',
     marginTop: 5,
@@ -547,7 +606,7 @@ const styles = StyleSheet.create({
   },
 
   bio: {
-    color: '#B7C9C1',
+    color: '#E6E2D5',
     fontSize: 14,
     lineHeight: 21,
     flex: 1,
@@ -566,8 +625,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     paddingVertical: 15,
     marginTop: 16,
   },
@@ -580,31 +639,27 @@ const styles = StyleSheet.create({
   },
 
   statValue: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 20,
     fontWeight: '900',
   },
 
   statLabel: {
-    color: '#8FA69B',
+    color: '#CBD5C8',
     fontSize: 11,
     marginTop: 6,
     textAlign: 'center',
   },
 
   followingRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
-  followingCard: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#10251E', padding: 13 },
-  followingValue: { color: '#62E6B1', fontSize: 18, fontWeight: '900' },
-  followingLabel: { color: '#8FA69B', fontSize: 11, marginTop: 3 },
-  findMembersButton: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', padding: 15, marginTop: 12 },
-  findMembersIcon: { color: '#62E6B1', fontSize: 30 }, findMembersContent: { flex: 1, marginLeft: 12 }, findMembersTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '900' }, findMembersText: { color: '#81958C', fontSize: 11, marginTop: 4 }, findMembersArrow: { color: '#62E6B1', fontSize: 28 },
-  aboutSection: { borderRadius: 0, backgroundColor: '#0C1C17', padding: 18, marginTop: 22 }, aboutTitle: { color: '#F3FFF9', fontSize: 19, fontWeight: '900', marginTop: 6 }, aboutText: { color: '#B7C9C1', lineHeight: 20, marginTop: 9 }, aboutCountry: { color: '#62E6B1', fontSize: 12, fontWeight: '800', marginTop: 10 }, activityHeader: { marginTop: 26, marginBottom: -8 },
-  settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#173D31' },
-  settingsIcon: { color: '#62E6B1', fontSize: 19 },
-  socialLinks: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },
-  socialLink: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 },
-  socialLinkText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' },
-  socialLinkArrow: { color: '#62E6B1', fontSize: 13, marginLeft: 6 },
+  followingCard: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#21472F', padding: 13 },
+  followingValue: { color: '#B86F4B', fontSize: 18, fontWeight: '900' },
+  followingLabel: { color: '#CBD5C8', fontSize: 11, marginTop: 3 },
+  findMembersButton: { flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#6F8D6C', backgroundColor: '#21472F', padding: 15, marginTop: 12 },
+  findMembersIcon: { color: '#B86F4B', fontSize: 30 }, findMembersContent: { flex: 1, marginLeft: 12 }, findMembersTitle: { color: '#F4E9D6', fontSize: 15, fontWeight: '900' }, findMembersText: { color: '#BCC8B8', fontSize: 11, marginTop: 4 }, findMembersArrow: { color: '#B86F4B', fontSize: 28 },
+  aboutSection: { borderRadius: 0, backgroundColor: '#173523', padding: 18, marginTop: 22 }, aboutTitle: { color: '#F4E9D6', fontSize: 19, fontWeight: '900', marginTop: 6 }, aboutText: { color: '#E6E2D5', lineHeight: 20, marginTop: 9 }, aboutCountry: { color: '#B86F4B', fontSize: 12, fontWeight: '800', marginTop: 10 }, activityHeader: { marginTop: 26, marginBottom: -8 },
+  settingsButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#2D5B3D' },
+  settingsIcon: { color: '#B86F4B', fontSize: 19 },
 
   library: {
     width: '100%',
@@ -623,21 +678,21 @@ const styles = StyleSheet.create({
   },
 
   libraryEyebrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.3,
   },
 
   libraryTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 21,
     fontWeight: '900',
     marginTop: 4,
   },
 
   libraryCount: {
-    color: '#8FA69B',
+    color: '#CBD5C8',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -648,8 +703,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 10,
     marginBottom: 10,
   },
@@ -666,11 +721,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   contentImageFallbackText: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 23,
   },
 
@@ -680,27 +735,27 @@ const styles = StyleSheet.create({
   },
 
   contentBadge: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 0.8,
   },
 
   contentTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 15,
     fontWeight: '900',
     marginTop: 4,
   },
 
   contentSubtitle: {
-    color: '#81958C',
+    color: '#BCC8B8',
     fontSize: 11,
     marginTop: 4,
   },
 
   contentArrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 27,
     paddingRight: 5,
   },
@@ -711,7 +766,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
+    borderColor: '#35563E',
     padding: 18,
   },
 
@@ -721,12 +776,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     marginTop: 30,
   },
 
   primaryButtonText: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 15,
     fontWeight: '900',
   },
@@ -738,13 +793,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#386B59',
-    backgroundColor: '#10251E',
+    borderColor: '#748D73',
+    backgroundColor: '#21472F',
     marginTop: 12,
   },
 
   secondaryButtonText: {
-    color: '#DFFFF2',
+    color: '#FBF1DF',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -755,14 +810,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     marginTop: 30,
   },
-  moderationButton: { width: '100%', minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#E9B949', backgroundColor: '#211D0E', marginTop: 30 },
-  moderationButtonText: { color: '#E9B949', fontSize: 14, fontWeight: '900' },
+  moderationButton: { width: '100%', minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#C58A62', backgroundColor: '#211D0E', marginTop: 30 },
+  moderationButtonText: { color: '#C58A62', fontSize: 14, fontWeight: '900' },
 
   editButtonText: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 15,
     fontWeight: '900',
   },
@@ -787,27 +842,27 @@ const styles = StyleSheet.create({
   deleteAccountButton: { width: '100%', minHeight: 48, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   deleteAccountText: { color: '#B77A7A', fontSize: 12, fontWeight: '800' },
   blockedUsersButton: { width: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  blockedUsersText: { color: '#8FA69B', fontSize: 12, fontWeight: '800' },
+  blockedUsersText: { color: '#CBD5C8', fontSize: 12, fontWeight: '800' },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 22, marginTop: 12 },
-  legalText: { color: '#62E6B1', fontSize: 11, fontWeight: '800', textDecorationLine: 'underline' },
+  legalText: { color: '#B86F4B', fontSize: 11, fontWeight: '800', textDecorationLine: 'underline' },
   emailStatus: { alignSelf: 'center', borderRadius: 0, backgroundColor: '#2A2412', paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
-  emailStatusConfirmed: { backgroundColor: '#173D31' },
-  emailStatusText: { color: '#E9B949', fontSize: 9, fontWeight: '900' },
-  emailStatusTextConfirmed: { color: '#62E6B1' },
-  resendText: { color: '#8FA69B', fontSize: 10, fontWeight: '800', textAlign: 'center', marginTop: 8, textDecorationLine: 'underline' },
+  emailStatusConfirmed: { backgroundColor: '#2D5B3D' },
+  emailStatusText: { color: '#C58A62', fontSize: 9, fontWeight: '900' },
+  emailStatusTextConfirmed: { color: '#B86F4B' },
+  resendText: { color: '#CBD5C8', fontSize: 10, fontWeight: '800', textAlign: 'center', marginTop: 8, textDecorationLine: 'underline' },
 
   quoteCard: {
     width: '100%',
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#173523',
     borderWidth: 1,
-    borderColor: '#19392E',
+    borderColor: '#35563E',
     borderRadius: 0,
     padding: 20,
     marginTop: 28,
   },
 
   quote: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 18,
     fontWeight: '900',
     textAlign: 'center',

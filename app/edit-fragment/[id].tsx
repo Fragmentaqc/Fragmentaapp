@@ -60,14 +60,14 @@ export default function EditFragmentScreen() {
     <Text style={styles.label}>Publication</Text><View style={styles.row}><Pressable style={[styles.choice, status === 'draft' && styles.active]} onPress={() => setStatus('draft')}><Text style={styles.choiceText}>Brouillon</Text></Pressable><Pressable style={[styles.choice, status === 'published' && styles.active]} onPress={() => setStatus('published')}><Text style={styles.choiceText}>Publié</Text></Pressable></View>
     <Text style={styles.label}>Position</Text><LocationPicker coordinate={coordinate} onSelect={setCoordinate} />
     <Text style={styles.note}>Les photos actuelles sont conservées.</Text>
-    <Pressable style={styles.save} onPress={() => void save()} disabled={saving}>{saving ? <ActivityIndicator color="#071310" /> : <Text style={styles.saveText}>Enregistrer</Text>}</Pressable>
+    <Pressable style={styles.save} onPress={() => void save()} disabled={saving}>{saving ? <ActivityIndicator color="#0B1710" /> : <Text style={styles.saveText}>Enregistrer</Text>}</Pressable>
   </ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#071310' }, flex: { flex: 1 }, container: { padding: 18, paddingBottom: 70 }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  back: { color: '#62E6B1', fontSize: 15, fontWeight: '800', marginBottom: 20 }, eyebrow: { color: '#62E6B1', fontSize: 10, fontWeight: '900', letterSpacing: 1.2 }, heading: { color: '#F3FFF9', fontSize: 28, fontWeight: '900', marginTop: 6 },
-  label: { color: '#DFFFF2', fontSize: 13, fontWeight: '800', marginTop: 18, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', color: '#F3FFF9', padding: 15 }, area: { minHeight: 150 },
-  row: { flexDirection: 'row', gap: 9 }, choice: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#285345', padding: 14 }, active: { backgroundColor: '#28634F' }, choiceText: { color: '#F3FFF9', fontWeight: '800' },
-  note: { color: '#81958C', fontSize: 11, marginTop: 15 }, save: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#62E6B1', marginTop: 24 }, saveText: { color: '#071310', fontSize: 15, fontWeight: '900' },
+  safe: { flex: 1, backgroundColor: '#0B1710' }, flex: { flex: 1 }, container: { padding: 18, paddingBottom: 70 }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  back: { color: '#B86F4B', fontSize: 15, fontWeight: '800', marginBottom: 20 }, eyebrow: { color: '#B86F4B', fontSize: 10, fontWeight: '900', letterSpacing: 1.2 }, heading: { color: '#F4E9D6', fontSize: 28, fontWeight: '900', marginTop: 6 },
+  label: { color: '#FBF1DF', fontSize: 13, fontWeight: '800', marginTop: 18, marginBottom: 8 }, input: { minHeight: 54, borderRadius: 0, borderWidth: 1, borderColor: '#3D6648', backgroundColor: '#173523', color: '#F4E9D6', padding: 15 }, area: { minHeight: 150 },
+  row: { flexDirection: 'row', gap: 9 }, choice: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#55775B', padding: 14 }, active: { backgroundColor: '#6F8D6C' }, choiceText: { color: '#F4E9D6', fontWeight: '800' },
+  note: { color: '#BCC8B8', fontSize: 11, marginTop: 15 }, save: { minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#B86F4B', marginTop: 24 }, saveText: { color: '#0B1710', fontSize: 15, fontWeight: '900' },
 });

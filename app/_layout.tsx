@@ -14,9 +14,12 @@ import { FragmentsProvider } from '@/context/fragments-context';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ConnectionSync } from '@/components/connection-sync';
 import { FavoritesProvider } from '@/context/favorites-context';
+import { CollectionsProvider } from '@/context/collections-context';
 import { BlocksProvider } from '@/context/blocks-context';
 import { FollowsProvider } from '@/context/follows-context';
+import { LaunchIntro } from '@/components/launch-intro';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useCallback, useState } from 'react';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -24,6 +27,8 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [showLaunchIntro, setShowLaunchIntro] = useState(true);
+  const finishLaunchIntro = useCallback(() => setShowLaunchIntro(false), []);
 
   return (
     <AuthProvider>
@@ -33,6 +38,7 @@ export default function RootLayout() {
         <CuriositiesProvider>
           <FragmentsProvider>
           <FavoritesProvider>
+          <CollectionsProvider>
           <ThemeProvider
             value={
               colorScheme === 'dark'
@@ -44,7 +50,7 @@ export default function RootLayout() {
               screenOptions={{
                 headerShown: false,
                 contentStyle: {
-                  backgroundColor: '#071310',
+                  backgroundColor: '#0B1710',
                 },
               }}
             >
@@ -76,6 +82,10 @@ export default function RootLayout() {
 
               <Stack.Screen name="members" />
 
+              <Stack.Screen name="chat/[id]" />
+
+              <Stack.Screen name="notifications" />
+
               <Stack.Screen name="report" />
 
               <Stack.Screen name="moderation" />
@@ -92,11 +102,14 @@ export default function RootLayout() {
 
             <StatusBar
               style="light"
-              backgroundColor="#071310"
+              backgroundColor="#0B1710"
+              hidden={showLaunchIntro}
             />
             <OfflineBanner />
             <ConnectionSync />
+            {showLaunchIntro ? <LaunchIntro onFinish={finishLaunchIntro} /> : null}
           </ThemeProvider>
+          </CollectionsProvider>
           </FavoritesProvider>
           </FragmentsProvider>
         </CuriositiesProvider>

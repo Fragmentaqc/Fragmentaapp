@@ -3,11 +3,13 @@ import { useCuriosities } from '@/context/curiosities-context';
 import { useAuth } from '@/context/auth-context';
 import { useBlocks } from '@/context/blocks-context';
 import { useFollows } from '@/context/follows-context';
-import { normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
+import { SocialLinksRow } from '@/components/social-links-row';
+import { parseSocialLinks, type SocialLink } from '@/lib/social-links';
 import { supabase } from '@/lib/supabase';
+import { openDirectConversation } from '@/lib/messages';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type PublicProfile = {
@@ -31,6 +33,7 @@ export default function PublicProfileScreen() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({ followers: 0, following: 0 });
+  const [openingChat, setOpeningChat] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -70,8 +73,18 @@ export default function PublicProfileScreen() {
     ]);
   }
 
+  async function startChat() {
+    if (!user) { router.push('/auth'); return; }
+    if (!userId || openingChat) return;
+    setOpeningChat(true);
+    const result = await openDirectConversation(userId);
+    setOpeningChat(false);
+    if (!result.id) { Alert.alert('Conversation indisponible', result.error || 'Impossible d’ouvrir cette conversation.'); return; }
+    router.push({ pathname: '/chat/[id]', params: { id: result.id, otherId: userId, name, avatar: profile?.avatar_url || '' } });
+  }
+
   if (loading) {
-    return <SafeAreaView style={styles.safeArea}><View style={styles.center}><ActivityIndicator color="#62E6B1" size="large" /></View></SafeAreaView>;
+    return <SafeAreaView style={styles.safeArea}><View style={styles.center}><ActivityIndicator color="#B86F4B" size="large" /></View></SafeAreaView>;
   }
 
   if (isHidden) {
@@ -85,27 +98,17 @@ export default function PublicProfileScreen() {
         <View style={styles.publicHero}>
           {coverImage ? <Image source={{ uri: coverImage }} style={styles.publicCover} /> : <View style={styles.publicCoverFallback}><Text style={styles.coverLetter}>F</Text></View>}
           <View style={styles.publicShade} />
-          <Text style={styles.passportLabel}>PASSEPORT D’AVENTURIER</Text>
           <View style={styles.avatar}>
             {profile?.avatar_url ? <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>}
           </View>
         </View>
+        <SocialLinksRow links={socialLinks} />
         <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{name}</Text>
         <Text style={styles.handle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{profile?.username ? `@${profile.username}` : 'Profil Fragmenta'}</Text>
         {profile?.country ? <Text style={styles.country}>⌖ {profile.country}</Text> : null}
         {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
-        {user?.id !== userId ? <Pressable style={[styles.followButton, isFollowing && styles.followingButton]} onPress={() => user ? void toggleFollow(userId).then((success) => { if (success) setCounts((current) => ({ ...current, followers: Math.max(0, current.followers + (isFollowing ? -1 : 1)) })); }) : router.push('/auth')}><Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>{isFollowing ? 'Abonné' : 'Suivre'}</Text></Pressable> : null}
+        {user?.id !== userId ? <View style={styles.profileActions}><Pressable style={[styles.followButton, isFollowing && styles.followingButton]} onPress={() => user ? void toggleFollow(userId).then((success) => { if (success) setCounts((current) => ({ ...current, followers: Math.max(0, current.followers + (isFollowing ? -1 : 1)) })); }) : router.push('/auth')}><Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>{isFollowing ? 'Abonné' : 'Suivre'}</Text></Pressable><Pressable style={styles.messageButton} onPress={() => void startChat()} disabled={openingChat}>{openingChat ? <ActivityIndicator color="#F4E9D6" /> : <Text style={styles.messageButtonText}>✦ Écrire</Text>}</Pressable></View> : null}
         {user?.id !== userId ? <View style={styles.safetyActions}><Pressable style={styles.reportButton} onPress={() => user ? router.push({ pathname: '/report', params: { type: 'user', id: userId, label: name } }) : router.push('/auth')}><Text style={styles.reportText}>⚑ Signaler</Text></Pressable><Pressable style={styles.reportButton} onPress={confirmBlock}><Text style={styles.blockText}>Bloquer</Text></Pressable></View> : null}
-
-        {socialLinks.length > 0 ? (
-          <View style={styles.socials}>
-            {socialLinks.map((link, index) => (
-              <Pressable key={`${link.platform}-${index}`} style={styles.social} onPress={() => void Linking.openURL(normalizeSocialUrl(link.url))}>
-                <Text style={styles.socialText}>{link.platform}</Text><Text style={styles.socialArrow}>↗</Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
 
         <View style={styles.stats}>
           <Text style={styles.stat}>{userAdventures.length} aventures</Text>
@@ -140,17 +143,16 @@ export default function PublicProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#071310' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  hiddenContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 16 }, hiddenTitle: { color: '#F3FFF9', fontSize: 24, fontWeight: '900' }, hiddenText: { color: '#8FA69B', textAlign: 'center' }, unblockButton: { borderRadius: 0, backgroundColor: '#174B3B', paddingHorizontal: 20, paddingVertical: 12 }, unblockText: { color: '#62E6B1', fontWeight: '900' },
-  container: { padding: 20, paddingBottom: 80 }, back: { alignSelf: 'flex-start', paddingVertical: 8 }, backText: { color: '#62E6B1', fontSize: 15, fontWeight: '800' },
-  publicHero: { height: 270, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#12382D', marginTop: 10 }, publicCover: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }, publicCoverFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', justifyContent: 'center' }, coverLetter: { color: 'rgba(98,230,177,0.08)', fontSize: 210, fontWeight: '900', marginRight: -10 }, publicShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,12,9,0.48)' }, passportLabel: { position: 'absolute', top: 18, left: 18, color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.6 },
-  avatar: { position: 'absolute', left: 18, bottom: 18, width: 94, height: 94, alignItems: 'center', justifyContent: 'center', borderRadius: 0, overflow: 'hidden', backgroundColor: '#174B3B', borderWidth: 3, borderColor: '#62E6B1' },
-  avatarImage: { width: '100%', height: '100%' }, avatarText: { color: '#F3FFF9', fontSize: 40, fontWeight: '900' },
-  name: { color: '#F3FFF9', fontSize: 28, fontWeight: '900', textAlign: 'center', marginTop: 16 }, handle: { color: '#62E6B1', textAlign: 'center', marginTop: 5 }, country: { color: '#8FA69B', textAlign: 'center', marginTop: 8 }, bio: { color: '#B7C9C1', fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 16 },
-  socials: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 20 }, social: { flexDirection: 'row', borderRadius: 0, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', paddingHorizontal: 13, paddingVertical: 9 }, socialText: { color: '#DFFFF2', fontSize: 12, fontWeight: '800' }, socialArrow: { color: '#62E6B1', marginLeft: 6 },
-  stats: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 24 }, stat: { color: '#B7C9C1', borderRadius: 0, backgroundColor: '#0C1C17', padding: 12 },
-  followButton: { alignSelf: 'center', borderRadius: 0, backgroundColor: '#62E6B1', paddingHorizontal: 30, paddingVertical: 12, marginTop: 18 }, followingButton: { backgroundColor: '#173D31' }, followButtonText: { color: '#071310', fontWeight: '900' }, followingButtonText: { color: '#62E6B1' },
-  socialStats: { flexDirection: 'row', justifyContent: 'center', gap: 40, marginTop: 14 }, socialStatValue: { color: '#F3FFF9', fontSize: 20, fontWeight: '900', textAlign: 'center' }, socialStatLabel: { color: '#81958C', fontSize: 11, marginTop: 3 }, aboutCard: { borderRadius: 0, backgroundColor: '#0C1C17', padding: 18, marginTop: 24 }, aboutText: { color: '#B7C9C1', lineHeight: 21, marginTop: 8 }, aboutMeta: { color: '#62E6B1', fontSize: 12, fontWeight: '800', marginTop: 12 },
-  safetyActions: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12 }, reportButton: { paddingHorizontal: 14, paddingVertical: 10 }, reportText: { color: '#81958C', fontSize: 11, fontWeight: '800' }, blockText: { color: '#B77A7A', fontSize: 11, fontWeight: '800' },
-  sectionTitle: { color: '#F3FFF9', fontSize: 20, fontWeight: '900', marginTop: 28, marginBottom: 10 }, card: { minHeight: 78, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#0C1C17', borderWidth: 1, borderColor: '#19392E', padding: 9, marginBottom: 9 }, cardImage: { width: 60, height: 60, borderRadius: 0, backgroundColor: '#173D31' }, cardContent: { flex: 1, paddingHorizontal: 12 }, cardTitle: { color: '#F3FFF9', fontSize: 14, fontWeight: '900' }, cardSubtitle: { color: '#81958C', fontSize: 11, marginTop: 5 }, arrow: { color: '#62E6B1', fontSize: 27, paddingRight: 5 },
+  safeArea: { flex: 1, backgroundColor: '#0B1710' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  hiddenContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 16 }, hiddenTitle: { color: '#F4E9D6', fontSize: 24, fontWeight: '900' }, hiddenText: { color: '#CBD5C8', textAlign: 'center' }, unblockButton: { borderRadius: 0, backgroundColor: '#264C32', paddingHorizontal: 20, paddingVertical: 12 }, unblockText: { color: '#B86F4B', fontWeight: '900' },
+  container: { padding: 20, paddingBottom: 80 }, back: { alignSelf: 'flex-start', paddingVertical: 8 }, backText: { color: '#B86F4B', fontSize: 15, fontWeight: '800' },
+  publicHero: { height: 270, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#55775B', backgroundColor: '#12382D', marginTop: 10 }, publicCover: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }, publicCoverFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', justifyContent: 'center' }, coverLetter: { color: 'rgba(98,230,177,0.08)', fontSize: 210, fontWeight: '900', marginRight: -10 }, publicShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,12,9,0.48)' },
+  avatar: { position: 'absolute', left: 18, bottom: 18, width: 94, height: 94, alignItems: 'center', justifyContent: 'center', borderRadius: 0, overflow: 'hidden', backgroundColor: '#264C32', borderWidth: 3, borderColor: '#B86F4B' },
+  avatarImage: { width: '100%', height: '100%' }, avatarText: { color: '#F4E9D6', fontSize: 40, fontWeight: '900' },
+  name: { color: '#F4E9D6', fontSize: 28, fontWeight: '900', textAlign: 'center', marginTop: 16 }, handle: { color: '#B86F4B', textAlign: 'center', marginTop: 5 }, country: { color: '#CBD5C8', textAlign: 'center', marginTop: 8 }, bio: { color: '#E6E2D5', fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 16 },
+  stats: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 24 }, stat: { color: '#E6E2D5', borderRadius: 0, backgroundColor: '#173523', padding: 12 },
+  profileActions: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 18 }, followButton: { minWidth: 116, alignItems: 'center', borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 22, paddingVertical: 12 }, followingButton: { backgroundColor: '#2D5B3D' }, followButtonText: { color: '#0B1710', fontWeight: '900' }, followingButtonText: { color: '#B86F4B' }, messageButton: { minWidth: 116, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#6F8D6C', paddingHorizontal: 20, paddingVertical: 11 }, messageButtonText: { color: '#F4E9D6', fontWeight: '900' },
+  socialStats: { flexDirection: 'row', justifyContent: 'center', gap: 40, marginTop: 14 }, socialStatValue: { color: '#F4E9D6', fontSize: 20, fontWeight: '900', textAlign: 'center' }, socialStatLabel: { color: '#BCC8B8', fontSize: 11, marginTop: 3 }, aboutCard: { borderRadius: 0, backgroundColor: '#173523', padding: 18, marginTop: 24 }, aboutText: { color: '#E6E2D5', lineHeight: 21, marginTop: 8 }, aboutMeta: { color: '#B86F4B', fontSize: 12, fontWeight: '800', marginTop: 12 },
+  safetyActions: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12 }, reportButton: { paddingHorizontal: 14, paddingVertical: 10 }, reportText: { color: '#BCC8B8', fontSize: 11, fontWeight: '800' }, blockText: { color: '#B77A7A', fontSize: 11, fontWeight: '800' },
+  sectionTitle: { color: '#F4E9D6', fontSize: 20, fontWeight: '900', marginTop: 28, marginBottom: 10 }, card: { minHeight: 78, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#173523', borderWidth: 1, borderColor: '#35563E', padding: 9, marginBottom: 9 }, cardImage: { width: 60, height: 60, borderRadius: 0, backgroundColor: '#2D5B3D' }, cardContent: { flex: 1, paddingHorizontal: 12 }, cardTitle: { color: '#F4E9D6', fontSize: 14, fontWeight: '900' }, cardSubtitle: { color: '#BCC8B8', fontSize: 11, marginTop: 5 }, arrow: { color: '#B86F4B', fontSize: 27, paddingRight: 5 },
 });

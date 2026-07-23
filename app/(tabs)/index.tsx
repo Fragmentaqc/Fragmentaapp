@@ -60,8 +60,9 @@ export default function HomeScreen() {
           <Image source={require('@/assets/images/D7K_3244.jpg')} style={styles.heroImage} contentFit="cover" contentPosition="center" />
           <View style={styles.heroShade} />
           <View style={styles.heroTop}>
-            <View style={styles.heroLogoLockup}><Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" /><Text style={styles.heroWordmark}>FRAGMENTA</Text></View>
-            <Pressable style={styles.profileButton} onPress={() => router.push('/profile')} accessibilityRole="button" accessibilityLabel="Ouvrir mon profil"><Text style={styles.profileButtonText}>◎</Text></Pressable>
+            <View style={styles.heroLogoLockup} pointerEvents="none">
+              <Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.heroLogo} contentFit="contain" />
+            </View>
           </View>
           <View style={styles.heroContent}>
             <Text style={styles.heroEyebrow}>LE MONDE EST PLEIN DE FRAGMENTS</Text>
@@ -89,7 +90,7 @@ export default function HomeScreen() {
 
         {loading ? (
           <View style={styles.loadingCard}>
-            <ActivityIndicator color="#62E6B1" />
+            <ActivityIndicator color="#B86F4B" />
             <Text style={styles.loadingText}>Préparation des découvertes…</Text>
           </View>
         ) : null}
@@ -231,6 +232,7 @@ function AdventureTile({ adventure }: { adventure: Adventure }) {
   return (
     <Pressable style={styles.adventureTile} onPress={() => router.push({ pathname: '/adventure/[id]', params: { id: adventure.id } })} accessibilityRole="button" accessibilityLabel={`Ouvrir ${adventure.title}`}>
       {adventure.images[0] ? <Image source={{ uri: adventure.images[0] }} style={styles.tileImage} contentFit="cover" /> : <View style={styles.tileFallback}><Text style={styles.tileEmoji}>{adventure.emoji}</Text></View>}
+      <View style={styles.tileShade} />
       <View style={styles.tileContent}>
         <Text style={styles.tileCategory}>{adventure.category.toUpperCase()}</Text>
         <Text style={styles.tileTitle} numberOfLines={2}>{adventure.title}</Text>
@@ -245,6 +247,7 @@ function CuriosityTile({ curiosity }: { curiosity: Curiosity }) {
   return (
     <Pressable style={styles.curiosityTile} onPress={() => router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } })} accessibilityRole="button" accessibilityLabel={`Ouvrir ${curiosity.title}`}>
       {curiosity.images[0] ? <Image source={{ uri: curiosity.images[0] }} style={styles.curiosityImage} contentFit="cover" /> : <View style={styles.curiosityFallback}><Text style={styles.curiosityFallbackIcon}>◇</Text></View>}
+      <View style={styles.curiosityShade} />
       <View style={styles.curiosityContent}>
         <View style={styles.curiosityMeta}><Text style={styles.curiosityCategory}>{curiosity.category}</Text>{verified ? <Text style={styles.verifiedBadge}>VÉRIFIÉE</Text> : null}</View>
         <Text style={styles.curiosityTitle} numberOfLines={2}>{curiosity.title}</Text>
@@ -269,97 +272,96 @@ function RecentAdventure({ adventure, index }: { adventure: Adventure; index: nu
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#071310' },
-  container: { paddingBottom: 48 },
-  profileButton: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: 'rgba(255,255,255,.55)', backgroundColor: 'rgba(7,19,16,.55)' },
-  profileButtonText: { color: '#FFFFFF', fontSize: 24, fontWeight: '900' },
-  hero: { height: 540, overflow: 'hidden', borderRadius: 0, backgroundColor: '#10251E' },
+  safeArea: { flex: 1, backgroundColor: '#0B1710' },
+  container: { paddingBottom: 0 },
+  hero: { height: 610, overflow: 'hidden', borderRadius: 0, backgroundColor: '#21472F' },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,10,8,.42)' },
-  heroTop: { position: 'absolute', top: 18, left: 18, right: 18, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
-  heroLogoLockup: { flexDirection: 'row', alignItems: 'center' },
-  heroLogo: { width: 76, height: 76 },
-  heroWordmark: { color: '#FFFFFF', fontSize: 20, fontWeight: '900', letterSpacing: 2.4, marginLeft: 8, textShadowColor: 'rgba(0,0,0,.6)', textShadowRadius: 8 },
-  heroContent: { position: 'absolute', left: 18, right: 18, bottom: 22 },
-  heroEyebrow: { color: '#8EF0C5', fontSize: 9, fontWeight: '900', letterSpacing: 1.3 },
-  heroTitle: { maxWidth: 410, color: '#FFFFFF', fontSize: 36, lineHeight: 40, fontWeight: '900', marginTop: 10, textShadowColor: 'rgba(0,0,0,.7)', textShadowRadius: 10 },
-  heroText: { maxWidth: 430, color: '#E2ECE8', fontSize: 13, lineHeight: 20, marginTop: 11, textShadowColor: 'rgba(0,0,0,.65)', textShadowRadius: 7 },
-  heroActions: { flexDirection: 'row', gap: 9, marginTop: 20 },
-  primaryAction: { minHeight: 48, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#62E6B1', paddingHorizontal: 14 },
-  primaryActionText: { color: '#071310', fontSize: 12, fontWeight: '900' },
-  primaryActionArrow: { color: '#071310', fontSize: 17, fontWeight: '900', marginLeft: 7 },
-  secondaryAction: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: 'rgba(255,255,255,.65)', backgroundColor: 'rgba(7,19,16,.5)', paddingHorizontal: 15 },
+  heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,14,16,.48)' },
+  heroTop: { position: 'absolute', top: 18, left: 18, right: 18, alignItems: 'flex-end' },
+  heroLogoLockup: { position: 'absolute', top: -55, left: '50%', width: 190, height: 190, marginLeft: -95 },
+  heroLogo: { width: 190, height: 190 },
+  heroContent: { position: 'absolute', left: 22, right: 22, bottom: 30 },
+  heroEyebrow: { color: '#E4C778', fontSize: 9, fontWeight: '900', letterSpacing: 2.1 },
+  heroTitle: { maxWidth: 390, color: '#FFFFFF', fontSize: 43, lineHeight: 46, fontWeight: '900', marginTop: 13, textShadowColor: 'rgba(0,0,0,.72)', textShadowRadius: 12 },
+  heroText: { maxWidth: 410, color: '#E2ECE8', fontSize: 13, lineHeight: 20, marginTop: 14, textShadowColor: 'rgba(0,0,0,.65)', textShadowRadius: 7 },
+  heroActions: { flexDirection: 'row', alignItems: 'center', gap: 18, marginTop: 25 },
+  primaryAction: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 22 },
+  primaryActionText: { color: '#0B1710', fontSize: 12, fontWeight: '900' },
+  primaryActionArrow: { color: '#0B1710', fontSize: 17, fontWeight: '900', marginLeft: 7 },
+  secondaryAction: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 0, paddingHorizontal: 2 },
   secondaryActionText: { color: '#FFFFFF', fontSize: 12, fontWeight: '900' },
-  metrics: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 18, marginTop: 12, borderRadius: 0, backgroundColor: '#0C1C17', paddingVertical: 14 },
+  metrics: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 18, paddingVertical: 24 },
   metric: { flex: 1, alignItems: 'center' },
-  metricValue: { color: '#F3FFF9', fontSize: 20, fontWeight: '900' },
-  metricLabel: { color: '#71877D', fontSize: 9, fontWeight: '800', textTransform: 'uppercase', marginTop: 3 },
-  metricDivider: { width: 1, height: 30, backgroundColor: '#1D4538' },
+  metricValue: { color: '#F4E9D6', fontSize: 25, fontWeight: '900' },
+  metricLabel: { color: '#AEBBAA', fontSize: 9, fontWeight: '800', textTransform: 'uppercase', marginTop: 3 },
+  metricDivider: { width: 1, height: 38, backgroundColor: 'rgba(228,199,120,.28)' },
   loadingCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginHorizontal: 18, marginTop: 24, padding: 24 },
-  loadingText: { color: '#81958C', fontSize: 12, marginLeft: 10 },
-  section: { marginTop: 30 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 18, marginBottom: 13 },
+  loadingText: { color: '#BCC8B8', fontSize: 12, marginLeft: 10 },
+  section: { marginTop: 42 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 22, marginBottom: 17 },
   sectionHeading: { flex: 1, paddingRight: 14 },
-  sectionTitle: { color: '#F3FFF9', fontSize: 21, fontWeight: '900' },
-  sectionSubtitle: { color: '#71877D', fontSize: 11, lineHeight: 16, marginTop: 4 },
-  sectionAction: { color: '#62E6B1', fontSize: 11, fontWeight: '900' },
-  horizontalContent: { gap: 11, paddingHorizontal: 18 },
-  featuredCard: { height: 430, overflow: 'hidden', marginHorizontal: 18, borderRadius: 0, backgroundColor: '#173D31' },
+  sectionTitle: { color: '#F4E9D6', fontSize: 26, lineHeight: 30, fontWeight: '900' },
+  sectionSubtitle: { color: '#AEBBAA', fontSize: 11, lineHeight: 16, marginTop: 4 },
+  sectionAction: { color: '#B86F4B', fontSize: 11, fontWeight: '900' },
+  horizontalContent: { gap: 12, paddingHorizontal: 22 },
+  featuredCard: { height: 470, overflow: 'hidden', borderRadius: 0, backgroundColor: '#2D5B3D' },
   featuredImage: { ...StyleSheet.absoluteFillObject },
   featuredFallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   featuredEmoji: { fontSize: 92 },
   featuredShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3, 12, 9, 0.43)' },
-  featuredTopRow: { position: 'absolute', top: 15, left: 15, right: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  liveBadge: { color: '#071310', backgroundColor: '#62E6B1', borderRadius: 0, overflow: 'hidden', paddingHorizontal: 10, paddingVertical: 6, fontSize: 8, fontWeight: '900' },
-  featuredCategory: { color: '#F3FFF9', backgroundColor: 'rgba(7,19,16,.8)', borderRadius: 0, overflow: 'hidden', paddingHorizontal: 10, paddingVertical: 6, fontSize: 9, fontWeight: '900' },
-  featuredContent: { position: 'absolute', left: 18, right: 18, bottom: 18 },
-  featuredLocation: { color: '#62E6B1', fontSize: 11, fontWeight: '900' },
-  featuredTitle: { color: '#FFFFFF', fontSize: 27, lineHeight: 32, fontWeight: '900', marginTop: 7 },
+  featuredTopRow: { position: 'absolute', top: 20, left: 22, right: 22, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  liveBadge: { color: '#0B1710', backgroundColor: '#B86F4B', borderRadius: 0, overflow: 'hidden', paddingHorizontal: 10, paddingVertical: 6, fontSize: 8, fontWeight: '900' },
+  featuredCategory: { color: '#F4E9D6', backgroundColor: 'rgba(7,19,16,.8)', borderRadius: 0, overflow: 'hidden', paddingHorizontal: 10, paddingVertical: 6, fontSize: 9, fontWeight: '900' },
+  featuredContent: { position: 'absolute', left: 22, right: 22, bottom: 24, borderLeftWidth: 3, borderLeftColor: '#B86F4B', paddingLeft: 16 },
+  featuredLocation: { color: '#B86F4B', fontSize: 11, fontWeight: '900' },
+  featuredTitle: { color: '#FFFFFF', fontSize: 31, lineHeight: 35, fontWeight: '900', marginTop: 7 },
   featuredDescription: { color: '#D8E8E1', fontSize: 12, lineHeight: 18, marginTop: 7 },
   featuredFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 },
   featuredAuthor: { color: '#D8E8E1', fontSize: 10, fontWeight: '800' },
-  featuredOpen: { color: '#62E6B1', fontSize: 11, fontWeight: '900' },
-  categoryCard: { width: 140, minHeight: 130, borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', padding: 15 },
-  categoryIcon: { fontSize: 27 },
-  categoryName: { color: '#F3FFF9', fontSize: 14, fontWeight: '900', marginTop: 12 },
-  categoryCount: { color: '#71877D', fontSize: 10, marginTop: 4 },
-  adventureTile: { width: 245, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17' },
-  tileImage: { width: '100%', height: 165 },
-  tileFallback: { height: 165, alignItems: 'center', justifyContent: 'center', backgroundColor: '#173D31' },
+  featuredOpen: { color: '#B86F4B', fontSize: 11, fontWeight: '900' },
+  categoryCard: { width: 136, minHeight: 122, borderRadius: 0, backgroundColor: '#173523', padding: 16 },
+  categoryIcon: { fontSize: 30 },
+  categoryName: { color: '#F4E9D6', fontSize: 14, fontWeight: '900', marginTop: 11 },
+  categoryCount: { color: '#AEBBAA', fontSize: 10, marginTop: 4 },
+  adventureTile: { width: 265, height: 350, overflow: 'hidden', borderRadius: 0, backgroundColor: '#173523' },
+  tileImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  tileFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: '#2D5B3D' },
   tileEmoji: { fontSize: 55 },
-  tileContent: { padding: 14 },
-  tileCategory: { color: '#62E6B1', fontSize: 8, fontWeight: '900', letterSpacing: .8 },
-  tileTitle: { color: '#F3FFF9', fontSize: 16, lineHeight: 21, fontWeight: '900', marginTop: 6 },
-  tileLocation: { color: '#81958C', fontSize: 10, marginTop: 8 },
-  curiosityTile: { width: 235, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#3D3920', backgroundColor: '#141A15' },
-  curiosityImage: { width: '100%', height: 145 },
-  curiosityFallback: { height: 145, alignItems: 'center', justifyContent: 'center', backgroundColor: '#2C2916' },
-  curiosityFallbackIcon: { color: '#F6C85F', fontSize: 54 },
-  curiosityContent: { padding: 14 },
+  tileShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,18,20,.38)' },
+  tileContent: { position: 'absolute', left: 17, right: 17, bottom: 18 },
+  tileCategory: { color: '#B86F4B', fontSize: 8, fontWeight: '900', letterSpacing: .8 },
+  tileTitle: { color: '#FFFFFF', fontSize: 19, lineHeight: 23, fontWeight: '900', marginTop: 7 },
+  tileLocation: { color: '#E2ECE8', fontSize: 10, marginTop: 9 },
+  curiosityTile: { width: 250, height: 315, overflow: 'hidden', borderRadius: 0, backgroundColor: '#141A15' },
+  curiosityImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  curiosityFallback: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: '#2C2916' },
+  curiosityFallbackIcon: { color: '#C58A62', fontSize: 54 },
+  curiosityShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(8,15,13,.42)' },
+  curiosityContent: { position: 'absolute', left: 17, right: 17, bottom: 17 },
   curiosityMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  curiosityCategory: { flex: 1, color: '#F6C85F', fontSize: 8, fontWeight: '900', textTransform: 'uppercase' },
-  verifiedBadge: { color: '#071310', backgroundColor: '#F6C85F', borderRadius: 0, overflow: 'hidden', paddingHorizontal: 6, paddingVertical: 3, fontSize: 7, fontWeight: '900' },
-  curiosityTitle: { color: '#F3FFF9', fontSize: 16, lineHeight: 21, fontWeight: '900', marginTop: 7 },
-  curiosityLocation: { color: '#81958C', fontSize: 10, marginTop: 8 },
-  recentList: { marginHorizontal: 18, borderTopWidth: 1, borderTopColor: '#19392E' },
-  recentCard: { minHeight: 96, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#19392E', paddingVertical: 15 },
-  recentIndex: { width: 42, color: '#386B59', fontSize: 18, fontWeight: '900' },
+  curiosityCategory: { flex: 1, color: '#C58A62', fontSize: 8, fontWeight: '900', textTransform: 'uppercase' },
+  verifiedBadge: { color: '#0B1710', backgroundColor: '#C58A62', borderRadius: 0, overflow: 'hidden', paddingHorizontal: 6, paddingVertical: 3, fontSize: 7, fontWeight: '900' },
+  curiosityTitle: { color: '#FFFFFF', fontSize: 18, lineHeight: 22, fontWeight: '900', marginTop: 8 },
+  curiosityLocation: { color: '#E2ECE8', fontSize: 10, marginTop: 9 },
+  recentList: { marginHorizontal: 22, gap: 8 },
+  recentCard: { minHeight: 105, flexDirection: 'row', alignItems: 'center', backgroundColor: '#102218', paddingHorizontal: 16, paddingVertical: 16 },
+  recentIndex: { width: 46, color: '#B86F4B', fontSize: 20, fontWeight: '900' },
   recentContent: { flex: 1 },
-  recentMeta: { color: '#62E6B1', fontSize: 8, fontWeight: '900', letterSpacing: .7 },
-  recentTitle: { color: '#F3FFF9', fontSize: 15, fontWeight: '900', marginTop: 5 },
-  recentAuthor: { color: '#71877D', fontSize: 10, marginTop: 5 },
-  recentArrow: { color: '#62E6B1', fontSize: 28, marginLeft: 10 },
-  emptyState: { alignItems: 'center', margin: 18, borderRadius: 0, borderWidth: 1, borderColor: '#285345', padding: 26 },
+  recentMeta: { color: '#B86F4B', fontSize: 8, fontWeight: '900', letterSpacing: .7 },
+  recentTitle: { color: '#F4E9D6', fontSize: 15, fontWeight: '900', marginTop: 5 },
+  recentAuthor: { color: '#AEBBAA', fontSize: 10, marginTop: 5 },
+  recentArrow: { color: '#B86F4B', fontSize: 28, marginLeft: 10 },
+  emptyState: { alignItems: 'center', margin: 22, padding: 30 },
   emptyIcon: { fontSize: 46 },
-  emptyTitle: { color: '#F3FFF9', fontSize: 20, fontWeight: '900', marginTop: 12 },
-  emptyText: { color: '#81958C', fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 7, marginBottom: 18 },
-  contributionCard: { marginHorizontal: 18, marginTop: 34, borderRadius: 0, backgroundColor: '#62E6B1', padding: 22 },
-  contributionEyebrow: { color: '#174B3B', fontSize: 9, fontWeight: '900', letterSpacing: 1.2 },
-  contributionTitle: { color: '#071310', fontSize: 24, lineHeight: 29, fontWeight: '900', marginTop: 8 },
-  contributionText: { color: '#174B3B', fontSize: 12, lineHeight: 18, marginTop: 8 },
+  emptyTitle: { color: '#F4E9D6', fontSize: 20, fontWeight: '900', marginTop: 12 },
+  emptyText: { color: '#BCC8B8', fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 7, marginBottom: 18 },
+  contributionCard: { marginTop: 50, borderTopWidth: 4, borderTopColor: '#B86F4B', borderRadius: 0, backgroundColor: '#173523', paddingHorizontal: 24, paddingTop: 34, paddingBottom: 48 },
+  contributionEyebrow: { color: '#B86F4B', fontSize: 9, fontWeight: '900', letterSpacing: 1.8 },
+  contributionTitle: { maxWidth: 390, color: '#F4E9D6', fontSize: 29, lineHeight: 34, fontWeight: '900', marginTop: 10 },
+  contributionText: { maxWidth: 420, color: '#BCC8B8', fontSize: 12, lineHeight: 19, marginTop: 10 },
   contributionActions: { gap: 8, marginTop: 18 },
-  contributionPrimary: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#071310' },
-  contributionPrimaryText: { color: '#F3FFF9', fontSize: 12, fontWeight: '900' },
-  contributionSecondary: { minHeight: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#174B3B' },
-  contributionSecondaryText: { color: '#071310', fontSize: 12, fontWeight: '900' },
+  contributionPrimary: { minHeight: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#B86F4B' },
+  contributionPrimaryText: { color: '#0B1710', fontSize: 12, fontWeight: '900' },
+  contributionSecondary: { minHeight: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 0 },
+  contributionSecondaryText: { color: '#E4C778', fontSize: 12, fontWeight: '900' },
 });

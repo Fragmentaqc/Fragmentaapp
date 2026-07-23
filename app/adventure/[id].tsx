@@ -24,6 +24,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { supabase } from '@/lib/supabase';
+import { CollectionPicker } from '@/components/collection-picker';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -42,6 +43,7 @@ export default function AdventureDetailsScreen() {
   const [deleting, setDeleting] = useState(false);
   const [deletingFragmentId, setDeletingFragmentId] = useState<string | null>(null);
   const [savingFavorite, setSavingFavorite] = useState(false);
+  const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
   const adventureId = Array.isArray(params.id)
     ? params.id[0]
     : params.id;
@@ -127,7 +129,7 @@ export default function AdventureDetailsScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#62E6B1" />
+          <ActivityIndicator size="large" color="#B86F4B" />
           <Text style={styles.loadingText}>{"Chargement de l'aventure…"}</Text>
         </View>
       </SafeAreaView>
@@ -180,7 +182,10 @@ export default function AdventureDetailsScreen() {
           <Pressable style={[styles.favoriteButton, favorite && styles.favoriteButtonActive]} onPress={() => void handleFavorite()} disabled={savingFavorite}>
             <Text style={[styles.favoriteButtonText, favorite && styles.favoriteButtonTextActive]}>{favorite ? '♥ Enregistrée' : '♡ Enregistrer'}</Text>
           </Pressable>
+          {user ? <Pressable style={styles.favoriteButton} onPress={() => setCollectionPickerVisible(true)}><Text style={styles.favoriteButtonText}>＋ Ajouter à une collection</Text></Pressable> : null}
         </View>
+
+        <CollectionPicker target={{ type: 'adventure', id: adventure.id }} visible={collectionPickerVisible} onClose={() => setCollectionPickerVisible(false)} />
 
         <Pressable
           style={styles.authorCard}
@@ -236,7 +241,7 @@ export default function AdventureDetailsScreen() {
             </Pressable>
           ) : null}
         </View>
-        {loadingAdventureId === adventure.id ? <ActivityIndicator color="#62E6B1" style={styles.fragmentLoader} /> : fragments.length ? fragments.map((fragment) => (
+        {loadingAdventureId === adventure.id ? <ActivityIndicator color="#B86F4B" style={styles.fragmentLoader} /> : fragments.length ? fragments.map((fragment) => (
           <View key={fragment.id} style={styles.fragmentCard}>
             <View style={styles.fragmentTopRow}>
               <Text style={styles.fragmentDate}>{fragment.occurredAt ? new Date(fragment.occurredAt).toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Date à venir'}</Text>
@@ -471,10 +476,10 @@ function AdventureRouteMap({
         </View>
       </View>
       <MapView style={styles.routeMap} initialRegion={initialRegion} scrollEnabled zoomEnabled>
-        {displayedCoordinates.length > 1 ? <Polyline coordinates={displayedCoordinates} strokeColor="#62E6B1" strokeWidth={5} /> : null}
-        {adventureCoordinate ? <Marker coordinate={adventureCoordinate} title={adventure.title} description="Point de l’aventure" pinColor="#E9B949" /> : null}
+        {displayedCoordinates.length > 1 ? <Polyline coordinates={displayedCoordinates} strokeColor="#B86F4B" strokeWidth={5} /> : null}
+        {adventureCoordinate ? <Marker coordinate={adventureCoordinate} title={adventure.title} description="Point de l’aventure" pinColor="#C58A62" /> : null}
         {fragmentCoordinates.map((fragment, index) => (
-          <Marker key={fragment.id} coordinate={fragment} title={fragment.title} description={`Fragment ${index + 1}`} pinColor="#62E6B1" />
+          <Marker key={fragment.id} coordinate={fragment} title={fragment.title} description={`Fragment ${index + 1}`} pinColor="#B86F4B" />
         ))}
       </MapView>
       <Text style={styles.routeMapHelper}>
@@ -495,7 +500,7 @@ function getRouteProfileLabel(profile: Adventure['routingProfile']) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#071310' },
+  safeArea: { flex: 1, backgroundColor: '#0B1710' },
   container: { paddingBottom: 60 },
   center: {
     flex: 1,
@@ -503,7 +508,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
-  loadingText: { color: '#81958C', fontSize: 13, marginTop: 12 },
+  loadingText: { color: '#BCC8B8', fontSize: 13, marginTop: 12 },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -518,27 +523,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
   },
-  backIcon: { color: '#62E6B1', fontSize: 34, lineHeight: 36 },
+  backIcon: { color: '#B86F4B', fontSize: 34, lineHeight: 36 },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  statusDot: { color: '#62E6B1', fontSize: 9, marginRight: 7 },
-  statusText: { color: '#DFFFF2', fontSize: 10, fontWeight: '900' },
-  gallery: { position: 'relative', minHeight: 310, backgroundColor: '#10251E' },
+  statusDot: { color: '#B86F4B', fontSize: 9, marginRight: 7 },
+  statusText: { color: '#FBF1DF', fontSize: 10, fontWeight: '900' },
+  gallery: { position: 'relative', minHeight: 310, backgroundColor: '#21472F' },
   galleryImage: { width: SCREEN_WIDTH, height: 310 },
   galleryFallback: {
     minHeight: 250,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
   galleryEmoji: { fontSize: 72 },
   galleryFallbackText: {
@@ -556,33 +561,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
-  imageCountText: { color: '#DFFFF2', fontSize: 10, fontWeight: '900' },
+  imageCountText: { color: '#FBF1DF', fontSize: 10, fontWeight: '900' },
   heading: { paddingHorizontal: 18, paddingTop: 24 },
   eyebrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.3,
   },
   title: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 31,
     lineHeight: 37,
     fontWeight: '900',
     marginTop: 7,
   },
   location: { color: '#79DDB5', fontSize: 13, fontWeight: '800', marginTop: 11 },
-  favoriteButton: { alignSelf: 'flex-start', borderRadius: 0, borderWidth: 1, borderColor: '#386B59', paddingHorizontal: 14, paddingVertical: 10, marginTop: 14 },
-  favoriteButtonActive: { backgroundColor: '#62E6B1', borderColor: '#62E6B1' },
-  favoriteButtonText: { color: '#DFFFF2', fontSize: 12, fontWeight: '900' },
-  favoriteButtonTextActive: { color: '#071310' },
+  favoriteButton: { alignSelf: 'flex-start', borderRadius: 0, borderWidth: 1, borderColor: '#748D73', paddingHorizontal: 14, paddingVertical: 10, marginTop: 14 },
+  favoriteButtonActive: { backgroundColor: '#B86F4B', borderColor: '#B86F4B' },
+  favoriteButtonText: { color: '#FBF1DF', fontSize: 12, fontWeight: '900' },
+  favoriteButtonTextActive: { color: '#0B1710' },
   authorCard: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 15,
     marginHorizontal: 18,
     marginTop: 22,
@@ -593,25 +598,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
-  avatarText: { color: '#62E6B1', fontSize: 18, fontWeight: '900' },
+  avatarText: { color: '#B86F4B', fontSize: 18, fontWeight: '900' },
   authorContent: { flex: 1, marginLeft: 12 },
   authorLabel: { color: '#657970', fontSize: 8, fontWeight: '900' },
-  authorName: { color: '#F3FFF9', fontSize: 14, fontWeight: '900', marginTop: 3 },
-  authorHandle: { color: '#62E6B1', fontSize: 10, marginTop: 2 },
-  date: { color: '#71877D', fontSize: 9, maxWidth: 92, textAlign: 'right' },
+  authorName: { color: '#F4E9D6', fontSize: 14, fontWeight: '900', marginTop: 3 },
+  authorHandle: { color: '#B86F4B', fontSize: 10, marginTop: 2 },
+  date: { color: '#AEBBAA', fontSize: 9, maxWidth: 92, textAlign: 'right' },
   routeCard: {
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#285345',
-    backgroundColor: '#10251E',
+    borderColor: '#55775B',
+    backgroundColor: '#21472F',
     padding: 18,
     marginHorizontal: 18,
     marginTop: 16,
   },
   sectionEyebrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.2,
@@ -623,13 +628,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
   },
-  routeMarkerText: { color: '#071310', fontSize: 12, fontWeight: '900' },
+  routeMarkerText: { color: '#0B1710', fontSize: 12, fontWeight: '900' },
   routeContent: { flex: 1, marginLeft: 12 },
   routeLabel: { color: '#70877D', fontSize: 9, fontWeight: '800' },
-  routeValue: { color: '#F3FFF9', fontSize: 14, fontWeight: '800', marginTop: 3 },
-  routeLine: { width: 2, height: 18, backgroundColor: '#285345', marginLeft: 16 },
+  routeValue: { color: '#F4E9D6', fontSize: 14, fontWeight: '800', marginTop: 3 },
+  routeLine: { width: 2, height: 18, backgroundColor: '#55775B', marginLeft: 16 },
   detailsRow: {
     flexDirection: 'row',
     gap: 10,
@@ -640,75 +645,75 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 14,
   },
   detailLabel: { color: '#657970', fontSize: 9, fontWeight: '800' },
-  detailValue: { color: '#DFFFF2', fontSize: 14, fontWeight: '900', marginTop: 5 },
+  detailValue: { color: '#FBF1DF', fontSize: 14, fontWeight: '900', marginTop: 5 },
   descriptionCard: {
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 18,
     marginHorizontal: 18,
     marginTop: 16,
   },
-  sectionTitle: { color: '#F3FFF9', fontSize: 19, fontWeight: '900', marginTop: 5 },
-  description: { color: '#A2B3AB', fontSize: 14, lineHeight: 22, marginTop: 11 },
+  sectionTitle: { color: '#F4E9D6', fontSize: 19, fontWeight: '900', marginTop: 5 },
+  description: { color: '#AAB6A6', fontSize: 14, lineHeight: 22, marginTop: 11 },
   fragmentsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 18, marginTop: 25 },
-  addFragmentButton: { borderRadius: 0, backgroundColor: '#62E6B1', paddingHorizontal: 13, paddingVertical: 10 },
-  addFragmentButtonText: { color: '#071310', fontSize: 11, fontWeight: '900' },
+  addFragmentButton: { borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 13, paddingVertical: 10 },
+  addFragmentButtonText: { color: '#0B1710', fontSize: 11, fontWeight: '900' },
   fragmentLoader: { marginTop: 24 },
-  fragmentCard: { borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', padding: 17, marginHorizontal: 18, marginTop: 12 },
+  fragmentCard: { borderRadius: 0, borderWidth: 1, borderColor: '#55775B', backgroundColor: '#21472F', padding: 17, marginHorizontal: 18, marginTop: 12 },
   fragmentTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  fragmentDate: { color: '#62E6B1', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' },
-  draftBadge: { color: '#071310', backgroundColor: '#E9B949', fontSize: 8, fontWeight: '900', borderRadius: 0, paddingHorizontal: 8, paddingVertical: 5 },
-  fragmentTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900', marginTop: 10 },
-  fragmentBody: { color: '#A2B3AB', fontSize: 13, lineHeight: 20, marginTop: 7 },
+  fragmentDate: { color: '#B86F4B', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' },
+  draftBadge: { color: '#0B1710', backgroundColor: '#C58A62', fontSize: 8, fontWeight: '900', borderRadius: 0, paddingHorizontal: 8, paddingVertical: 5 },
+  fragmentTitle: { color: '#F4E9D6', fontSize: 18, fontWeight: '900', marginTop: 10 },
+  fragmentBody: { color: '#AAB6A6', fontSize: 13, lineHeight: 20, marginTop: 7 },
   fragmentGallery: { gap: 10, paddingTop: 13 },
   fragmentImage: { width: 245, height: 190, borderRadius: 0},
   fragmentActions: { flexDirection: 'row', gap: 9, marginTop: 13 },
-  fragmentEditButton: { flex: 1, alignItems: 'center', borderRadius: 0, backgroundColor: '#28634F', padding: 11 },
-  fragmentEditText: { color: '#F3FFF9', fontSize: 11, fontWeight: '900' },
+  fragmentEditButton: { flex: 1, alignItems: 'center', borderRadius: 0, backgroundColor: '#6F8D6C', padding: 11 },
+  fragmentEditText: { color: '#F4E9D6', fontSize: 11, fontWeight: '900' },
   fragmentDeleteButton: { flex: 1, alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#7B3535', padding: 11 },
   fragmentDeleteText: { color: '#FFB8B8', fontSize: 11, fontWeight: '900' },
-  emptyFragments: { borderRadius: 0, borderWidth: 1, borderColor: '#19392E', padding: 18, marginHorizontal: 18, marginTop: 12 },
-  emptyFragmentsText: { color: '#71877D', fontSize: 12, textAlign: 'center' },
+  emptyFragments: { borderRadius: 0, borderWidth: 1, borderColor: '#35563E', padding: 18, marginHorizontal: 18, marginTop: 12 },
+  emptyFragmentsText: { color: '#AEBBAA', fontSize: 12, textAlign: 'center' },
   statsSection: { marginHorizontal: 18, marginTop: 24 },
-  statsTitle: { color: '#F3FFF9', fontSize: 19, fontWeight: '900', marginTop: 5, marginBottom: 12 },
+  statsTitle: { color: '#F4E9D6', fontSize: 19, fontWeight: '900', marginTop: 5, marginBottom: 12 },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  statCard: { width: '48%', minHeight: 88, justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 14 },
-  statValue: { color: '#62E6B1', fontSize: 20, fontWeight: '900' },
-  statLabel: { color: '#81958C', fontSize: 10, fontWeight: '800', marginTop: 5 },
-  statsHelper: { color: '#63766D', fontSize: 10, lineHeight: 15, marginTop: 9 },
-  routeMapCard: { overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', marginHorizontal: 18, marginTop: 16 },
+  statCard: { width: '48%', minHeight: 88, justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#173523', padding: 14 },
+  statValue: { color: '#B86F4B', fontSize: 20, fontWeight: '900' },
+  statLabel: { color: '#BCC8B8', fontSize: 10, fontWeight: '800', marginTop: 5 },
+  statsHelper: { color: '#A8B3A4', fontSize: 10, lineHeight: 15, marginTop: 9 },
+  routeMapCard: { overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#55775B', backgroundColor: '#21472F', marginHorizontal: 18, marginTop: 16 },
   routeMapHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
-  routeMapTitle: { color: '#F3FFF9', fontSize: 18, fontWeight: '900', marginTop: 4 },
+  routeMapTitle: { color: '#F4E9D6', fontSize: 18, fontWeight: '900', marginTop: 4 },
   routeMapCount: { color: '#82AA99', fontSize: 10, fontWeight: '800' },
   routeMapMeta: { alignItems: 'flex-end' },
-  routeMapDistance: { color: '#62E6B1', fontSize: 18, fontWeight: '900' },
+  routeMapDistance: { color: '#B86F4B', fontSize: 18, fontWeight: '900' },
   routeMap: { width: '100%', height: 260 },
-  routeMapHelper: { color: '#71877D', fontSize: 10, lineHeight: 15, paddingHorizontal: 16, paddingVertical: 12 },
+  routeMapHelper: { color: '#AEBBAA', fontSize: 10, lineHeight: 15, paddingHorizontal: 16, paddingVertical: 12 },
   coordinatesCard: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
     padding: 15,
     marginHorizontal: 18,
     marginTop: 12,
   },
-  coordinatesIcon: { color: '#62E6B1', fontSize: 25, marginRight: 12 },
-  coordinatesTitle: { color: '#F3FFF9', fontSize: 12, fontWeight: '900' },
+  coordinatesIcon: { color: '#B86F4B', fontSize: 25, marginRight: 12 },
+  coordinatesTitle: { color: '#F4E9D6', fontSize: 12, fontWeight: '900' },
   coordinatesText: { color: '#82AA99', fontSize: 11, marginTop: 4 },
-  directionsButton: { marginLeft: 'auto', borderRadius: 0, backgroundColor: '#62E6B1', paddingHorizontal: 12, paddingVertical: 9 },
-  directionsButtonText: { color: '#071310', fontSize: 11, fontWeight: '900' },
+  directionsButton: { marginLeft: 'auto', borderRadius: 0, backgroundColor: '#B86F4B', paddingHorizontal: 12, paddingVertical: 9 },
+  directionsButtonText: { color: '#0B1710', fontSize: 11, fontWeight: '900' },
   emptyEmoji: { fontSize: 48 },
-  emptyTitle: { color: '#F3FFF9', fontSize: 21, fontWeight: '900', marginTop: 13 },
+  emptyTitle: { color: '#F4E9D6', fontSize: 21, fontWeight: '900', marginTop: 13 },
   emptyText: {
-    color: '#81958C',
+    color: '#BCC8B8',
     fontSize: 13,
     lineHeight: 20,
     textAlign: 'center',
@@ -719,16 +724,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     paddingHorizontal: 22,
     marginTop: 20,
   },
-  primaryButtonText: { color: '#071310', fontSize: 13, fontWeight: '900' },
+  primaryButtonText: { color: '#0B1710', fontSize: 13, fontWeight: '900' },
   ownerActions: { marginHorizontal: 18, marginTop: 22, gap: 10 },
-  editButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#62E6B1' },
-  editButtonText: { color: '#071310', fontSize: 14, fontWeight: '900' },
+  editButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#B86F4B' },
+  editButtonText: { color: '#0B1710', fontSize: 14, fontWeight: '900' },
   deleteButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#7B3535', backgroundColor: '#261414' },
   deleteButtonText: { color: '#FFB8B8', fontSize: 14, fontWeight: '900' },
   reportButton: { alignItems: 'center', justifyContent: 'center', minHeight: 48, marginHorizontal: 18, marginTop: 20 },
-  reportButtonText: { color: '#81958C', fontSize: 11, fontWeight: '800' },
+  reportButtonText: { color: '#BCC8B8', fontSize: 11, fontWeight: '800' },
 });

@@ -274,17 +274,11 @@ export default function ExploreScreen() {
     const randomCuriosity =
       filteredCuriosities[randomIndex];
 
-    Alert.alert(
-      randomCuriosity.title,
-      `${formatLocation(randomCuriosity)}\n\n${randomCuriosity.description}`
-    );
+    router.push({ pathname: '/curiosity/[id]', params: { id: randomCuriosity.id } });
   }
 
   function openCuriosity(curiosity: Curiosity) {
-    Alert.alert(
-      curiosity.title,
-      `${formatLocation(curiosity)}\n\n${curiosity.description}`
-    );
+    router.push({ pathname: '/curiosity/[id]', params: { id: curiosity.id } });
   }
 
   function openAdventure(adventure: Adventure) {
@@ -329,38 +323,6 @@ export default function ExploreScreen() {
             communauté.
           </Text>
         </View>
-
-        <Pressable
-          style={styles.contributionCard}
-          onPress={openAddCuriosity}
-        >
-          <View style={styles.contributionIcon}>
-            <Text style={styles.contributionEmoji}>
-              📍
-            </Text>
-          </View>
-
-          <View style={styles.contributionContent}>
-            <Text style={styles.contributionEyebrow}>
-              CONTRIBUTION COMMUNAUTAIRE
-            </Text>
-
-            <Text style={styles.contributionTitle}>
-              Ajouter une curiosité
-            </Text>
-
-            <Text style={styles.contributionText}>
-              Partage un lieu étrange, historique ou
-              remarquable découvert pendant une aventure.
-            </Text>
-          </View>
-
-          <View style={styles.contributionArrow}>
-            <Text style={styles.contributionArrowText}>
-              ›
-            </Text>
-          </View>
-        </Pressable>
 
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>⌕</Text>
@@ -452,7 +414,7 @@ export default function ExploreScreen() {
           <View style={styles.loadingArea}>
             <ActivityIndicator
               size="large"
-              color="#62E6B1"
+              color="#B86F4B"
             />
 
             <Text style={styles.loadingText}>
@@ -595,20 +557,6 @@ export default function ExploreScreen() {
               </View>
             )}
 
-            <View style={styles.bottomBanner}>
-              <Text style={styles.bottomBannerEyebrow}>
-                FRAGMENTA
-              </Text>
-
-              <Text style={styles.bottomBannerTitle}>
-                Chaque détour peut cacher une histoire
-              </Text>
-
-              <Text style={styles.bottomBannerText}>
-                Explore, documente et partage les endroits qui
-                méritent de ne pas être oubliés.
-              </Text>
-            </View>
           </>
         )}
       </ScrollView>
@@ -753,6 +701,8 @@ function CuriosityCard({
         </View>
       )}
 
+      <View style={styles.curiosityOverlay} />
+
       <View style={styles.curiosityContent}>
         <Text style={styles.curiosityCategory}>
           {curiosity.category}
@@ -810,6 +760,8 @@ function AdventureCard({
           </Text>
         </View>
       )}
+
+      <View style={styles.adventureOverlay} />
 
       <View style={styles.adventureContent}>
         <View style={styles.adventureTopRow}>
@@ -909,17 +861,17 @@ function EmptyCuriosities({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#071310',
+    backgroundColor: '#0B1710',
   },
 
   container: {
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 135,
+    paddingTop: 22,
+    paddingBottom: 110,
   },
 
   header: {
-    marginBottom: 20,
+    paddingHorizontal: 22,
+    marginBottom: 24,
   },
 
   headerTopRow: {
@@ -933,25 +885,26 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.8,
   },
 
   title: {
-    color: '#F3FFF9',
-    fontSize: 31,
-    lineHeight: 37,
+    color: '#F4E9D6',
+    fontSize: 39,
+    lineHeight: 44,
     fontWeight: '900',
     marginTop: 8,
   },
 
   subtitle: {
-    color: '#8FA69B',
-    fontSize: 14,
-    lineHeight: 21,
-    marginTop: 11,
+    color: '#CBD5C8',
+    maxWidth: 430,
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 14,
   },
 
   addHeaderButton: {
@@ -960,11 +913,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
   },
 
   addHeaderIcon: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 30,
     fontWeight: '500',
     marginTop: -2,
@@ -976,8 +929,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#2B6552',
-    backgroundColor: '#10251E',
+    borderColor: '#436B4A',
+    backgroundColor: '#21472F',
     padding: 16,
     marginBottom: 17,
   },
@@ -988,7 +941,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   contributionEmoji: {
@@ -1001,21 +954,21 @@ const styles = StyleSheet.create({
   },
 
   contributionEyebrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 8,
     fontWeight: '900',
     letterSpacing: 1.1,
   },
 
   contributionTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 17,
     fontWeight: '900',
     marginTop: 5,
   },
 
   contributionText: {
-    color: '#8FA69B',
+    color: '#CBD5C8',
     fontSize: 11,
     lineHeight: 17,
     marginTop: 5,
@@ -1027,12 +980,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     marginLeft: 10,
   },
 
   contributionArrowText: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 26,
     fontWeight: '800',
   },
@@ -1042,24 +995,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
+    borderBottomWidth: 1,
+    borderColor: '#6F8D6C',
+    backgroundColor: '#173523',
     paddingHorizontal: 15,
+    marginHorizontal: 22,
   },
 
-  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, borderWidth: 1, borderColor: '#28634F', backgroundColor: '#10251E', padding: 13, marginTop: 11 },
-  memberSearchIcon: { color: '#62E6B1', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F3FFF9', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#81958C', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#62E6B1', fontSize: 28 },
+  memberSearchButton: { minHeight: 72, flexDirection: 'row', alignItems: 'center', borderRadius: 0, backgroundColor: '#102218', paddingHorizontal: 15, marginHorizontal: 22, marginTop: 10 },
+  memberSearchIcon: { color: '#B86F4B', fontSize: 27 }, memberSearchContent: { flex: 1, marginLeft: 12 }, memberSearchTitle: { color: '#F4E9D6', fontSize: 14, fontWeight: '900' }, memberSearchText: { color: '#BCC8B8', fontSize: 10, lineHeight: 15, marginTop: 4 }, memberSearchArrow: { color: '#B86F4B', fontSize: 28 },
 
   searchIcon: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 26,
     marginRight: 10,
   },
 
   searchInput: {
     flex: 1,
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 14,
   },
 
@@ -1069,16 +1023,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   clearText: {
-    color: '#DFFFF2',
+    color: '#FBF1DF',
     fontSize: 21,
   },
 
   categories: {
     gap: 9,
+    paddingHorizontal: 22,
     paddingTop: 15,
     paddingBottom: 8,
   },
@@ -1088,30 +1043,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#173523',
     paddingHorizontal: 15,
   },
 
   categoryButtonSelected: {
-    borderColor: '#62E6B1',
-    backgroundColor: '#62E6B1',
+    borderColor: '#B86F4B',
+    backgroundColor: '#B86F4B',
   },
 
   categoryText: {
-    color: '#9EB0A8',
+    color: '#A7B3A3',
     fontSize: 12,
     fontWeight: '800',
   },
 
   categoryTextSelected: {
-    color: '#071310',
+    color: '#0B1710',
     fontWeight: '900',
   },
 
-  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#173D31', paddingHorizontal: 12, paddingVertical: 8, marginTop: 4 },
-  nearbyNoticeText: { color: '#62E6B1', fontSize: 10, fontWeight: '800' },
+  nearbyNotice: { alignSelf: 'flex-start', borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 12, paddingVertical: 8, marginHorizontal: 22, marginTop: 4 },
+  nearbyNoticeText: { color: '#B86F4B', fontSize: 10, fontWeight: '800' },
 
   loadingArea: {
     minHeight: 320,
@@ -1120,7 +1073,7 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
-    color: '#81958C',
+    color: '#BCC8B8',
     fontSize: 13,
     marginTop: 13,
   },
@@ -1129,20 +1082,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    marginTop: 28,
-    marginBottom: 14,
+    marginHorizontal: 22,
+    marginTop: 44,
+    marginBottom: 18,
   },
 
   sectionEyebrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.4,
   },
 
   sectionTitle: {
-    color: '#F3FFF9',
-    fontSize: 21,
+    color: '#F4E9D6',
+    fontSize: 27,
     fontWeight: '900',
     marginTop: 4,
   },
@@ -1153,11 +1107,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   refreshText: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 20,
     fontWeight: '900',
   },
@@ -1165,22 +1119,20 @@ const styles = StyleSheet.create({
   resultCount: {
     minWidth: 32,
     height: 32,
-    color: '#DFFFF2',
+    color: '#FBF1DF',
     fontSize: 12,
     fontWeight: '900',
     textAlign: 'center',
     textAlignVertical: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   featuredCard: {
-    minHeight: 430,
+    minHeight: 540,
     overflow: 'hidden',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#285345',
-    backgroundColor: '#10251E',
+    backgroundColor: '#21472F',
   },
 
   featuredImage: {
@@ -1193,7 +1145,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   featuredFallbackEmoji: {
@@ -1214,9 +1166,9 @@ const styles = StyleSheet.create({
 
   featuredTopRow: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
+    top: 22,
+    left: 22,
+    right: 22,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1231,7 +1183,7 @@ const styles = StyleSheet.create({
   },
 
   featuredBadgeText: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1250,39 +1202,42 @@ const styles = StyleSheet.create({
   verificationIcon: {
     width: 18,
     height: 18,
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 10,
     lineHeight: 18,
     fontWeight: '900',
     textAlign: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     overflow: 'hidden',
     marginRight: 6,
   },
 
   verificationText: {
-    color: '#DFFFF2',
+    color: '#FBF1DF',
     fontSize: 9,
     fontWeight: '900',
   },
 
   featuredContent: {
     position: 'absolute',
-    left: 18,
-    right: 18,
-    bottom: 19,
+    left: 22,
+    right: 22,
+    bottom: 26,
+    borderLeftWidth: 3,
+    borderLeftColor: '#B86F4B',
+    paddingLeft: 16,
   },
 
   featuredTitle: {
     color: '#FFFFFF',
-    fontSize: 27,
-    lineHeight: 32,
+    fontSize: 32,
+    lineHeight: 37,
     fontWeight: '900',
   },
 
   featuredLocation: {
-    color: '#8EF0C5',
+    color: '#E4C778',
     fontSize: 12,
     fontWeight: '800',
     marginTop: 8,
@@ -1316,18 +1271,18 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 1,
     borderColor: '#3D705D',
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
     marginRight: 9,
   },
 
   featuredAvatarText: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 15,
     fontWeight: '900',
   },
 
   featuredAuthorName: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 11,
     fontWeight: '900',
   },
@@ -1343,19 +1298,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     paddingHorizontal: 14,
     marginLeft: 8,
   },
 
   featuredOpenText: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 11,
     fontWeight: '900',
   },
 
   featuredOpenArrow: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 23,
     fontWeight: '800',
     marginLeft: 5,
@@ -1365,54 +1320,56 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 23,
+    marginHorizontal: 22,
+    marginTop: 34,
     marginBottom: 13,
   },
 
   smallSectionTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 17,
     fontWeight: '900',
   },
 
   curiositiesGrid: {
-    gap: 12,
+    gap: 10,
   },
 
   curiosityCard: {
-    minHeight: 135,
-    flexDirection: 'row',
+    height: 330,
     overflow: 'hidden',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#173523',
   },
 
   curiosityImage: {
-    width: 122,
-    minHeight: 135,
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
 
   curiosityFallback: {
-    width: 122,
-    minHeight: 135,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
+
+  curiosityOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,18,20,.44)' },
 
   curiosityFallbackEmoji: {
     fontSize: 37,
   },
 
   curiosityContent: {
-    flex: 1,
-    padding: 13,
+    position: 'absolute',
+    left: 22,
+    right: 22,
+    bottom: 20,
   },
 
   curiosityCategory: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 8,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1420,15 +1377,15 @@ const styles = StyleSheet.create({
   },
 
   curiosityTitle: {
-    color: '#F3FFF9',
-    fontSize: 16,
-    lineHeight: 20,
+    color: '#FFFFFF',
+    fontSize: 23,
+    lineHeight: 27,
     fontWeight: '900',
     marginTop: 6,
   },
 
   curiosityLocation: {
-    color: '#79BDA1',
+    color: '#E4C778',
     fontSize: 10,
     fontWeight: '800',
     marginTop: 7,
@@ -1442,13 +1399,13 @@ const styles = StyleSheet.create({
   },
 
   curiosityAuthor: {
-    color: '#6E857B',
+    color: '#E6E2D5',
     fontSize: 9,
     fontWeight: '700',
   },
 
   curiosityArrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 23,
     fontWeight: '800',
   },
@@ -1458,11 +1415,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#10251E',
+    backgroundColor: '#21472F',
     padding: 15,
-    marginTop: 22,
+    marginHorizontal: 22,
+    marginTop: 28,
   },
 
   randomIcon: {
@@ -1471,7 +1427,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   randomEmoji: {
@@ -1484,13 +1440,13 @@ const styles = StyleSheet.create({
   },
 
   randomTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 15,
     fontWeight: '900',
   },
 
   randomText: {
-    color: '#81958C',
+    color: '#BCC8B8',
     fontSize: 12,
     lineHeight: 17,
     marginTop: 4,
@@ -1502,50 +1458,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     marginLeft: 10,
   },
 
   randomArrow: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 27,
     fontWeight: '800',
   },
 
   adventuresList: {
-    gap: 14,
+    gap: 10,
   },
 
   adventureCard: {
-    flexDirection: 'row',
     overflow: 'hidden',
-    minHeight: 190,
+    height: 410,
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#173523',
   },
 
   adventureImage: {
-    width: 125,
-    minHeight: 190,
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
 
   adventureFallback: {
-    width: 125,
-    minHeight: 190,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
+
+  adventureOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,17,19,.5)' },
 
   adventureEmoji: {
     fontSize: 44,
   },
 
   adventureContent: {
-    flex: 1,
-    padding: 14,
+    position: 'absolute',
+    left: 22,
+    right: 22,
+    bottom: 22,
   },
 
   adventureTopRow: {
@@ -1555,7 +1512,7 @@ const styles = StyleSheet.create({
   },
 
   adventureCategory: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -1569,22 +1526,22 @@ const styles = StyleSheet.create({
   },
 
   adventureTitle: {
-    color: '#F3FFF9',
-    fontSize: 17,
-    lineHeight: 21,
+    color: '#FFFFFF',
+    fontSize: 25,
+    lineHeight: 29,
     fontWeight: '900',
     marginTop: 8,
   },
 
   adventureLocation: {
-    color: '#78DDB4',
+    color: '#E4C778',
     fontSize: 10,
     fontWeight: '800',
     marginTop: 6,
   },
 
   adventureDescription: {
-    color: '#8FA69B',
+    color: '#CBD5C8',
     fontSize: 11,
     lineHeight: 16,
     marginTop: 7,
@@ -1602,11 +1559,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   avatarText: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 12,
     fontWeight: '900',
   },
@@ -1617,7 +1574,7 @@ const styles = StyleSheet.create({
   },
 
   authorName: {
-    color: '#DFFFF2',
+    color: '#FBF1DF',
     fontSize: 10,
     fontWeight: '800',
   },
@@ -1634,11 +1591,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
   },
 
   openCircleText: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 21,
     fontWeight: '800',
   },
@@ -1647,8 +1604,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 28,
   },
 
@@ -1658,7 +1615,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#173D31',
+    backgroundColor: '#2D5B3D',
   },
 
   emptyCuriositiesEmoji: {
@@ -1666,14 +1623,14 @@ const styles = StyleSheet.create({
   },
 
   emptyCuriositiesTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 17,
     fontWeight: '900',
     marginTop: 13,
   },
 
   emptyCuriositiesText: {
-    color: '#81958C',
+    color: '#BCC8B8',
     fontSize: 12,
     lineHeight: 18,
     textAlign: 'center',
@@ -1685,13 +1642,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     paddingHorizontal: 16,
     marginTop: 16,
   },
 
   emptyAddButtonText: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 12,
     fontWeight: '900',
   },
@@ -1700,8 +1657,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#19392E',
-    backgroundColor: '#0C1C17',
+    borderColor: '#35563E',
+    backgroundColor: '#173523',
     padding: 28,
   },
 
@@ -1710,14 +1667,14 @@ const styles = StyleSheet.create({
   },
 
   emptyCommunityTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 16,
     fontWeight: '900',
     marginTop: 10,
   },
 
   emptyCommunityText: {
-    color: '#81958C',
+    color: '#BCC8B8',
     fontSize: 12,
     textAlign: 'center',
     marginTop: 6,
@@ -1726,21 +1683,21 @@ const styles = StyleSheet.create({
   bottomBanner: {
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#285345',
-    backgroundColor: '#10251E',
+    borderColor: '#55775B',
+    backgroundColor: '#21472F',
     padding: 22,
     marginTop: 28,
   },
 
   bottomBannerEyebrow: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.5,
   },
 
   bottomBannerTitle: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 21,
     lineHeight: 27,
     fontWeight: '900',
@@ -1748,7 +1705,7 @@ const styles = StyleSheet.create({
   },
 
   bottomBannerText: {
-    color: '#8FA69B',
+    color: '#CBD5C8',
     fontSize: 13,
     lineHeight: 20,
     marginTop: 9,

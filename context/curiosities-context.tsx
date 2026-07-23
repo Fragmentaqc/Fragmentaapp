@@ -569,6 +569,8 @@ export function CuriositiesProvider({
         category: update.category.trim() || 'Autre',
         location_name: update.locationName.trim() || null,
         address: update.address.trim() || null,
+        latitude: update.latitude ?? null,
+        longitude: update.longitude ?? null,
         accessibility: update.accessibility.trim() || null,
         best_time_to_visit: update.bestTimeToVisit.trim() || null,
         recommended_duration: update.recommendedDuration.trim() || null,

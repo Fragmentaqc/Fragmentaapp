@@ -118,7 +118,7 @@ export default function AuthScreen() {
                 value={displayName}
                 onChangeText={setDisplayName}
                 placeholder="Jean-Michel"
-                placeholderTextColor="#63766D"
+                placeholderTextColor="#A8B3A4"
                 style={styles.input}
               />
 
@@ -128,7 +128,7 @@ export default function AuthScreen() {
                 value={username}
                 onChangeText={setUsername}
                 placeholder="fragmentaqc"
-                placeholderTextColor="#63766D"
+                placeholderTextColor="#A8B3A4"
                 style={styles.input}
                 autoCapitalize="none"
               />
@@ -141,7 +141,7 @@ export default function AuthScreen() {
             value={email}
             onChangeText={setEmail}
             placeholder="toi@exemple.com"
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
             autoCapitalize="none"
             keyboardType="email-address"
@@ -153,7 +153,7 @@ export default function AuthScreen() {
             value={password}
             onChangeText={setPassword}
             placeholder="Au moins 6 caractères"
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
             secureTextEntry
           />
@@ -173,7 +173,7 @@ export default function AuthScreen() {
             ]}
           >
             {submitting ? (
-              <ActivityIndicator color="#071310" />
+              <ActivityIndicator color="#0B1710" />
             ) : (
               <Text style={styles.primaryButtonText}>
                 {mode === 'signup'
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#071310',
+    backgroundColor: '#0B1710',
   },
   container: {
     flexGrow: 1,
@@ -227,26 +227,26 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   brand: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 21,
     fontWeight: '900',
     letterSpacing: 3,
   },
   title: {
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 34,
     fontWeight: '900',
     marginTop: 16,
   },
   subtitle: {
-    color: '#8FA69B',
+    color: '#CBD5C8',
     fontSize: 16,
     lineHeight: 23,
     marginTop: 8,
     marginBottom: 28,
   },
   label: {
-    color: '#DFFFF2',
+    color: '#FBF1DF',
     fontSize: 14,
     fontWeight: '800',
     marginBottom: 8,
@@ -256,9 +256,9 @@ const styles = StyleSheet.create({
     minHeight: 56,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
-    color: '#F3FFF9',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
+    color: '#F4E9D6',
     fontSize: 15,
     paddingHorizontal: 16,
   },
@@ -267,14 +267,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 0,
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     marginTop: 26,
   },
   disabledButton: {
     opacity: 0.65,
   },
   primaryButtonText: {
-    color: '#071310',
+    color: '#0B1710',
     fontSize: 16,
     fontWeight: '900',
   },
@@ -288,9 +288,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   note: {
-    backgroundColor: '#0C1C17',
+    backgroundColor: '#173523',
     borderWidth: 1,
-    borderColor: '#19392E',
+    borderColor: '#35563E',
     borderRadius: 0,
     padding: 16,
     marginTop: 12,
@@ -302,14 +302,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   forgotButton: { alignItems: 'center', paddingTop: 15 },
-  forgotText: { color: '#62E6B1', fontSize: 12, fontWeight: '800' },
-  visitorNote: { color: '#E9B949', fontSize: 12, lineHeight: 18, marginTop: -16, marginBottom: 16 },
-  consentBox: { borderRadius: 0, borderWidth: 1, borderColor: '#19392E', backgroundColor: '#0C1C17', padding: 14, marginTop: 18, gap: 13 },
+  forgotText: { color: '#B86F4B', fontSize: 12, fontWeight: '800' },
+  visitorNote: { color: '#C58A62', fontSize: 12, lineHeight: 18, marginTop: -16, marginBottom: 16 },
+  consentBox: { borderRadius: 0, borderWidth: 1, borderColor: '#35563E', backgroundColor: '#173523', padding: 14, marginTop: 18, gap: 13 },
   consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  checkbox: { width: 22, height: 22, borderRadius: 0, borderWidth: 1, borderColor: '#386B59', alignItems: 'center', justifyContent: 'center' },
-  checkboxActive: { backgroundColor: '#62E6B1', borderColor: '#62E6B1' },
-  checkmark: { color: '#071310', fontSize: 13, fontWeight: '900' },
+  checkbox: { width: 22, height: 22, borderRadius: 0, borderWidth: 1, borderColor: '#748D73', alignItems: 'center', justifyContent: 'center' },
+  checkboxActive: { backgroundColor: '#B86F4B', borderColor: '#B86F4B' },
+  checkmark: { color: '#0B1710', fontSize: 13, fontWeight: '900' },
   consentText: { flex: 1, color: '#A4B8AF', fontSize: 12, lineHeight: 18 },
   legalLinks: { flexDirection: 'row', gap: 18, marginLeft: 32 },
-  legalLink: { color: '#62E6B1', fontSize: 11, fontWeight: '900', textDecorationLine: 'underline' },
+  legalLink: { color: '#B86F4B', fontSize: 11, fontWeight: '900', textDecorationLine: 'underline' },
 });

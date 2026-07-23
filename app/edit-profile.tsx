@@ -1,6 +1,9 @@
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
-import { SOCIAL_PLATFORMS, normalizeSocialUrl, parseSocialLinks, type SocialLink } from '@/lib/social-links';
+import { SOCIAL_PLATFORMS, normalizeSocialUrl, parseSocialLinks, socialAccountValue, socialPlaceholder, type SocialLink } from '@/lib/social-links';
+import { PlaceAutocomplete } from '@/components/place-autocomplete';
+import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -47,6 +50,7 @@ export default function EditProfileScreen() {
   const [selectedCover, setSelectedCover] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [countrySelected, setCountrySelected] = useState(false);
 
   const loadProfile = useCallback(async () => {
     if (!user) {
@@ -74,8 +78,9 @@ if (data) {
     country: data.country ?? '',
     avatarUrl: data.avatar_url ?? null,
     coverUrl: data.cover_url ?? null,
-    socialLinks: parseSocialLinks(data.social_links),
+    socialLinks: parseSocialLinks(data.social_links).map((link) => ({ ...link, url: socialAccountValue(link.url, link.platform) })),
   });
+  setCountrySelected(Boolean(data.country));
 }
 
     setLoading(false);
@@ -123,28 +128,33 @@ if (data) {
       throw new Error('Utilisateur non connecté.');
     }
 
-    const response = await fetch(uri);
-    const arrayBuffer = await response.arrayBuffer();
-
-    const extension =
-      uri.split('.').pop()?.toLowerCase().split('?')[0] || 'jpg';
+    const detectedExtension = uri.split('?')[0].split('.').pop()?.toLowerCase();
+    const extension = detectedExtension === 'png' ? 'png' : 'jpg';
+    const base64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
 
     const filePath = `${user.id}/${kind}-${Date.now()}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(filePath, arrayBuffer, {
+      .upload(filePath, decode(base64), {
         contentType: extension === 'png' ? 'image/png' : 'image/jpeg',
+        cacheControl: '3600',
         upsert: true,
       });
 
     if (uploadError) {
-      throw uploadError;
+      throw new Error(`Téléversement de l’image impossible : ${uploadError.message}`);
     }
 
     const { data } = supabase.storage
       .from('avatars')
       .getPublicUrl(filePath);
+
+    if (!data.publicUrl) {
+      throw new Error("Impossible de générer l’adresse publique de l’image.");
+    }
 
     return data.publicUrl;
   }
@@ -173,6 +183,11 @@ if (data) {
       return;
     }
 
+    if (form.country.trim() && !countrySelected) {
+      Alert.alert('Pays à confirmer', 'Choisis ton pays dans les suggestions Mapbox.');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -186,9 +201,8 @@ if (data) {
 
       const { error } = await supabase
   .from('profiles')
-  .upsert(
+  .update(
     {
-      id: user.id,
       display_name: form.displayName.trim(),
       username: cleanUsername,
       bio: form.bio.trim(),
@@ -198,18 +212,16 @@ if (data) {
       social_links: form.socialLinks
         .map((link) => ({
           platform: link.platform.trim() || 'Autre',
-          url: normalizeSocialUrl(link.url),
+          url: normalizeSocialUrl(link.url, link.platform),
         }))
         .filter((link) => link.url),
       updated_at: new Date().toISOString(),
-    },
-    {
-      onConflict: 'id',
     }
-  );
+  )
+  .eq('id', user.id);
 
       if (error) {
-        throw error;
+        throw new Error(`Enregistrement du profil impossible : ${error.message}`);
       }
 
       Alert.alert('Profil enregistré', 'Tes modifications sont en ligne.', [
@@ -237,7 +249,7 @@ if (data) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#62E6B1" />
+          <ActivityIndicator size="large" color="#B86F4B" />
         </View>
       </SafeAreaView>
     );
@@ -260,6 +272,14 @@ if (data) {
             </Pressable>
 
             <Text style={styles.headerTitle}>Modifier le profil</Text>
+
+            <Pressable
+              onPress={saveProfile}
+              disabled={saving}
+              style={[styles.headerSaveButton, saving && styles.disabledButton]}
+            >
+              {saving ? <ActivityIndicator size="small" color="#0B1710" /> : <Text style={styles.headerSaveText}>Enregistrer</Text>}
+            </Pressable>
           </View>
 
           <Pressable style={styles.avatarButton} onPress={selectAvatar}>
@@ -292,7 +312,7 @@ if (data) {
               }))
             }
             placeholder="Ton nom"
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#A8B3A4"
             style={styles.input}
             maxLength={60}
           />
@@ -311,7 +331,7 @@ if (data) {
                 }))
               }
               placeholder="aventurier"
-              placeholderTextColor="#63766D"
+              placeholderTextColor="#A8B3A4"
               style={styles.usernameTextInput}
               autoCapitalize="none"
               maxLength={30}
@@ -329,7 +349,7 @@ if (data) {
               }))
             }
             placeholder="Raconte les aventures qui t’inspirent."
-            placeholderTextColor="#63766D"
+            placeholderTextColor="#A8B3A4"
             style={[styles.input, styles.bioInput]}
             multiline
             textAlignVertical="top"
@@ -342,19 +362,24 @@ if (data) {
 
           <Text style={styles.label}>Pays</Text>
 
-          <TextInput
+          <PlaceAutocomplete
             value={form.country}
-            onChangeText={(value) =>
-              setForm((current) => ({
-                ...current,
-                country: value,
-              }))
-            }
-            placeholder="Canada"
-            placeholderTextColor="#63766D"
-            style={styles.input}
-            maxLength={60}
+            onChangeText={(value) => { setForm((current) => ({ ...current, country: value })); setCountrySelected(false); }}
+            onSelect={(place) => { setForm((current) => ({ ...current, country: place.country || place.label })); setCountrySelected(true); }}
+            placeholder="Commence à écrire ton pays"
+            types="country"
+            selected={countrySelected}
           />
+
+          <View style={styles.coverSectionHeader}>
+            <Text style={styles.label}>Image de couverture</Text>
+            <Text style={styles.coverHint}>Cette image apparaît en pleine largeur en haut de ton profil.</Text>
+          </View>
+
+          <Pressable style={styles.coverButton} onPress={selectCover}>
+            {displayedCover ? <Image source={{ uri: displayedCover }} style={styles.coverImage} /> : <View style={styles.coverPlaceholder}><Text style={styles.coverPlaceholderIcon}>⌁</Text><Text style={styles.coverPlaceholderText}>Choisir une image de couverture</Text></View>}
+            <View style={styles.coverCameraBadge}><Text style={styles.coverCameraText}>📷 Modifier</Text></View>
+          </Pressable>
 
           <View style={styles.socialHeader}>
             <View>
@@ -371,11 +396,6 @@ if (data) {
               <Text style={styles.addSocialText}>+ Ajouter</Text>
             </Pressable>
           </View>
-
-          <Pressable style={styles.coverButton} onPress={selectCover}>
-            {displayedCover ? <Image source={{ uri: displayedCover }} style={styles.coverImage} /> : <View style={styles.coverPlaceholder}><Text style={styles.coverPlaceholderIcon}>⌁</Text><Text style={styles.coverPlaceholderText}>Ajouter une image de couverture</Text></View>}
-            <View style={styles.coverCameraBadge}><Text style={styles.coverCameraText}>📷 Modifier la couverture</Text></View>
-          </Pressable>
 
           {form.socialLinks.map((link, index) => (
             <View key={`${index}-${link.platform}`} style={styles.socialEditor}>
@@ -395,19 +415,6 @@ if (data) {
                   </Pressable>
                 ))}
               </ScrollView>
-              <TextInput
-                value={link.platform}
-                onChangeText={(platform) => setForm((current) => ({
-                  ...current,
-                  socialLinks: current.socialLinks.map((item, itemIndex) =>
-                    itemIndex === index ? { ...item, platform } : item
-                  ),
-                }))}
-                placeholder="Nom du réseau"
-                placeholderTextColor="#63766D"
-                maxLength={40}
-                style={[styles.input, styles.platformInput]}
-              />
               <View style={styles.socialUrlRow}>
                 <TextInput
                   value={link.url}
@@ -417,8 +424,8 @@ if (data) {
                       itemIndex === index ? { ...item, url } : item
                     ),
                   }))}
-                  placeholder="instagram.com/tonprofil"
-                  placeholderTextColor="#63766D"
+                  placeholder={`${socialPlaceholder(link.platform)}toncompte`}
+                  placeholderTextColor="#A8B3A4"
                   autoCapitalize="none"
                   keyboardType="url"
                   maxLength={300}
@@ -437,22 +444,6 @@ if (data) {
             </View>
           ))}
 
-          <Pressable
-            onPress={saveProfile}
-            disabled={saving}
-            style={[
-              styles.saveButton,
-              saving && styles.disabledButton,
-            ]}
-          >
-            {saving ? (
-              <ActivityIndicator color="#071310" />
-            ) : (
-              <Text style={styles.saveButtonText}>
-                Enregistrer le profil
-              </Text>
-            )}
-          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -466,7 +457,7 @@ const styles = StyleSheet.create({
 
   safeArea: {
     flex: 1,
-    backgroundColor: '#071310',
+    backgroundColor: '#0B1710',
   },
 
   loadingContainer: {
@@ -483,12 +474,14 @@ const styles = StyleSheet.create({
 
   header: {
     minHeight: 46,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
   },
 
   backButton: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -496,7 +489,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     alignSelf: 'center',
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 18,
     fontWeight: '900',
   },
@@ -507,8 +500,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 0,
     borderWidth: 2,
-    borderColor: '#62E6B1',
-    backgroundColor: '#174B3B',
+    borderColor: '#B86F4B',
+    backgroundColor: '#264C32',
   },
 
   avatarImage: {
@@ -519,7 +512,7 @@ const styles = StyleSheet.create({
 
   avatarPlaceholder: {
     flex: 1,
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 42,
     fontWeight: '900',
     textAlign: 'center',
@@ -535,9 +528,9 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#62E6B1',
+    backgroundColor: '#B86F4B',
     borderWidth: 3,
-    borderColor: '#071310',
+    borderColor: '#0B1710',
   },
 
   cameraBadgeText: {
@@ -545,7 +538,7 @@ const styles = StyleSheet.create({
   },
 
   changePhotoText: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 13,
     fontWeight: '800',
     textAlign: 'center',
@@ -554,7 +547,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: '#DFFFF2',
+    color: '#FBF1DF',
     fontSize: 14,
     fontWeight: '800',
     marginTop: 14,
@@ -565,9 +558,9 @@ const styles = StyleSheet.create({
     minHeight: 56,
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
-    color: '#F3FFF9',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
+    color: '#F4E9D6',
     fontSize: 15,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -579,13 +572,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 0,
     borderWidth: 1,
-    borderColor: '#1D4538',
-    backgroundColor: '#0C1C17',
+    borderColor: '#3D6648',
+    backgroundColor: '#173523',
     paddingHorizontal: 16,
   },
 
   atSymbol: {
-    color: '#62E6B1',
+    color: '#B86F4B',
     fontSize: 16,
     fontWeight: '900',
     marginRight: 3,
@@ -593,7 +586,7 @@ const styles = StyleSheet.create({
 
   usernameTextInput: {
     flex: 1,
-    color: '#F3FFF9',
+    color: '#F4E9D6',
     fontSize: 15,
   },
 
@@ -602,48 +595,52 @@ const styles = StyleSheet.create({
   },
 
   characterCount: {
-    color: '#63766D',
+    color: '#A8B3A4',
     fontSize: 11,
     textAlign: 'right',
     marginTop: 5,
   },
 
-  coverButton: { height: 190, overflow: 'hidden', borderRadius: 0, borderWidth: 1, borderColor: '#285345', backgroundColor: '#10251E', marginBottom: -48 },
+  headerSaveButton: {
+    position: 'absolute',
+    right: 0,
+    minWidth: 82,
+    minHeight: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#B86F4B',
+    paddingHorizontal: 10,
+  },
+
+  headerSaveText: {
+    color: '#0B1710',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+
+  coverSectionHeader: { marginTop: 22 },
+  coverHint: { color: '#A8B3A4', fontSize: 11, lineHeight: 16, marginTop: -4, marginBottom: 10 },
+  coverButton: { height: 190, overflow: 'hidden', borderRadius: 0, backgroundColor: '#21472F', marginBottom: 24 },
   coverImage: { width: '100%', height: '100%' },
   coverPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  coverPlaceholderIcon: { color: '#62E6B1', fontSize: 34 },
-  coverPlaceholderText: { color: '#8FA69B', fontSize: 12, fontWeight: '800', marginTop: 6 },
+  coverPlaceholderIcon: { color: '#B86F4B', fontSize: 34 },
+  coverPlaceholderText: { color: '#CBD5C8', fontSize: 12, fontWeight: '800', marginTop: 6 },
   coverCameraBadge: { position: 'absolute', right: 10, top: 10, borderRadius: 0, backgroundColor: 'rgba(7,19,16,0.88)', paddingHorizontal: 12, paddingVertical: 8 },
   coverCameraText: { color: '#E4FFF4', fontSize: 10, fontWeight: '900' },
-  socialHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
-  socialHint: { color: '#63766D', fontSize: 11, marginTop: -4 },
-  addSocialButton: { borderRadius: 0, backgroundColor: '#173D31', paddingHorizontal: 13, paddingVertical: 10 },
-  addSocialText: { color: '#62E6B1', fontSize: 12, fontWeight: '900' },
-  socialEditor: { borderRadius: 0, borderWidth: 1, borderColor: '#1D4538', backgroundColor: '#0C1C17', padding: 10, marginTop: 10 },
+  socialHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
+  socialHint: { color: '#A8B3A4', fontSize: 11, marginTop: -4 },
+  addSocialButton: { borderRadius: 0, backgroundColor: '#2D5B3D', paddingHorizontal: 13, paddingVertical: 10 },
+  addSocialText: { color: '#B86F4B', fontSize: 12, fontWeight: '900' },
+  socialEditor: { borderRadius: 0, borderWidth: 1, borderColor: '#3D6648', backgroundColor: '#173523', padding: 10, marginTop: 10 },
   platforms: { marginBottom: 9 },
   platformInput: { minHeight: 46, marginBottom: 8 },
-  platformChip: { borderRadius: 0, backgroundColor: '#10251E', paddingHorizontal: 11, paddingVertical: 8, marginRight: 7 },
-  platformChipActive: { backgroundColor: '#28634F' },
-  platformChipText: { color: '#DFFFF2', fontSize: 11, fontWeight: '800' },
+  platformChip: { borderRadius: 0, backgroundColor: '#21472F', paddingHorizontal: 11, paddingVertical: 8, marginRight: 7 },
+  platformChipActive: { backgroundColor: '#6F8D6C' },
+  platformChipText: { color: '#FBF1DF', fontSize: 11, fontWeight: '800' },
   socialUrlRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   socialUrlInput: { flex: 1, minHeight: 48 },
   removeSocialButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 0, backgroundColor: '#351919' },
   removeSocialText: { color: '#FFB8B8', fontSize: 24, fontWeight: '700' },
-
-  saveButton: {
-    minHeight: 58,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 0,
-    backgroundColor: '#62E6B1',
-    marginTop: 30,
-  },
-
-  saveButtonText: {
-    color: '#071310',
-    fontSize: 16,
-    fontWeight: '900',
-  },
 
   disabledButton: {
     opacity: 0.65,
