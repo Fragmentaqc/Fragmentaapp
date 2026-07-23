@@ -24,5 +24,5 @@ export function SocialLinksRow({ links }: { links: SocialLink[] }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 9, paddingHorizontal: 16, marginTop: 14 },
-  button: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', backgroundColor: '#21472F' },
+  button: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
 });
